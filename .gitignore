@@ -1,0 +1,7 @@
+.venv/
+.Rhistory
+.RData
+.DS_Store
+# Keep downloaded/provider data local; share the retrieval script and metadata.
+datasets/raw/
+datasets/processed/
