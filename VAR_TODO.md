@@ -11,7 +11,7 @@ Only the audit items marked `[x]` have been completed. Add an owner and completi
 date beside each task as the group works through it; retain evidence in the
 specified output. Proposed decisions below still need to be recorded by the group.
 
-## Start here sdjhgfsjhfgshj
+## Start here
 
 1. Resolve the research scope: keep interest rates and add their data, or explicitly
    revise the question to commodity signals. The current file cannot test rates.
