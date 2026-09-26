@@ -1,6 +1,12 @@
 # Quant_methods_project
 Group project
 
+## VAR research checklist
+
+See [VAR_TODO.md](VAR_TODO.md) for the prioritised data-quality, code, modelling,
+forecast-evaluation and reporting checklist, including findings from the current
+VOLARE data and VAR notebook review.
+
 ## Research data
 
 Daily S&P 500, Treasury yield, Brent and VIX data for 2017–2025:
