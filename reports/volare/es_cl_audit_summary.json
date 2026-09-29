@@ -1,0 +1,26 @@
+{
+  "source_sha256": "face904a9aeb062796d8fb2c2d17c7e2a2df6f7ecfdca9e473232ddebecacb8f",
+  "ledger_sha256": "58cda2cc7127459a7eac55a2b3e111deebdee2a279d9ae89b1a8c016145c4079",
+  "code_sha256": {
+    "audit_volare_es_cl.py": "64e0f0c9365ff468fd00140a96db0e642bc838d36c86b14bf1d7fbffff971343",
+    "volare_review.py": "d3839c81dbf1df036715682cc9a2fb01880901a24760cd2a82f7f70bb4e04fa8",
+    "volare_data.py": "e370078238c97e37089c482f96f8569a29043a0159e9c38f319ef00281df3408"
+  },
+  "output_sha256": {
+    "es_cl_flag_evidence.csv": "acfe5b7a0ee03b3fa1f22a7324b62ce3fc20fa3e55ea702d7a372a5ba14efae6",
+    "es_cl_calendar_audit.csv": "3c9272313060d271733a46f4ae0b6a1022bd5256eeb527772ecd36ad8fa8ef74",
+    "es_cl_calendar_gaps.csv": "d6884307cff802a77d23eca6f5587686ddde6b0637fb5423bca8aeaf31408d79"
+  },
+  "flagged_es_cl_records": 14,
+  "review_counts": {
+    "retain_crisis_move_provisional": 9,
+    "suspected_quote_error_unresolved": 4,
+    "possible_roll_contamination_unresolved": 1
+  },
+  "weekdays_both_absent": 37,
+  "dates_only_one_observed": 10,
+  "observed_weekend_dates": 0,
+  "joint_missing_without_holiday_candidate": 0,
+  "calendar_verified": false,
+  "cleaning_applied": false
+}

@@ -38,10 +38,19 @@ listed at the beginning of each section.
 - [x] Documented the command, environment and explicit loader in the README and
   data guide. The notebooks and original exports are preserved.
 
-**Next:** review ES/CL flags and resolve the intended session calendar. This
-completes the initial preparation milestone, not anomaly adjudication or notebook
-integration. D1–D3, D7, D10 and C1–C2/C7 are advanced, but the broader tasks below
-remain open until their full completion criteria are met.
+- [x] Completed a preliminary ES/CL evidence review on 29 September 2026:
+  four suspected quote problems, one possible contract-switch problem and nine
+  provisionally retained crisis records. Evidence and limits are recorded in
+  `reports/volare/ES_CL_REVIEW.md` and the source-bound decision ledger.
+- [x] Added `scripts/audit_volare_es_cl.py`: catches 37 jointly missing weekdays
+  and 10 dates observed for just one asset, distinguishes coverage boundaries,
+  and refuses stale review decisions. Nine preparation/audit tests pass.
+
+**Next:** resolve provider session boundaries and contract-switch treatment,
+then write the dated-lag and sensitivity policy before notebook integration.
+The initial preparation and preliminary ES/CL review are complete; quote-level
+adjudication and a verified exchange calendar remain open. D1–D3, D7, D10 and
+C1–C2/C7 are advanced, but broader tasks remain open until all criteria are met.
 
 The later legacy transformed CSV has RV5 columns and no date column; do not
 interpret the earlier audit below as validation of that newer file. Use the new

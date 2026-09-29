@@ -46,6 +46,21 @@ decisions separately with date, symbol, evidence and reviewer. These decisions
 are **not yet applied automatically**; a reviewed cleaning policy is the next
 stage. Original provider data and the existing notebooks are left intact.
 
+### ES/CL review and calendar audit
+
+Read [the evidence review](../reports/volare/ES_CL_REVIEW.md), then run
+`python scripts/audit_volare_es_cl.py` to reproduce the ES/CL flag evidence,
+weekday calendar audit and gap list under `reports/volare/`. This additional
+diagnostic catches weekdays absent from both series. Holiday labels are only
+candidates, not official closure or session validation.
+
+The decision ledger now contains 14 preliminary Codex assessments: four suspected
+quote problems, one possible roll problem and nine provisionally retained crisis
+observations. It includes a source SHA-256 for each assessment; the audit rejects
+stale source hashes, duplicate decisions and changed screening flags. These
+annotations do not clean the data or constitute group approval. The reproducible
+counts and code/input/output hashes are in `es_cl_audit_summary.json`.
+
 ### Explicit loading for the VAR
 
 Run from the project root (also works after cloning the repository into Colab):

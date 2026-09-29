@@ -24,6 +24,11 @@ models. Preparation preserves missing entries and flags anomalies; it does not
 approve the data for estimation. The [VOLARE data guide](datasets/README.md)
 explains outputs and how to load explicit RK or RV5 columns.
 
+The [ES/CL evidence review](reports/volare/ES_CL_REVIEW.md) records the preliminary
+assessment of quote anomalies, possible contract switching and calendar gaps.
+Reproduce its diagnostic tables with `python scripts/audit_volare_es_cl.py`.
+Review annotations never automatically change the modelling panels.
+
 The original FRED setup is also retained: daily S&P 500, Treasury yield, Brent and
 VIX data for 2017–2025 can be downloaded with:
 
