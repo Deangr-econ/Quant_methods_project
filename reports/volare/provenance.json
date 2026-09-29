@@ -1,0 +1,57 @@
+{
+  "prepared_at_utc": "2026-09-29T08:41:47.792867+00:00",
+  "source_file": "realized_variance_futures.csv",
+  "source_sha256": "face904a9aeb062796d8fb2c2d17c7e2a2df6f7ecfdca9e473232ddebecacb8f",
+  "source_downloaded_at": null,
+  "source_download_note": "Historical download time is not recorded; preparation time is not retrieval time.",
+  "documentation": "https://volare.unime.it/documentation",
+  "symbols_in_source": [
+    "C",
+    "CL",
+    "ES",
+    "GC",
+    "NG"
+  ],
+  "selected_symbols": [
+    "ES",
+    "CL",
+    "GC",
+    "NG",
+    "C"
+  ],
+  "input_rows": 21808,
+  "selected_rows": 21808,
+  "date_start": "2009-09-28",
+  "date_end": "2026-08-31",
+  "transform": {
+    "scaled_variance": "variance * 10000",
+    "logged_variance": "natural log of scaled variance when positive"
+  },
+  "calendar": "union of observed dates; not a verified exchange calendar",
+  "rules": {
+    "rk_rv5_ratio_high": 10.0,
+    "rk_rv5_ratio_low": 0.1,
+    "low_to_open_close": 0.75,
+    "high_to_open_close": 1.25,
+    "absolute_unadjusted_close_log_return_pct": 20.0
+  },
+  "rules_purpose": "fixed review flags, not deletion or trained thresholds",
+  "deletions": 0,
+  "imputation": false,
+  "anomalies_corrected": false,
+  "python": "3.13.0",
+  "pandas": "3.0.6",
+  "numpy": "2.5.3",
+  "code_sha256": {
+    "prepare_volare.py": "273abfc389be7897866740beb2b6dd771510196b83d8c266f1adbf997417e287",
+    "volare_data.py": "e370078238c97e37089c482f96f8569a29043a0159e9c38f319ef00281df3408"
+  },
+  "output_sha256": {
+    "volare_rk.csv": "27967d3f28f22f2948fd1c77310c7acfa00c976b4b87338de97e9696cfd2681c",
+    "volare_rv5.csv": "70124bb9123adc5a896982f003937720f68005594a3e1d2890c1ffb45a0e0fbb",
+    "quality_flags.csv": "9fb10016ebd0c48cdb15e684d24b4a2d5a0f22d7ed882d09f66b6eb12a0fe034",
+    "availability.csv": "201102e983762a955021191a9c0d66783bd7b0cbb1038847eec1c7db76477c96",
+    "coverage.csv": "8185cbb970edb8ad1becdd536e074b3a02b5c76e0e574d30714bedd878d71ce9",
+    "sample_flow.csv": "36173d5a9cff5e081ed36306412cc8ca39dc91570125529906236e2440f6a506"
+  }
+}

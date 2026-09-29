@@ -24,7 +24,30 @@ specified output. Proposed decisions below still need to be recorded by the grou
 main analysis; P2 = extension after the main analysis works. Dependencies are
 listed at the beginning of each section.
 
-## Completed audit: what we know now
+## Preparation progress — 29 September 2026
+
+- [x] Added `scripts/prepare_volare.py` and tracked `volare_data.py`: one local
+  preparation command creates separate, dated RK and RV5 panels from the original
+  export, retaining source values, missing entries and the initial variance date.
+- [x] Added automated coverage/availability checks, fixed anomaly flags, source
+  and output hashes, a readable data-quality report and a separate human decision
+  ledger. No flags have been treated as confirmed errors or deleted.
+- [x] Added six focused checks of duplicates, scale/measure selection, missing-date
+  preservation, invalid-log handling, sorting/loading and preparation look-ahead.
+  Forecast-level leakage tests remain to be written when forecasts are implemented.
+- [x] Documented the command, environment and explicit loader in the README and
+  data guide. The notebooks and original exports are preserved.
+
+**Next:** review ES/CL flags and resolve the intended session calendar. This
+completes the initial preparation milestone, not anomaly adjudication or notebook
+integration. D1–D3, D7, D10 and C1–C2/C7 are advanced, but the broader tasks below
+remain open until their full completion criteria are met.
+
+The later legacy transformed CSV has RV5 columns and no date column; do not
+interpret the earlier audit below as validation of that newer file. Use the new
+dated outputs for further work. See `reports/volare/DATA_QUALITY_REPORT.md`.
+
+## Historical audit — 26 September 2026, revision `011333c`
 
 - [x] Inspected `realized_variance_futures.csv`: 21,808 asset-date records, five
   instruments (`C`, `CL`, `ES`, `GC`, `NG`), and no duplicate asset-date pairs.

@@ -1,5 +1,94 @@
 # Research data
 
+## VOLARE: current preparation pipeline
+
+The original `realized_variance_futures.csv` is the input. The older
+`volatility_model_QTFE_data.csv` currently contains RV5 columns without dates;
+keep it for reference but do not use it for dated forecast evaluation. The VAR
+notebook still constructs RK. The pipeline below makes the estimator explicit.
+
+Run from the project root:
+
+```sh
+python scripts/prepare_volare.py
+```
+
+On the current machine: `.venv/bin/python scripts/prepare_volare.py`. A fresh
+environment needs `python -m pip install -r requirements-data.txt`. This stage was
+validated with Python 3.13 and uses only pandas and NumPy beyond the standard
+library. The source export must already be present; the command does not download
+or replace it. To validate the preparation logic:
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+The new outputs are:
+
+| File | Meaning |
+|---|---|
+| `processed/volare/volare_rk.csv` | Date plus raw, scaled and logged RK variance for ES, CL, GC, NG, C |
+| `processed/volare/volare_rv5.csv` | Equivalent RV5 panel on the same date grid |
+| `../reports/volare/DATA_QUALITY_REPORT.md` | Coverage, flag counts, limitations and next steps |
+| `../reports/volare/quality_flags.csv` | Automatically flagged observations and reasons; not cleaning decisions |
+| `../reports/volare/availability.csv` | Observed/missing status on the source-date union |
+| `../reports/volare/provenance.json` | Source/code/output hashes and preparation settings |
+| `volare_review_decisions.csv` | Separate human review ledger; never overwritten by preparation |
+
+All dates and source values are retained. Blank entries identify missing values
+or undefined logs. The script does not fill gaps, clip extremes, delete rows,
+choose an exchange calendar, estimate a model, or select a training period. The
+union of observed dates is **not** an official trading calendar: a session missing
+from every source series cannot be detected from this union alone.
+
+Rerunning regenerates prepared files and automated reports. Record approved
+decisions separately with date, symbol, evidence and reviewer. These decisions
+are **not yet applied automatically**; a reviewed cleaning policy is the next
+stage. Original provider data and the existing notebooks are left intact.
+
+### Explicit loading for the VAR
+
+Run from the project root (also works after cloning the repository into Colab):
+
+```python
+from volare_data import load_var_panel
+
+rk_panel = load_var_panel(measure="rk", symbols=("ES", "CL"))
+rv5_panel = load_var_panel(measure="rv5", symbols=("ES", "CL"))
+
+print(rk_panel.head())
+print(rk_panel.isna().sum())
+```
+
+The returned index is `date`; columns are explicitly named
+`log_rk_scaled_ES`, `log_rk_scaled_CL` or the corresponding RV5 names. Missing rows
+remain visible. **Do not immediately call `.dropna()` and assume remaining rows
+are consecutive trading sessions.** First resolve gaps and the forecast calendar.
+The loader does not select lags or use future observations.
+
+### Variable dictionary
+
+| Field pattern | Definition |
+|---|---|
+| `date` | Provider's observation date; publication time/session boundaries still need confirmation |
+| `rk_ES` / `rv5_ES` | Provider's daily variance estimate in decimal-return squared units |
+| `rk_scaled_ES` / `rv5_scaled_ES` | Variance multiplied by 10,000, for percentage-return squared units |
+| `log_rk_scaled_ES` / `log_rv5_scaled_ES` | Natural log of the positive scaled variance |
+
+The same naming applies to CL (WTI futures), GC (gold), NG (natural gas) and C
+(corn). ES is E-mini S&P 500 futures. There are no interest-rate observations in
+these panels. No additional annualisation is applied. RV5 uses five-minute
+sampling; it is not a five-day measure. This pipeline intentionally does not
+construct modelling returns from unadjusted continuous futures closes.
+
+The [report](../reports/volare/DATA_QUALITY_REPORT.md) describes transparent fixed
+screening thresholds. They flag potential problems, including genuine crisis
+moves and contract switches, without deciding which observations are wrong.
+The VOLARE retrieval date is unknown and is recorded as such; preparation time
+is recorded separately. [Provider methodology](https://volare.unime.it/documentation).
+
+## FRED: original daily-market dataset
+
 Use local CSV files for the analysis and the download script to obtain them. This
 keeps the sample consistent across model runs and works with both R and Python.
 No FRED account, API key or additional R packages are needed. The script uses

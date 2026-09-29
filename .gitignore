@@ -5,3 +5,7 @@
 # Keep downloaded/provider data local; share the retrieval script and metadata.
 datasets/raw/
 datasets/processed/
+# Generated provider-derived audit tables; the Markdown report/provenance are tracked.
+reports/volare/*.csv
+__pycache__/
+*.pyc
