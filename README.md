@@ -1,6 +1,21 @@
 # Quant_methods_project
 Group project
 
+## Teammate's R analysis
+
+The 3 October contribution and results draft are in [timadditions](timadditions/README.md).
+The original files are preserved; a portable version reproduces the draft's
+nine-model forecast results using the repository VOLARE data:
+
+```sh
+Rscript --vanilla scripts/run_teammate_var.R
+Rscript --vanilla scripts/verify_teammate_var.R
+```
+
+See the [verification and checklist review](timadditions/VERIFICATION.md) for
+validated results and remaining limitations. This is an ES/oil/gold **log-RV5**
+analysis; final scope, data treatment and session timing are still unresolved.
+
 ## VAR research checklist
 
 See [VAR_TODO.md](VAR_TODO.md) for the prioritised data-quality, code, modelling,

@@ -9,3 +9,5 @@ datasets/processed/
 reports/volare/*.csv
 __pycache__/
 *.pyc
+# Reproducible local outputs from the imported teammate analysis.
+reports/teammate_var/

@@ -7,9 +7,10 @@ markets improves forecasts of equity volatility. Better data, valid comparisons
 and clear economic interpretation take priority over adding more models.
 
 This is an implementation checklist, not a record of completed model repairs.
-Only the audit items marked `[x]` have been completed. Add an owner and completion
-date beside each task as the group works through it; retain evidence in the
-specified output. Proposed decisions below still need to be recorded by the group.
+Items marked `[x]` are completed within the scope recorded in the progress notes.
+The October R contribution does not repair the legacy notebooks or approve the
+final research design. Add an owner, date and evidence as tasks are completed.
+Proposed final design decisions still need to be recorded by the group.
 
 ## Start here
 
@@ -23,6 +24,31 @@ specified output. Proposed decisions below still need to be recorded by the grou
 **Priority key:** P0 = prerequisite for trustworthy results; P1 = required for the
 main analysis; P2 = extension after the main analysis works. Dependencies are
 listed at the beginning of each section.
+
+## Teammate integration — 4 October 2026
+
+Owner/reviewer: Codex, integrating the teammate's 3 October R contribution.
+Evidence: [integration review](timadditions/VERIFICATION.md) and
+[run instructions](timadditions/README.md). Original R and HTML files are preserved.
+
+- [x] Imported the draft and made a portable R entry point; removed duplicate
+  computation, enforced key/log-input validation and fixed the AR(0) case.
+- [x] Reproduced all nine draft MSE values and four Clark–West comparisons on
+  809 forecast targets. Saved forecasts, dates, losses, diagnostics and versions.
+- [x] Completed **M1, M2, M3, F4 and I1 for the R commodity analysis**, with
+  the exact scope and limitations recorded in the integration review.
+
+These checked items credit implemented work, not overall model approval. F4
+covers log squared-error inference; F3's proposed variance/QLIKE evaluation remains
+open. M2 is an investigation, not a finding that stationarity concerns are solved.
+Legacy notebook-specific repairs remain open. Sequential forecasts and several
+other tasks have advanced, but incomplete tasks retain unchecked boxes.
+
+The contribution uses **log(RV5), ES/CL/GC, data from 2011, an 80/20 chronological
+split and next jointly observed dates**. It does not implement square-root RV,
+resolve provider timing/anomalies or settle the original interest-rate hypothesis.
+The supplied HTML acknowledges important limits and remains a draft. See the
+review for residual diagnostic failures and work still outstanding.
 
 ## Preparation progress — 29 September 2026
 
@@ -241,18 +267,18 @@ using the repository instructions and documented data access.
 Dependencies: completed modelling panel and reproducible code. Outputs: model
 specification, training diagnostics and a concise decision log.
 
-- [ ] **M1 — Establish the equity-only comparison.** Fit an AR model to the same
+- [x] **M1 — Establish the equity-only comparison.** Fit an AR model to the same
   ES log-variance target and include a simple last-observed-variance forecast.
   A one-variable AR should be fitted with an appropriate univariate estimator,
   not forced through a multivariate VAR interface. An AR using the same lag order
   is a useful restricted comparison; also allow a separately training-selected AR
   so the benchmark is not deliberately weakened.
-- [ ] **M2 — Investigate stationarity on training data.** Combine time plots, ACFs,
+- [x] **M2 — Investigate stationarity on training data.** Combine time plots, ACFs,
   ADF/KPSS, persistence and possible regime changes. Document deterministic terms
   and test lags. Do not automatically difference all log variances, or add a VECM,
   just to obtain convenient p-values. If differencing is justified, reconstruct
   level forecasts consistently. [VAR requirements](https://www.statsmodels.org/stable/vector_ar.html).
-- [ ] **M3 — Select lags without future information.** Current BIC selection uses
+- [x] **M3 — Select lags without future information.** Current BIC selection uses
   the entire sample. Restrict selection to the training/validation procedure and
   record the maximum lag, intercept/trend choice and whether lag selection repeats
   at refits. Keep candidate ranges small enough to diagnose and explain. Handle
@@ -305,7 +331,7 @@ Dependencies: frozen design and viable specifications. Outputs:
   into a variance formula. Report failed forecasts and missing targets explicitly.
   Robustness of proxy-based scoring relies on assumptions; QLIKE does not repair
   erroneous quotes. [Forecast-loss reference](https://public.econ.duke.edu/~ap172/Patton_vol_proxies_JoE_2011.pdf).
-- [ ] **F4 — Quantify uncertainty in forecast improvements.** Save the paired loss
+- [x] **F4 — Quantify uncertainty in forecast improvements.** Save the paired loss
   series and report average improvements with uncertainty. Choose a test suitable
   for nested versus non-nested models and dependent errors. An off-the-shelf
   Diebold–Mariano test is not automatically appropriate for a nested AR/VAR
@@ -329,7 +355,7 @@ comparisons use the same information rules, targets and dates.
 Dependencies: main results exist. Output: a small robustness table and clearly
 labelled secondary figures, not an uncontrolled search across specifications.
 
-- [ ] **I1 — Explain magnitude, not just significance (P1).** Translate forecast
+- [x] **I1 — Explain magnitude, not just significance (P1).** Translate forecast
   improvements into a readable change in prediction error. Where reporting a
   log-variance response d, variance changes by `100*(exp(d)-1)%` and standard
   deviation by `100*(exp(d/2)-1)%`. State horizon and shock normalization; avoid
@@ -417,7 +443,8 @@ by reproducible evidence. Significant cross-market effects are not a requirement
 |---|---|
 | `datasets/realized_variance_futures.csv` | Original VOLARE export; preserve unchanged |
 | `datasets/volatility_model_QTFE_data.csv` | Derived panel; recreate through a tracked pipeline |
-| `VAR_GPRD_OIL_GAS.ipynb` | Current log-variance VAR; stale name, private imports, full-sample estimation |
+| `timadditions/var_analysis.R` | Reproduced teammate ES/CL/GC log-RV5 analysis; run with `scripts/run_teammate_var.R` |
+| `VAR_GPRD_OIL_GAS.ipynb` | Legacy log-variance VAR; stale name, private imports, full-sample estimation |
 | `Group_Project_QTFE_Functions.ipynb` | Shared helper definitions; imported `.py` module is not tracked |
 | `GARCH_QTFE.ipynb` | Optional benchmark; variance-regressor implementation needs correction |
 | `datasets/README.md` | Existing FRED guide; add separate VOLARE documentation |

@@ -1,0 +1,577 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Empirical methodology and results</title><style>
+body{font-family:Georgia,serif;color:#20303c;line-height:1.65;max-width:980px;margin:50px auto;padding:0 32px}h1,h2,h3,h4,table,.caption,.note{font-family:Arial,sans-serif}h1{font-size:34px;line-height:1.15;margin-bottom:12px}h2{font-size:26px;margin-top:54px;color:#155d61}h3{font-size:19px;margin-top:32px}p{margin:12px 0}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.5;margin:18px 0 10px}th{background:#e9f1f2;text-align:left}th,td{padding:9px 10px;border-bottom:1px solid #d9e1e5}td.num{text-align:right;font-variant-numeric:tabular-nums}.caption{font-size:13px;color:#52626d;margin:8px 0 24px}.equation{background:#f3f6f8;padding:14px 20px;text-align:center;margin:20px 0;font-size:18px;overflow-wrap:anywhere}.subtitle{font-family:Arial,sans-serif;color:#61717c;font-size:16px}.note{background:#f4f6f8;padding:18px 22px;font-size:14px;margin:24px 0}.label{font:12px Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#177b70}figure{margin:28px 0}svg{max-width:100%;height:auto}a{color:#156b80}li{margin:7px 0}code{font-size:.9em} @media print{body{margin:0;max-width:none;font-size:10pt}h2,h3{break-after:avoid}table,figure,.equation{break-inside:avoid}a{color:inherit}}
+</style></head><body>
+<div class="label">Quantitative Techniques for Financial Economics · EBC4097</div>
+<h1>Cross-market forecasts of equity realised variance</h1>
+<p class="subtitle">Detailed account of the empirical methodology and results</p>
+<p>This analysis asks whether past realised variance in crude oil and gold improves forecasts of equity realised variance beyond the information contained in equity’s own history. Equity-only autoregressions are compared with three-variable vector autoregressions using the same forecast dates, forecast horizon and evaluation target. The analysis covers models in log realised variance levels and in first differences of those log levels.</p>
+
+<h2>3. Empirical methodology</h2>
+<h3>3.1 Forecasting objective and variable definitions</h3>
+<p>The dependent variable is the natural logarithm of daily realised variance for the E-mini S&amp;P 500 futures series, identified by ES. The additional markets are crude oil futures (CL) and gold futures (GC). All three series use the <code>rv5</code> measure in the VOLARE dataset. The empirical target is therefore realised variance measured using five-minute data, rather than equity returns or a price index.</p>
+<div class="equation">y<sub>t</sub> = ln(RV<sub>ES,t</sub>), &nbsp; o<sub>t</sub> = ln(RV<sub>CL,t</sub>), &nbsp; g<sub>t</sub> = ln(RV<sub>GC,t</sub>)</div>
+<p>The log transformation compresses the scale of large variance observations and provides a convenient specification for modelling persistent variance dynamics. It does not by itself establish stationarity or normally distributed errors. Negative values of log realised variance are entirely possible because the logarithm is negative whenever the underlying positive variance measure is below one.</p>
+<p>The forecast target is y<sub>t+1</sub>, the equity log realised variance of the next jointly observed session. The predictive question is whether lagged o and g improve this forecast after controlling for lagged y. This is a forecasting exercise. It does not identify a causal effect of commodity volatility on equity volatility, and it does not require structural shock identification or an economic ordering of contemporaneous shocks.</p>
+
+<h3>3.2 Data preparation relevant to the econometric design</h3>
+<p>The original data were converted from a long format, with one row per market and date, into a wide format, with separate market columns. Dates were converted to R’s Date class and sorted chronologically. The code checks for duplicate date–market combinations, inspects missing observations and examines the largest realised variance observations alongside available futures prices.</p>
+<p>The estimation sample retains observations dated January 2011 onwards and removes dates with a missing observation in ES, CL or GC. This creates a common sample across the three markets. The January 2011 restriction followed the examination of unusually large early gold observations discussed during the analysis. It should be presented as a sample construction decision, rather than as evidence that the excluded observations were definitively erroneous. The final script does not winsorise the retained observations or remove individual retained dates on the basis of their variance magnitude.</p>
+<p>Before taking logarithms, the script checks whether all retained realised variances are finite and strictly positive. After matching dates, a lag refers to the previous retained observation. It need not represent the previous calendar day: weekends, holidays and removed incomplete observations can generate gaps. Consequently, “one step ahead” consistently means the next common observation, not necessarily the next calendar day.</p>
+<p>The alignment assumes that all three session-level variance measures for date t are observable at the forecast origin. Calendar-date matching alone cannot verify this timing assumption; trading-session boundaries and data availability must support it. The code also does not itself establish how the source handles futures rolls. These details belong primarily in the data section but matter for interpreting the forecasts.</p>
+
+<h3>3.3 Chronological training and test samples</h3>
+<p>The first 80% of the matched log-variance observations form the initial training sample, with the count rounded down. The remaining observations form the test sample. In the reported results, the test sample contains 809 observations and begins on 13 July 2023. Observations are never randomly shuffled.</p>
+<p>The initial training sample is used for preliminary plots, stationarity tests, lag selection and model diagnostics. The test sample evaluates forecasts made using only observations that precede each target date. A chronological split is appropriate because forecasting is an ordered information problem: a model deployed at a historical date could not have used subsequent outcomes.</p>
+<p>The lag lengths are kept fixed during forecast evaluation, while coefficients are re-estimated as new observations become available. This separates the choice of lag order from recursive coefficient estimation. The longer-lag and differenced models should be described as alternative specifications or robustness comparisons; the final ranking across models is observed in the test sample and is not an independent validation of a newly selected “best” model.</p>
+
+<h3>3.4 Stationarity and persistence assessment</h3>
+<p>The series were first examined using training-sample time plots, annual means and autocorrelation functions extending to 100 observed sessions. Autocorrelations at lags 1, 5, 20, 60 and 100 were extracted to make persistence easier to compare across markets. Annual averages provide descriptive evidence about variation in the level of log realised variance, but do not constitute a formal structural-break test.</p>
+<p>Two complementary stationarity tests were applied. The augmented Dickey–Fuller test was estimated with an intercept and no deterministic time trend, using <code>ur.df(type = "drift", lags = 20, selectlags = "BIC")</code>. Its null hypothesis is a unit root. The augmented regression includes lagged changes to account for serial dependence:</p>
+<div class="equation">Δx<sub>t</sub> = α + δx<sub>t−1</sub> + Σ<sub>j=1</sub><sup>k</sup> γ<sub>j</sub>Δx<sub>t−j</sub> + ε<sub>t</sub></div>
+<p>Here x denotes one of the three log realised variance series. The unit-root null is δ = 0. The statistic is assessed against Dickey–Fuller critical values appropriate to a regression with a constant; it is not an ordinary t-test using standard normal critical values.</p>
+<p>The KPSS test was run with a level-stationarity null, using <code>ur.kpss(type = "mu", lags = "long")</code>. Additional KPSS calculations used truncation lags of 28, 56 and 112 to examine sensitivity to the treatment of serial dependence. These are bandwidth choices for the test’s long-run variance estimate, not lag orders for the forecasting models.</p>
+<p>ADF and KPSS have different null hypotheses and therefore provide complementary evidence. Rejection of the ADF unit-root null does not guarantee that a series satisfies every assumption of a stable, constant-mean model. Persistent dynamics or changes in the mean can complicate the interpretation. Because the earlier analysis found mixed stationarity evidence in levels, models in first differences were considered alongside models in levels. ADF and KPSS checks were also applied to the differenced training series.</p>
+
+<h3>3.5 Equity-only autoregressive benchmark</h3>
+<p>The equity-only model explains equity log realised variance using its own lagged observations and an intercept:</p>
+<div class="equation">y<sub>t</sub> = α + Σ<sub>j=1</sub><sup>p</sup> φ<sub>j</sub>y<sub>t−j</sub> + u<sub>t</sub></div>
+<p>This benchmark is essential because volatility-related measures can be persistent. A cross-market model should be evaluated against a model that already exploits equity’s own history. Otherwise, an apparent improvement could reflect basic autoregressive predictability rather than information from other markets.</p>
+<p>Candidate AR orders from 0 to 20 were estimated by ordinary least squares. The order-zero candidate contains only an intercept. The candidate regressions use the same observations, constructed after allowing for 20 lags, so their BIC values are compared on a common estimation sample. BIC selected five lags in the reported analysis. The selected AR(5) was then refitted using all training observations available after its own five-lag requirement.</p>
+<p>An AR(15) was subsequently included to provide a benchmark for VAR(15). It was not presented as the independently BIC-selected equity model. Matching lag orders ensures that a comparison does not attribute an improvement from a longer equity history to the addition of commodities.</p>
+
+<h3>3.6 Three-market vector autoregression</h3>
+<p>The cross-market model is a reduced-form VAR with an intercept in every equation. Define z<sub>t</sub> = (y<sub>t</sub>, o<sub>t</sub>, g<sub>t</sub>)′. The model is:</p>
+<div class="equation">z<sub>t</sub> = c + Σ<sub>j=1</sub><sup>p</sup> A<sub>j</sub>z<sub>t−j</sub> + ε<sub>t</sub></div>
+<p>Each equation contains lagged values of all three variables. The system is estimated equation by equation using OLS. In particular, the equity equation is:</p>
+<div class="equation">y<sub>t</sub> = c<sub>y</sub> + Σ<sub>j=1</sub><sup>p</sup> a<sub>j</sub>y<sub>t−j</sub> + Σ<sub>j=1</sub><sup>p</sup> b<sub>j</sub>o<sub>t−j</sub> + Σ<sub>j=1</sub><sup>p</sup> d<sub>j</sub>g<sub>t−j</sub> + ε<sub>y,t</sub></div>
+<p>The coefficients on lagged oil and gold allow their histories to contribute to the equity forecast after controlling for equity’s own lags. Setting all b and d coefficients to zero gives the corresponding AR model. The AR is therefore nested within the VAR’s equity equation when the transformation and lag length match.</p>
+<p>The additional flexibility has a cost. At five lags, the equity equation has 16 regression coefficients including the constant, compared with six in AR(5). At 15 lags, it has 46, compared with 16 in AR(15). These counts exclude innovation covariance parameters. More predictors can improve fit within the training sample while increasing estimation noise in future forecasts.</p>
+<p>For one-step point forecasting, the VAR equity equation uses already observed lagged values. It does not require forecasting tomorrow’s oil and gold values first. Contemporaneous residual correlations are permitted, but the exercise does not interpret them as identified structural shocks.</p>
+
+<h3>3.7 Lag selection and alternative transformations</h3>
+<p>The VAR lag search considered orders 1 through 20 with constants. BIC, labelled SC in the R output, selected five lags in levels. The analysis also considered the AIC-selected 15-lag specification. BIC imposes a stronger complexity penalty than AIC at this sample size, motivating the five-lag model as the more parsimonious main specification and the longer model as a check on richer dynamics.</p>
+<p>The differenced variables are Δz<sub>t</sub> = z<sub>t</sub> − z<sub>t−1</sub>. VAR models in differences retain intercepts and were evaluated at four and 14 lags, corresponding to the reported BIC and AIC selections. Matching equity-only autoregressions were estimated in differences at these same orders. The four-lag and 14-lag AR benchmarks were chosen to match the differenced VARs, not through a separate AR lag-selection exercise.</p>
+<p>A model for changes in log realised variance must be converted back to the common forecast target before evaluation:</p>
+<div class="equation">ŷ<sub>t+1|t</sub> = y<sub>t</sub> + Δŷ<sub>t+1|t</sub></div>
+<p>This converts the predicted change into a predicted log level. It does not exponentiate the forecast into raw variance. All reported models are consequently evaluated against exactly the same observed equity log realised variance.</p>
+<p>Differencing represents a substantive alternative specification. For example, an AR model in differences imposes a unit root when expressed in levels, so a four-lag differenced model is not simply an unrestricted five-lag level model with different notation. If levels are stationary, differencing may discard useful mean-reversion information. The forecast comparison assesses this choice empirically without treating better forecast performance as a formal stationarity test.</p>
+<table><thead><tr><th>Specification</th><th>Series modelled</th><th>Equity benchmark</th><th>Cross-market model</th><th>Role</th></tr></thead><tbody>
+<tr><td>Levels, short</td><td>Log RV</td><td>AR(5)</td><td>VAR(5)</td><td>Main BIC comparison</td></tr>
+<tr><td>Levels, long</td><td>Log RV</td><td>AR(15)</td><td>VAR(15)</td><td>AIC VAR / matched AR</td></tr>
+<tr><td>Differences, short</td><td>Change in log RV</td><td>AR_D4</td><td>VAR_D4</td><td>BIC differenced VAR / matched AR</td></tr>
+<tr><td>Differences, long</td><td>Change in log RV</td><td>AR_D14</td><td>VAR_D14</td><td>AIC differenced VAR / matched AR</td></tr>
+<tr><td>Persistence</td><td>Latest log RV</td><td colspan="2">ŷ<sub>t+1|t</sub> = y<sub>t</sub></td><td>Simple reference forecast</td></tr>
+</tbody></table><p class="caption">Table 1. Forecasting specifications. Every forecast is evaluated in log realised variance levels.</p>
+
+<h3>3.8 Model diagnostics</h3>
+<p>The initially fitted VAR specifications were checked for dynamic stability, residual serial correlation and multivariate ARCH effects. Stability was assessed using the absolute eigenvalues of the VAR companion matrix returned by <code>roots()</code>. Values below one indicate dynamic stability of the fitted coefficient system. This check is distinct from proof that the data-generating process is stationary or that coefficients are constant over the entire sample.</p>
+<p>Residual serial correlation was assessed with the adjusted multivariate Portmanteau test through lag 30. Rejection indicates residual dependence not adequately captured by the model. A multivariate ARCH test with five lags assessed dependence in residual second moments. ARCH effects in these regressions concern errors in predicting log realised variance; they are not a separate estimated GARCH model for equity returns.</p>
+<p>The reported earlier diagnostics identified remaining serial correlation and ARCH effects. The models should therefore be treated as forecasting approximations, with qualified inference. The final script does not remove these problems through additional dynamics or a conditional covariance model. Its diagnostic calls apply to the initially fitted VARs; it does not rerun the full diagnostic suite at every forecast origin or present a parallel suite for every AR benchmark.</p>
+
+<h3>3.9 Expanding-window forecast evaluation</h3>
+<p>Forecasts were generated recursively across all 809 test dates. At each origin, the relevant AR and VAR were re-estimated using the initial training sample plus all test observations already realised. The models then predicted the next observation. After that outcome became available, it was added to the estimation history and the procedure repeated.</p>
+<p>This is an expanding-window design: the historical starting point remains fixed while the endpoint advances. It is not a fixed-length rolling window. Lag orders and transformations remain fixed. For differenced models, changes are recomputed from the available history, and the predicted equity change is added to the latest observed equity log level.</p>
+<p>The indexing line <code>last_known &lt;- n_initial + i - 1</code> ensures that the target observation is excluded from the estimation history. The first recursive forecasts reproduce the separate one-step calculation for 13 July 2023. The script also verifies that forecast values are finite. Together, these checks support implementation consistency; they do not establish that every upstream data convention is free of timing or measurement problems.</p>
+
+<h3>3.10 Forecast-loss measures</h3>
+<p>For model m and test observation i, the forecast error is e<sub>m,i</sub> = y<sub>i</sub> − ŷ<sub>m,i</sub>. Accuracy is summarised using:</p>
+<div class="equation">MSE<sub>m</sub> = (1/N)Σe<sub>m,i</sub><sup>2</sup><br>RMSE<sub>m</sub> = √MSE<sub>m</sub><br>MAE<sub>m</sub> = (1/N)Σ|e<sub>m,i</sub>|, &nbsp; N = 809</div>
+<p>Lower values indicate more accurate forecasts. MSE is the main measure and gives relatively greater weight to large errors. RMSE is expressed in the same log units as the target and gives the identical model ranking to MSE. MAE is less sensitive to large misses and can therefore produce a different ranking.</p>
+<p>The matched-model percentage gain is defined as 100 × (1 − MSE<sub>VAR</sub>/MSE<sub>AR</sub>). Positive values favour the VAR; negative values favour the AR. These percentages describe forecast-loss improvements. They do not measure percentage changes in market volatility or investment returns.</p>
+
+<h3>3.11 Statistical comparison of nested forecasts</h3>
+<p>As a supplementary method beyond the supplied VAR tutorial, Clark–West tests were used for the four matched AR–VAR pairs. The adjustment accounts for forecast noise from estimating additional coefficients in the larger nested model. For each test date, the code calculates:</p>
+<div class="equation">d<sub>i</sub><sup>CW</sup> = e<sub>AR,i</sub><sup>2</sup> − e<sub>VAR,i</sub><sup>2</sup> + (ŷ<sub>AR,i</sub> − ŷ<sub>VAR,i</sub>)<sup>2</sup></div>
+<p>The average adjusted difference is estimated with an intercept-only regression. Its standard error uses Newey–West HAC estimation, with automatic bandwidth selection, no prewhitening and a finite-sample adjustment. These settings concern uncertainty in the average adjusted loss difference; they do not alter the forecasts or fix misspecified forecasting equations. The implementation follows the official <a href="https://sandwich.r-forge.r-project.org/reference/NeweyWest.html">sandwich documentation</a>.</p>
+<p>A one-sided standard-normal approximation assesses evidence in favour of the larger model. Holm-adjusted p-values account for the four comparisons. The procedure follows <a href="https://doi.org/10.1016/j.jeconom.2006.05.023">Clark and West (2007)</a>. The normal approximation is not an exact finite-sample test, and stationarity uncertainty and residual dependence warrant caution. Adjusted loss differences do not replace the realised MSE ranking; failure to reject does not establish equivalence or the absence of predictive information.</p>
+
+<h3>3.12 Changes in relative performance over time</h3>
+<p>For the main AR(5)–VAR(5) comparison, the script computes the cumulative unadjusted squared-error difference:</p>
+<div class="equation">C<sub>k</sub> = Σ<sub>i=1</sub><sup>k</sup>(e<sub>AR,i</sub><sup>2</sup> − e<sub>VAR,i</sub><sup>2</sup>)</div>
+<p>An upward movement indicates an interval in which the VAR gains relative to the AR. A downward movement indicates the reverse. A positive level means the VAR has performed better cumulatively since the test began; a negative level means the AR has performed better cumulatively. The slope and the level therefore answer different questions.</p>
+<p>Calendar-year MSE values were also calculated for this main pair. This descriptive analysis was motivated by the cumulative-loss plot and is exploratory. It does not estimate regimes, test structural breaks or establish a feasible switching strategy.</p>
+
+<h2>4. Results</h2>
+<h3>4.1 Overall forecast accuracy</h3>
+<p>Table 2 reports accuracy for all nine forecasts over the same 809 test observations. AR(15) achieves the lowest MSE, RMSE and MAE among the evaluated specifications. Every estimated AR and VAR has a lower MSE than the persistence benchmark.</p>
+<table><thead><tr><th>Model</th><th>MSE</th><th>RMSE</th><th>MAE</th></tr></thead><tbody>
+<tr><td>AR(5)</td><td>0.4328876</td><td>0.6579420</td><td>0.4970283</td></tr>
+<tr><td>VAR(5)</td><td>0.4356551</td><td>0.6600417</td><td>0.4981932</td></tr>
+<tr><td><strong>AR(15)</strong></td><td><strong>0.4296496</strong></td><td><strong>0.6554766</strong></td><td><strong>0.4947571</strong></td></tr>
+<tr><td>VAR(15)</td><td>0.4328146</td><td>0.6578864</td><td>0.4980830</td></tr>
+<tr><td>AR_D4</td><td>0.4501892</td><td>0.6709614</td><td>0.5083633</td></tr>
+<tr><td>VAR_D4</td><td>0.4524269</td><td>0.6726269</td><td>0.5079093</td></tr>
+<tr><td>AR_D14</td><td>0.4369072</td><td>0.6609896</td><td>0.5006208</td></tr>
+<tr><td>VAR_D14</td><td>0.4399775</td><td>0.6633080</td><td>0.5031430</td></tr>
+<tr><td>Persistence</td><td>0.5267887</td><td>0.7258021</td><td>0.5464770</td></tr>
+</tbody></table><p class="caption">Table 2. Expanding-window, one-step forecast accuracy for equity log realised variance. Source: reported R output. Bold denotes the best value in each column. Differences-model forecasts have been reconstructed in log levels.</p>
+<p>Relative to persistence, AR(5) reduces MSE by approximately 17.83%, while AR(15) reduces MSE by approximately 18.44%. Thus, modelling equity’s own dynamics produces a sizeable improvement relative to simply using the latest observation in this evaluation. These are observed sample improvements; no separate significance test against persistence was reported.</p>
+<p>Moving from AR(5) to AR(15) lowers MSE by approximately 0.75%. The improvement is much smaller than the improvement over persistence. AR(15)’s first-place ranking describes the models and sample examined; it does not establish universal superiority or a statistically significant advantage over AR(5).</p>
+
+<h3>4.2 Does adding oil and gold improve prediction?</h3>
+<p>The most direct comparisons hold the transformation and lag order constant. In all four cases, adding commodity histories increases MSE.</p>
+<table><thead><tr><th>Matched pair</th><th>AR MSE</th><th>VAR MSE</th><th>VAR MSE gain</th></tr></thead><tbody>
+<tr><td>Levels, 5 lags</td><td>0.4328876</td><td>0.4356551</td><td>−0.64%</td></tr>
+<tr><td>Levels, 15 lags</td><td>0.4296496</td><td>0.4328146</td><td>−0.74%</td></tr>
+<tr><td>Differences, 4 lags</td><td>0.4501892</td><td>0.4524269</td><td>−0.50%</td></tr>
+<tr><td>Differences, 14 lags</td><td>0.4369072</td><td>0.4399775</td><td>−0.70%</td></tr>
+</tbody></table><p class="caption">Table 3. Incremental forecast contribution of oil and gold. Gain = 100 × (1 − VAR MSE / AR MSE); negative values indicate deterioration.</p>
+<figure><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="648pt" height="237.6pt" viewBox="0 0 648 237.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-03T15:44:59.204554</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 237.6 
+L 648 237.6 
+L 648 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 114.11 195.64 
+L 637.2 195.64 
+L 637.2 38.88 
+L 114.11 38.88 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 465.827267 46.005455 
+L 309.312195 46.005455 
+L 309.312195 67.744129 
+L 465.827267 67.744129 
+z
+" clip-path="url(#p1b20e21ed2)" style="fill: #b86043"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 465.827267 86.26226 
+L 285.482733 86.26226 
+L 285.482733 108.000935 
+L 465.827267 108.000935 
+z
+" clip-path="url(#p1b20e21ed2)" style="fill: #b86043"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 465.827267 126.519065 
+L 344.138505 126.519065 
+L 344.138505 148.25774 
+L 465.827267 148.25774 
+z
+" clip-path="url(#p1b20e21ed2)" style="fill: #b86043"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 465.827267 166.775871 
+L 293.784946 166.775871 
+L 293.784946 188.514545 
+L 465.827267 188.514545 
+z
+" clip-path="url(#p1b20e21ed2)" style="fill: #b86043"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m97d5247acf" d="M 0 0 
+L 0 3.5 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m97d5247acf" x="159.80453" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="159.80453" y="210.238437" transform="rotate(-0 159.80453 210.238437)">−1.25</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m97d5247acf" x="221.009077" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="221.009077" y="210.238437" transform="rotate(-0 221.009077 210.238437)">−1.00</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#m97d5247acf" x="282.213625" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="282.213625" y="210.238437" transform="rotate(-0 282.213625 210.238437)">−0.75</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m97d5247acf" x="343.418172" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="343.418172" y="210.238437" transform="rotate(-0 343.418172 210.238437)">−0.50</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m97d5247acf" x="404.62272" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="404.62272" y="210.238437" transform="rotate(-0 404.62272 210.238437)">−0.25</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m97d5247acf" x="465.827267" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="465.827267" y="210.238437" transform="rotate(-0 465.827267 210.238437)">0.00</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m97d5247acf" x="527.031815" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="527.031815" y="210.238437" transform="rotate(-0 527.031815 210.238437)">0.25</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m97d5247acf" x="588.236362" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="588.236362" y="210.238437" transform="rotate(-0 588.236362 210.238437)">0.50</text>
+     </g>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="375.655" y="223.916562" transform="rotate(-0 375.655 223.916562)">VAR MSE gain relative to matched AR (%) • positive favours VAR</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_9"/>
+     <g id="text_10">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="110.61" y="60.674011" transform="rotate(-0 110.61 60.674011)">Levels: 5 lags</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_10"/>
+     <g id="text_11">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="110.61" y="100.930816" transform="rotate(-0 110.61 100.930816)">Levels: 15 lags</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_11"/>
+     <g id="text_12">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="110.61" y="141.187621" transform="rotate(-0 110.61 141.187621)">Differences: 4 lags</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_12"/>
+     <g id="text_13">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="110.61" y="181.444427" transform="rotate(-0 110.61 181.444427)">Differences: 14 lags</text>
+     </g>
+    </g>
+   </g>
+   <g id="line2d_13">
+    <path d="M 465.827267 195.64 
+L 465.827267 38.88 
+" clip-path="url(#p1b20e21ed2)" style="fill: none; stroke: #65727c; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 114.11 195.64 
+L 637.2 195.64 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="299.519467" y="59.634167" transform="rotate(-0 299.519467 59.634167)">-0.64%</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="275.690005" y="99.890972" transform="rotate(-0 275.690005 99.890972)">-0.74%</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="334.345778" y="140.147778" transform="rotate(-0 334.345778 140.147778)">-0.50%</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="283.992218" y="180.404583" transform="rotate(-0 283.992218 180.404583)">-0.70%</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="114.11" y="20.88" transform="rotate(-0 114.11 20.88)">Adding oil and gold increases MSE in every matched comparison</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p1b20e21ed2">
+   <rect x="114.11" y="38.88" width="523.09" height="156.76"/>
+  </clipPath>
+ </defs>
+</svg>
+<figcaption class="caption">Figure 1. Percentage MSE gains from adding oil and gold, calculated from the reported accuracy table. Every value is negative. These are point estimates, without confidence intervals.</figcaption></figure>
+<p>In the main comparison, VAR(5) has an MSE of 0.4356551, compared with 0.4328876 for AR(5), a deterioration of approximately 0.64%. At 15 lags, the deterioration is approximately 0.74%. The differenced specifications lead to the same directional result.</p>
+<p>MAE favours the equity-only model in three of the four pairs. The exception is the four-lag differenced pair: VAR_D4 has a slightly lower MAE than AR_D4, 0.5079093 versus 0.5083633. Its MSE and RMSE remain higher. The broad result should therefore be stated specifically in terms of squared-error loss rather than claiming that every accuracy measure always favours the AR.</p>
+<p>VAR(15) also has a very slightly lower MSE than AR(5). That comparison alone would be misleading as evidence for cross-market predictability: VAR(15) includes ten more equity lags. Its appropriate matched benchmark, AR(15), still performs better. This illustrates why matched equity-only benchmarks are central to the design.</p>
+
+<h3>4.3 Levels versus first differences</h3>
+<p>The level specifications outperform their corresponding differenced alternatives on MSE. AR(5) and VAR(5) have lower MSE than AR_D4 and VAR_D4, respectively. AR(15) and VAR(15) likewise outperform AR_D14 and VAR_D14. The level models also have lower MAE in these comparisons.</p>
+<p>Modelling changes therefore does not improve realised forecast accuracy in this exercise, and it does not reveal an advantage from adding commodities. This strengthens the descriptive cross-market finding across alternative transformations. However, it does not resolve the stationarity issue: a forecast ranking is not a formal test of the order of integration.</p>
+
+<h3>4.4 Clark–West results</h3>
+<table><thead><tr><th>Specification</th><th>Mean adjusted difference</th><th>CW statistic</th><th>One-sided p</th><th>Holm p</th></tr></thead><tbody>
+<tr><td>Levels, 5 lags</td><td>0.0003432863</td><td>0.1148388</td><td>0.4542865</td><td>0.9503624</td></tr>
+<tr><td>Levels, 15 lags</td><td>0.0025264990</td><td>0.6790396</td><td>0.2485564</td><td>0.9503624</td></tr>
+<tr><td>Differences, 4 lags</td><td>0.0006052997</td><td>0.2252955</td><td>0.4108747</td><td>0.9503624</td></tr>
+<tr><td>Differences, 14 lags</td><td>0.0026699329</td><td>0.7140744</td><td>0.2375906</td><td>0.9503624</td></tr>
+</tbody></table><p class="caption">Table 4. Reported nested-model forecast comparisons. Positive adjusted differences favour the larger model after adjustment. Tests use HAC standard errors and a one-sided normal approximation.</p>
+<p>All unadjusted p-values exceed 0.10, so none of the four comparisons rejects at either the 10% or 5% level. The results provide no statistically significant evidence of an incremental predictive contribution from oil and gold within these specifications. The common Holm-adjusted value follows from the adjustment across these four p-values and is not evidence of a coding problem.</p>
+<p>The mean adjusted differences are positive, whereas every raw VAR MSE is higher than its matching AR MSE. This follows directly from the positive squared-forecast-difference term in the implemented statistic. Nevertheless, the reported CW statistics are small relative to their estimated uncertainty. Neither the adjusted results nor the raw losses demonstrate a cross-market forecasting benefit.</p>
+<p>These results do not prove that the AR and VAR have equal population forecasting ability. They also do not establish statistically significant AR superiority: the reported one-sided tests were directed towards detecting a VAR advantage. The appropriate conclusion is a lack of demonstrated additional predictive benefit in the analysed framework.</p>
+
+<h3>4.5 Relative performance across calendar years</h3>
+<p>The calendar-year comparison for AR(5) and VAR(5) reveals variation that is hidden by the full-period average. The VAR reduces MSE in 2024 but increases MSE in every other observed year.</p>
+<table><thead><tr><th>Year</th><th>Forecasts</th><th>AR(5) MSE</th><th>VAR(5) MSE</th><th>VAR MSE gain</th><th>Contribution to cumulative advantage</th></tr></thead><tbody>
+<tr><td>2023, partial</td><td>121</td><td>0.2687951</td><td>0.2723252</td><td>−1.31%</td><td>−0.43</td></tr>
+<tr><td>2024</td><td>259</td><td>0.4208457</td><td>0.4140632</td><td>+1.61%</td><td>+1.76</td></tr>
+<tr><td>2025</td><td>258</td><td>0.5371468</td><td>0.5461024</td><td>−1.67%</td><td>−2.31</td></tr>
+<tr><td>2026, partial</td><td>171</td><td>0.4099356</td><td>0.4172916</td><td>−1.79%</td><td>−1.26</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>809</strong></td><td>0.4328876</td><td>0.4356551</td><td>−0.64%</td><td><strong>−2.24</strong></td></tr>
+</tbody></table><p class="caption">Table 5. Annual performance for the main comparison. Contributions equal the number of forecasts multiplied by (AR MSE − VAR MSE), calculated from rounded reported values. Full-period losses weight years by their observation counts. Annual percentage gains should not be averaged without these loss and sample-size weights.</p>
+<figure><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="648pt" height="237.6pt" viewBox="0 0 648 237.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-03T15:44:59.265088</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 237.6 
+L 648 237.6 
+L 648 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 118.52 195.64 
+L 637.2 195.64 
+L 637.2 38.88 
+L 118.52 38.88 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 387.722608 46.005455 
+L 245.987193 46.005455 
+L 245.987193 67.744129 
+L 387.722608 67.744129 
+z
+" clip-path="url(#p6c59dfe67b)" style="fill: #b86043"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 387.722608 86.26226 
+L 561.654228 86.26226 
+L 561.654228 108.000935 
+L 387.722608 108.000935 
+z
+" clip-path="url(#p6c59dfe67b)" style="fill: #177b70"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 387.722608 126.519065 
+L 207.788445 126.519065 
+L 207.788445 148.25774 
+L 387.722608 148.25774 
+z
+" clip-path="url(#p6c59dfe67b)" style="fill: #b86043"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 387.722608 166.775871 
+L 194.065772 166.775871 
+L 194.065772 188.514545 
+L 387.722608 188.514545 
+z
+" clip-path="url(#p6c59dfe67b)" style="fill: #b86043"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="me9bb35b54e" d="M 0 0 
+L 0 3.5 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#me9bb35b54e" x="171.877547" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="171.877547" y="210.238437" transform="rotate(-0 171.877547 210.238437)">−2</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#me9bb35b54e" x="279.800078" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="279.800078" y="210.238437" transform="rotate(-0 279.800078 210.238437)">−1</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#me9bb35b54e" x="387.722608" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="387.722608" y="210.238437" transform="rotate(-0 387.722608 210.238437)">0</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#me9bb35b54e" x="495.645139" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="495.645139" y="210.238437" transform="rotate(-0 495.645139 210.238437)">1</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#me9bb35b54e" x="603.56767" y="195.64" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="603.56767" y="210.238437" transform="rotate(-0 603.56767 210.238437)">2</text>
+     </g>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="377.86" y="223.916562" transform="rotate(-0 377.86 223.916562)">VAR MSE gain relative to AR(5) (%) • positive favours VAR</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_6"/>
+     <g id="text_7">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="115.02" y="60.674011" transform="rotate(-0 115.02 60.674011)">2023 (121 forecasts)</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_7"/>
+     <g id="text_8">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="115.02" y="100.930816" transform="rotate(-0 115.02 100.930816)">2024 (259 forecasts)</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_8"/>
+     <g id="text_9">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="115.02" y="141.187621" transform="rotate(-0 115.02 141.187621)">2025 (258 forecasts)</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_9"/>
+     <g id="text_10">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="115.02" y="181.444427" transform="rotate(-0 115.02 181.444427)">2026 (171 forecasts)</text>
+     </g>
+    </g>
+   </g>
+   <g id="line2d_10">
+    <path d="M 387.722608 195.64 
+L 387.722608 38.88 
+" clip-path="url(#p6c59dfe67b)" style="fill: none; stroke: #65727c; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 118.52 195.64 
+L 637.2 195.64 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="241.670292" y="59.634167" transform="rotate(-0 241.670292 59.634167)">-1.31%</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start" x="565.97113" y="99.890972" transform="rotate(-0 565.97113 99.890972)">+1.61%</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="203.471544" y="140.147778" transform="rotate(-0 203.471544 140.147778)">-1.67%</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: end" x="189.74887" y="180.404583" transform="rotate(-0 189.74887 180.404583)">-1.79%</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="118.52" y="20.88" transform="rotate(-0 118.52 20.88)">VAR(5) improves on AR(5) in 2024 only</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p6c59dfe67b">
+   <rect x="118.52" y="38.88" width="518.68" height="156.76"/>
+  </clipPath>
+ </defs>
+</svg>
+<figcaption class="caption">Figure 2. Annual MSE gains for VAR(5) relative to AR(5). The first and last years cover only the observed portions of the test sample. No significance is implied.</figcaption></figure>
+<p>The positive contribution in 2024 is approximately 1.76 cumulative squared-error units. The 2025 contribution is approximately −2.31, which by itself more than offsets the 2024 advantage. The other observed years also contribute negatively, producing an endpoint of approximately −2.24:</p>
+<div class="equation">C<sub>809</sub> = 809 × (0.4328876 − 0.4356551) ≈ −2.24</div>
+<p>This endpoint is consistent with the full-period accuracy table. The original daily cumulative-loss plot provides finer detail about when these gains and losses occur. The annual results support changing relative performance, but cannot locate the within-year episodes responsible for it.</p>
+<p>The pattern is consistent with several possibilities: commodity information may be more relevant in some periods, coefficients may change, or a small number of large forecast errors may influence annual averages. The analysis does not distinguish these explanations. No annual significance tests or formal regime model were estimated, so the 2024 advantage should remain an exploratory descriptive finding.</p>
+
+<h3>4.6 Main empirical finding and its scope</h3>
+<p>Across the four matched specifications, including lagged oil and gold realised variance increases out-of-sample MSE by approximately 0.50–0.74%. The supplementary tests provide no statistically significant evidence of additional predictive information. The cross-market model occasionally performs better within the evaluation period, notably in 2024 for the main comparison, but these gains do not translate into an overall forecasting advantage.</p>
+<p>The evidence supports a narrow, defensible finding: within these linear models, lag choices, transformations, markets and one-step evaluation dates, the additional commodity histories do not deliver a demonstrated improvement over equity-only forecasts. It does not imply that commodities are irrelevant for equity risk, that all cross-market forecasting methods fail, or that the result would hold at other horizons.</p>
+<p>The MSE differences measure statistical forecast accuracy, not investor welfare. No portfolio allocation, trading strategy, risk-management loss function or transaction-cost calculation was evaluated. Mixed stationarity evidence and remaining residual dependence further limit stronger inferential claims. These qualifications preserve the practical value of the findings without extending them beyond the design.</p>
+
+<h2>Editorial notes for completing and compressing the report</h2>
+<div class="note"><strong>Evidence boundary.</strong> The attached file contains the final R commands, but not the raw CSV or the printed stationarity, lag-selection, coefficient and diagnostic output. Forecast-accuracy, Clark–West and annual values above come from the numerical output supplied in the conversation. Earlier qualitative diagnostic findings are retained as such. No missing test statistic, coefficient, exact sample endpoint or daily curve has been reconstructed.</div>
+<p>Before final submission, insert the exact training sample size and date bounds from the split table, and copy the ADF, KPSS, maximum companion eigenvalues and diagnostic p-values into an appendix. Retain the qualitative diagnosis only where the original output supports it. In particular, do not report every individual series as having the same test outcome without checking its output.</p>
+<p>Figures 1 and 2 are newly prepared visual summaries of the reported numerical tables. They are not replacements for the original daily cumulative-loss data. For the final report, export the cumulative plot directly from the existing <code>FORECASTS</code> object. A suitable caption is: “Cumulative difference in squared forecast errors, AR(5) minus VAR(5), over 809 one-step forecasts. Positive values indicate a cumulative VAR advantage; rising segments indicate gains for the VAR. Forecasts use expanding estimation windows and target equity log realised variance.”</p>
+<p>The script repeats the AR(15)/VAR(15) forecasting loop and recalculates the same comparison. This duplicates computation; it is not a second robustness exercise. The reported methodology counts each specification once. The absolute Windows working directory should also be replaced with a portable project path when preparing the submission script. No changes to the supplied code have been made here.</p>
+<p>The syllabus allocates 6–8 pages to the entire report, excluding references and appendices. This deliberately expanded account should therefore be compressed later. A compact main text can retain the model equations, chronological expanding-window design, matched comparisons, the full accuracy table, a short statement of the Clark–West results and the cumulative-loss figure. Detailed diagnostic output, the annual table and implementation explanations fit naturally in an appendix.</p>
+<h3>Sources and methodological references</h3>
+<ul>
+<li>Supplied final R script, <em>Eingefügter Text.txt</em>, and numerical R output in the accompanying conversation.</li>
+<li>EBC4097 course syllabus, 2026–2027 P1, pp. 8–9: final empirical report requirements.</li>
+<li>EBC4097 Time Series Econometrics tutorial, <em>Vector AutoRegression Model</em>: VAR specification, equation-by-equation OLS, lag selection and diagnostics.</li>
+<li>Clark, T. E., and West, K. D. (2007). Approximately normal tests for equal predictive accuracy in nested models. <em>Journal of Econometrics</em>, 138, 291–311. <a href="https://doi.org/10.1016/j.jeconom.2006.05.023">doi:10.1016/j.jeconom.2006.05.023</a>. Supplementary methodology beyond the supplied VAR tutorial.</li>
+<li><em>sandwich</em> package documentation: <a href="https://sandwich.r-forge.r-project.org/reference/NeweyWest.html">Newey–West HAC covariance matrix estimation</a>. Supplementary implementation reference.</li>
+</ul>
+</body></html>
