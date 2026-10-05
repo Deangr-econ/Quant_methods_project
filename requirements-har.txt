@@ -1,0 +1,4 @@
+# Versions validated by the HAR audit; Python 3.13.0.
+-r requirements-data.txt
+scipy==1.18.1
+statsmodels==0.15.0

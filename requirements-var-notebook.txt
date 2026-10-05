@@ -1,0 +1,5 @@
+# Validated Python notebook environment; direct versions, not a full lockfile.
+-r requirements-har.txt
+matplotlib==3.11.2
+ipykernel==7.3.0
+jupyter_client==8.10.0

@@ -1,0 +1,16 @@
+{
+  "source": "datasets/realized_variance_futures.csv",
+  "har_reference": "HAR_QTFE.ipynb",
+  "symbols": ["ES", "CL", "C", "GC", "NG"],
+  "sample_start": "2011-01-01",
+  "training_end": "2023-07-12",
+  "measure": "rv5",
+  "max_lag": 20,
+  "common_warmup": 22,
+  "hac_lags": 22,
+  "downside": "abs(min(mean(percent ES close log returns over 1/5/22 retained rows), 0))",
+  "selection": "BIC on initial-history five-market plain VAR; same order for every VAR comparison",
+  "calendar": "Exact current HAR preparation; source-grid volatility windows, then all-five complete-case matching; provider timing unverified",
+  "evaluation": "802 shared next-row targets; expanding fits; already examined and exploratory",
+  "fallback": "last ES log variance when fit fails, dynamics are unstable or inputs are unavailable"
+}

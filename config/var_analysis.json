@@ -1,0 +1,23 @@
+{
+  "research_question": "Do lagged oil and gold realised variances improve forecasts of ES realised variance beyond ES history?",
+  "main_symbols": ["ES", "CL", "GC"],
+  "extension_symbols": ["ES", "CL", "GC", "C", "NG"],
+  "sample_start": "2011-01-01",
+  "training_end": "2023-07-12",
+  "test_end": "2026-08-31",
+  "primary_measure": "rv5",
+  "robustness_measure": "rk",
+  "max_lag": 20,
+  "intercept": true,
+  "horizon": "next jointly observed ES/CL/GC row",
+  "refit": "expanding at every origin; lag orders fixed from initial training",
+  "primary_loss": "log-variance MSE",
+  "secondary_losses": ["log RMSE", "log MAE", "variance MSE", "QLIKE"],
+  "backtransform": "exp(log forecast) times expanding training-residual smearing factor",
+  "fallback": "last ES observation for failed, unstable or unavailable fits",
+  "suspect_dates": ["2018-03-26", "2020-04-16", "2021-03-29"],
+  "suspect_policy": "retrospective sensitivity only; exclude exposed training design rows without rebuilding lags",
+  "calendar_status": "provider interval and publication timing unverified",
+  "scope_confirmed": "2026-10-04: user chose ES/oil/gold main and corn/gas extension",
+  "evaluation_status": "already inspected; exploratory evidence, not an untouched confirmatory holdout"
+}

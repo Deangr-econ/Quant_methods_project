@@ -11,3 +11,9 @@ __pycache__/
 *.pyc
 # Reproducible local outputs from the imported teammate analysis.
 reports/teammate_var/
+reports/har_verification/*.csv
+reports/har_verification/provenance.json
+reports/har_followup/*.csv
+reports/har_followup/provenance.json
+reports/var_final/generated/
+reports/var_har_notebook/generated/

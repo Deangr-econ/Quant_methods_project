@@ -6,26 +6,128 @@ Purpose: build a defensible, reproducible answer to whether information from oth
 markets improves forecasts of equity volatility. Better data, valid comparisons
 and clear economic interpretation take priority over adding more models.
 
-This is an implementation checklist, not a record of completed model repairs.
 Items marked `[x]` are completed within the scope recorded in the progress notes.
-The October R contribution does not repair the legacy notebooks or approve the
-final research design. Add an owner, date and evidence as tasks are completed.
-Proposed final design decisions still need to be recorded by the group.
+The canonical VAR is now the shared R pipeline, not the legacy notebooks.
+Completed coding does not certify provider data or solve remaining model
+limitations. Earlier progress notes describe the state at their own dates.
 
 ## Start here
 
-1. Resolve the research scope: keep interest rates and add their data, or explicitly
-   revise the question to commodity signals. The current file cannot test rates.
-2. Investigate the flagged observations and establish the trading calendar.
-3. Make the analysis run from repository files in a fresh session.
-4. Build an equity-only benchmark and a small VAR; diagnose both on training data.
-5. Evaluate genuinely forward-looking forecasts before expanding the model.
+1. Review the [VAR report draft](reports/var_final/VAR_REPORT_SECTION.md) and
+   integrate it into the group report; main scope is ES/CL/GC, extension C/NG.
+2. Confirm provider session/publication timing and contract handling; adjudicate
+   flagged quotes where evidence is available. These are still open.
+3. Explain the remaining residual dependence and ARCH. Do not call a stable VAR
+   well specified solely because its roots pass.
+4. Have another group member reproduce the main result using
+   [the VAR guide](reports/var_final/README.md).
+5. Reconcile the VAR and HAR sections' target, dates and information rules.
 
 **Priority key:** P0 = prerequisite for trustworthy results; P1 = required for the
 main analysis; P2 = extension after the main analysis works. Dependencies are
 listed at the beginning of each section.
 
+## HAR-aligned notebook — 5 October 2026
+
+The user's latest request is to match the asymmetric HAR methods and results
+layout, including corn and gas. [VAR_QTFE.ipynb](VAR_QTFE.ipynb) is the new
+notebook entry point for that comparison; the earlier R analysis remains intact.
+See [the matching-methods guide](reports/var_har_notebook/README.md).
+
+- [x] Reproduced the current HAR preparation and actual saved R² values.
+- [x] Added plain and downside-augmented VAR families with the same ES return
+  terms and HAC(22); added corn/no-corn and daily-restriction tables.
+- [x] Used one training-selected lag order, identical fit rows and 802 common
+  forecast targets; recomputed matching LHAR controls instead of importing
+  scores from a different sample.
+- [x] Saved the executed notebook with coefficient tables, residual plots,
+  diagnostics, forecast metrics and source/code provenance.
+- [x] Passed five focused alignment/forecast checks plus the existing 16 Python
+  tests. Native VAR and original LHAR calculations independently agree.
+
+This advances C3's replacement pathway; the original stale notebook is preserved
+as legacy rather than repaired in place. Common provider-date matching follows
+HAR for compatibility, not provider certification. M5, provider/return validation
+and final report/group review remain open. Do not mix 802-target and 809-target
+losses or describe full-sample R² as forecast accuracy.
+
+## Canonical VAR completion — 4 October 2026
+
+Owner/reviewer: Codex. Scope confirmed by the user: **ES, oil and gold main VAR;
+corn and natural gas extension**. Evidence: [recorded research design](reports/var_final/research_design.md),
+[run guide](reports/var_final/README.md), [report draft](reports/var_final/VAR_REPORT_SECTION.md),
+`R/var_pipeline.R`, `scripts/run_var.R` and `scripts/verify_var.R`.
+
+- [x] Added one local, configured R path; retained original contribution and
+  legacy notebooks. No private Drive imports, API keys or notebook state.
+- [x] Executed four scenarios in fresh R sessions: main RV5, RK, retrospective
+  suspect-training mask and five-market extension, each on the same 809 targets.
+- [x] Added fitted roots/size/status at every origin, explicit persistence
+  fallbacks, positive variance back-transforms and QLIKE/variance-scale scores.
+- [x] Added joint HAC training tests, saved ADF/KPSS critical values and residual
+  diagnostics, yearly losses, influential-date checks and appendix figures.
+- [x] Added same-order, same-training-row three-market controls for the C/NG
+  extension, plus an explicitly secondary 700-date availability comparison.
+- [x] Passed focused R tests and full result verification; original main forecasts
+  agree to numerical precision. Existing 16 Python tests also pass. The source
+  export is unchanged, and input/output SHA-256 hashes and versions are saved.
+- [x] Independently audited 128 real-data forecasts using NumPy/SVD and rebuilt
+  Clark–West standard errors directly. A full fresh run reproduced all 33 CSV
+  result tables exactly; see [the implementation audit](reports/var_final/IMPLEMENTATION_AUDIT.md).
+
+**Finding:** main VAR(5) has 0.64% higher log MSE than AR(5); VAR(15) is 0.74%
+worse than AR(15). RK and the suspect mask do not reverse the finding.
+The five-market level VAR(5) invokes 35 persistence fallbacks and is 2.27% worse
+than its matched three-market control over all targets. On the 700 dates where
+all extension models fit, it is about 0.30% better than that control but remains
+worse than matched ES AR. These are exploratory findings, not confirmatory
+holdout evidence or causal effects.
+
+R1/R2/R4/R5, D1/D7/D10, C1/C2/C4–C8, M4/M6/M7, F1–F5, I2/I3 and S2/S3 are
+completed for this recorded VAR design. C8 refers to fresh R execution, not to
+repairing legacy notebooks. D2/D3 and R3/D4–D6/D8 retain provider/coverage review
+work. M5 remains open as a model limitation: tested alternatives still reject
+whiteness. Five-session forecasts, IRF/FEVD and GARCH are outside the agreed
+VAR handover scope. S1/S4/S5 still require report/group work.
+
 ## Teammate integration — 4 October 2026
+
+### HAR follow-up — 4 October 2026
+
+**Return-control follow-up completed:** see
+[the evidence and sensitivity review](reports/har_followup/RETURN_CONTROL_REVIEW.md).
+
+- [x] Gave AR(5)/AR(15) the exact three LHAR return signals. AR(15)'s MSE improves
+  about 9.7%; LHAR's additional advantage is about 1.0%, with an exploratory
+  block-bootstrap interval spanning zero. This updates the interpretation of
+  the earlier 10.6% gain against variance-only AR.
+- [x] Audited ES return arithmetic and approximate historical roll dates, and ran
+  return-definition, RK/RV5 and suspect-training-window sensitivities on the same
+  809 targets. No return series has been certified as roll-adjusted or corrected.
+- [x] Saved paired loss intervals, yearly results and influential-date checks.
+  All 16 tests pass, including future-data invariance for the matched AR signals
+  and preservation of lag/target dates under the sensitivity mask.
+
+I2/I3/F4 and C7 have advanced for this provisional analysis. The final design,
+provider session/contract validation and appropriate final inference remain open.
+
+- [x] Reproduced the HAR notebook's in-sample R² values and separately executed
+  its previously unsaved forecast function. Recorded its origin/target label bug
+  and fresh-session failures without overwriting the notebook.
+- [x] Implemented HAR/LHAR and matched commodity extensions on the same 809
+  targets as the R comparison, with a common 22-observation regression warm-up.
+  This completes **I6's benchmark implementation for the provisional common-row
+  design**. Plain HAR improves MSE only slightly; equity-only LHAR improves MSE
+  about 10.6% over AR(15). Commodity extensions slightly worsen MSE.
+- [x] Added forecast-level future-perturbation, date/window and invalid-input
+  checks; all 12 preparation/review/forecast tests pass.
+
+Evidence: [HAR verification](reports/har_verification/HAR_REVIEW.md). These remain
+exploratory results; final calendar, equity-return roll treatment, uncertainty,
+anomaly robustness and the research scope remain unresolved. The next modelling
+control is a return-augmented AR benchmark. C7/F1 are advanced, not globally closed.
+
+### Imported R contribution
 
 Owner/reviewer: Codex, integrating the teammate's 3 October R contribution.
 Evidence: [integration review](timadditions/VERIFICATION.md) and
@@ -115,26 +217,33 @@ economic causality, and they must be repeated for the final training specificati
 
 Dependencies: none. Output: a short `research_design.md` and shared configuration.
 
-- [ ] **R1 — Fix the question and hypotheses.** Original route: Treasury
+- [x] **R1 — Fix the question and hypotheses.** Original route: Treasury
   yield-change volatility and oil volatility predict equity volatility. Add the
   Treasury data and preserve that hypothesis. Alternative route: commodity
   futures volatility predicts S&P 500 futures volatility. Explicitly document
   that revision. Do not substitute gold or corn for an interest-rate signal.
-- [ ] **R2 — Name the instruments precisely.** ES is E-mini S&P 500 futures;
+- [x] **R2 — Name the instruments precisely.** ES is E-mini S&P 500 futures;
   CL is WTI futures, replacing the proposal's cash equity index and Brent spot
   price. Explain why the substitutions suit the economic question. Specify the
   role of every additional commodity before including it.
-- [ ] **R3 — Define the outcome and timing.** Recommended first target: next-session
-  ES realised variance, modelled as `log(10000 * rk_ES)`. State the session boundary,
-  timezone and forecast issue time. Use predictors available by that time. Clarify
-  whether “next session” means the next ES session or next jointly active session.
-- [ ] **R4 — Freeze a chronological evaluation design.** One proposed split is
+- [ ] **R3 — Verify the provider timing behind the recorded target.** The current
+  target is `log(rv5_ES)` at the next jointly observed ES/CL/GC provider date,
+  with RK separate. Provider session boundary, timezone, publication and forecast
+  issue time remain unverified. Use predictors available by that time. Do not
+  call the statistical common-row horizon the next ES session without validation.
+- [x] **R4 — Freeze a chronological evaluation design.** The recorded design
+  uses initial history through 2023-07-12 and 809 already-inspected evaluation
+  targets through 2026-08-31; fixed initial orders, expanding refits, exploratory
+  interpretation. This supersedes the earlier proposed split below. One proposed split is
   training through 2018, validation 2019–2021, and final evaluation 2022–2026-08-31.
   Confirm adequate observations after data checks, then record exact dates and
   refit rules. Never randomly shuffle time-series observations. Full-sample plots
   have already been inspected: describe this honestly, and stop tuning on the
   evaluation period once the design is frozen.
-- [ ] **R5 — Agree a compact model ladder.** Start with an ES-only AR benchmark and
+- [x] **R5 — Agree a compact model ladder.** The recorded ladder is selected/matched
+  ES AR, persistence, ES/CL/GC level/differenced VAR and a C/NG extension with
+  matched three-market controls. This supersedes the earlier suggestions below.
+  Start with an ES-only AR benchmark and
   ES+CL VAR. Under the original question, compare ES-only, ES+rate and ES+rate+oil.
   Keep the five-market VAR as a motivated extension. Compare models on identical
   evaluation dates and targets; use a common estimation period for the principal
@@ -148,7 +257,7 @@ and split are written down before model selection resumes.
 Dependencies: R1–R3. Outputs: data dictionary, provenance record, anomaly ledger,
 sample-flow table and reproducible modelling panels.
 
-- [ ] **D1 — Preserve and identify the source snapshot.** Keep the original VOLARE
+- [x] **D1 — Preserve and identify the source snapshot.** Keep the original VOLARE
   export unchanged. Record retrieval date if known, URL, selected assets, sample,
   estimator definitions and file hash. If the historical download date is unknown,
   say so rather than inventing it. The existing FRED manifest does not document
@@ -188,7 +297,10 @@ sample-flow table and reproducible modelling panels.
   intended session grid and keep actual forecast-origin and target dates. Do not
   silently compress a missing trading session into a one-day lag. If using joint
   sessions deliberately, state that estimand and assess the gaps it creates.
-- [ ] **D7 — Replace blanket missing-value deletion.** The current pivot contains
+- [x] **D7 — Replace blanket missing-value deletion.** The canonical R path uses
+  only required main variances; the extension retains its missing cells on the
+  main grid, with no filling. Saved exclusions, fit masks and counts are auditable.
+  The legacy pivot contains
   prices, returns and variances, then drops a row if any field is missing. Build
   the VAR panel from its chosen variance columns only. A missing return or an
   unused corn observation should not automatically remove an ES/oil observation.
@@ -201,13 +313,14 @@ sample-flow table and reproducible modelling panels.
   documented adjustment. The log-variance VAR does not use closing returns, so
   these issues need separate assessment rather than an automatic change to `rk`.
   Confirm that forecasts and realised targets cover comparable time intervals.
-- [ ] **D9 — Add rates if retaining the original question.** Obtain the required
+**D9 — Not applicable to the confirmed commodity question.** Rates were not
+  added or tested. If reverting to the original question, obtain the required
   FRED history, calculate arithmetic yield changes in basis points, and construct
   a backward-looking volatility proxy. Document its window, missing-day policy
   and publication lag. Daily-yield volatility and intraday futures variance are
   different measurements; justify their combination and labels. Never log the
   signed yield change itself.
-- [ ] **D10 — Save one auditable transformation pipeline.** Generate panels from
+- [x] **D10 — Save one auditable transformation pipeline.** Generate panels from
   raw inputs plus explicit cleaning decisions; include dates, selected estimator,
   units and exclusion reasons. Reproduce the CSV from a fresh run instead of
   maintaining notebook-specific, manually edited copies.
@@ -224,37 +337,42 @@ export. [Provider guidance](https://www.kibot.com/futures/continuous-futures.htm
 Dependencies: design and data decisions above. Output: an analysis that runs from
 a fresh checkout/session without private Drive files or hidden notebook state.
 
-- [ ] **C1 — Use repository paths.** Replace `userdata.get('data_path')` and the
+- [x] **C1 — Use repository paths.** Canonical R entry points use repository paths;
+  Colab notebooks are preserved as legacy work. Replace `userdata.get('data_path')` and the
   private Drive module path with project-relative paths. Keep Colab as an optional
   interface. Remove the FRED API-key requirement from the VOLARE-only path; only
   request/access FRED when that source is actually needed.
-- [ ] **C2 — Create the actual shared module.** The code imports
+- [x] **C2 — Create the actual shared module.** The canonical module is
+  `R/var_pipeline.R`; the runner and focused tests source it. The legacy code imports
   `group_project_qtfe_functions.py`, but only a notebook with related functions is
   tracked. Move the required functions into a tracked module and import that
   module consistently. Avoid two independently edited definitions.
-- [ ] **C3 — Fix stale references and names.** Remove or update `var_df['GAS_RET']`
+- [ ] **C3 — Optional legacy-notebook cleanup, outside the canonical path.** Remove or update `var_df['GAS_RET']`
   in the last VAR cell; neither exists in the revised pipeline. Update GPR/oil/gas
   comments and the notebook name after fixing the research scope. Replace
   “lags 1–15” with the actual configured candidate range (currently up to 30).
-- [ ] **C4 — Make inputs explicit.** List model variables in a configuration rather
+- [x] **C4 — Make inputs explicit.** List model variables in a configuration rather
   than selecting every column containing `scaled`. Preserve a deliberate order,
   especially for any orthogonalized decomposition. Make plots adapt to the number
   of variables rather than hard-coding five panels.
-- [ ] **C5 — Record package versions and run instructions.** Pin the environment
-  actually validated, including Python, pandas, NumPy, statsmodels and plotting
-  packages. Pin `arch` if keeping the benchmark. The local 0.15.0 stationarity API
-  works; ensure Colab matches or implement a tested compatibility wrapper.
-- [ ] **C6 — Correct interpretation labels.** Rename the helper's automatic
+- [x] **C5 — Record package versions and run instructions.** The canonical VAR's
+  validated R/direct package versions are recorded in `requirements-var.R` and
+  the complete installed environment in generated `sessionInfo.txt`; see the
+  VAR guide. This is a version record, not a complete dependency lockfile.
+- [x] **C6 — Correct interpretation labels.** The canonical stationarity output
+  does not label test disagreement as a structural break. In legacy helpers, rename the automatic
   “Contradictory / Structural Break” conclusion to “Conflicting tests; investigate”.
   Opposing ADF/KPSS outcomes do not identify a break. Preserve warnings and report
   KPSS boundary p-values as bounds where appropriate.
-- [ ] **C7 — Add focused correctness checks.** Check unique sorted dates, finite
+- [x] **C7 — Add focused correctness checks.** Check unique sorted dates, finite
   positive variance before logs, unit conversions, exact source reconstruction,
   forecast-origin/target alignment and common comparison dates. Add a leakage
   check: altering observations after a forecast origin must not change the forecast
   or fitted preprocessing at that origin. Test these risks rather than duplicating
   every implementation line in a unit test.
-- [ ] **C8 — Restart and run all.** Execute the notebook in order in a fresh
+- [x] **C8 — Restart and run all.** Executed canonical scripts with `Rscript --vanilla`,
+  then independently verified saved outputs. Legacy notebook execution remains
+  outside this handover. The original criterion was to execute the notebook in order in a fresh
   environment, with local data and no existing variables. Save outputs only from
   that run. Record warnings and their resolutions. Any date-frequency warning
   needs explicit forecast-date mapping, not arbitrary calendar reindexing.
@@ -278,12 +396,12 @@ specification, training diagnostics and a concise decision log.
   and test lags. Do not automatically difference all log variances, or add a VECM,
   just to obtain convenient p-values. If differencing is justified, reconstruct
   level forecasts consistently. [VAR requirements](https://www.statsmodels.org/stable/vector_ar.html).
-- [x] **M3 — Select lags without future information.** Current BIC selection uses
+- [x] **M3 — Select lags without future information.** Legacy notebook BIC selection uses
   the entire sample. Restrict selection to the training/validation procedure and
   record the maximum lag, intercept/trend choice and whether lag selection repeats
   at refits. Keep candidate ranges small enough to diagnose and explain. Handle
   a selected lag of zero deliberately rather than breaking forecast code.
-- [ ] **M4 — Track model size and stability.** Record observations, lag order,
+- [x] **M4 — Track model size and stability.** Record observations, lag order,
   coefficients and `is_stable()` for each fit. With K variables and an intercept,
   there are `K * (1 + K*p)` regression coefficients. Current K=5, p=5 gives 130.
   Log unstable or failed rolling fits and apply a predefined fallback; do not
@@ -294,12 +412,15 @@ specification, training diagnostics and a concise decision log.
   Investigate data artefacts, lag structure and volatility persistence on training
   data; use a modest alternative or HAR benchmark if justified. Do not increase
   lags indefinitely until one p-value passes. [Whiteness test](https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.var_model.VARResults.test_whiteness.html).
-- [ ] **M6 — Check heteroskedasticity and distributional fit.** Inspect squared
+- [x] **M6 — Check heteroskedasticity and distributional fit.** Inspected via
+  saved residual/squared-ACF, QQ/histogram and ARCH diagnostics; inference uses
+  HAC with explicit asymptotic limitations, and no Gaussian intervals are claimed.
+  This documents, rather than removes, heteroskedasticity. Inspect squared
   residual dependence, tails and time-varying dispersion. Non-normal residuals
   do not automatically invalidate point forecasts, but they limit conventional
   inference and Gaussian intervals. Choose inference/bootstrap assumptions that
   address the diagnosed dependence and heteroskedasticity; document limitations.
-- [ ] **M7 — Test incremental predictive relationships jointly.** In the ES
+- [x] **M7 — Test incremental predictive relationships jointly.** In the ES
   equation, jointly test all lags of the proposed added market, conditional on the
   included variables. State the null, sample and test method. Use robust inference
   if required by M5/M6. Avoid selecting isolated significant coefficients or
@@ -313,20 +434,21 @@ are explained, and claims match the assumptions actually supported.
 Dependencies: frozen design and viable specifications. Outputs:
 `forecasts.csv`, `forecast_metrics.csv`, forecast plots and a run log.
 
-- [ ] **F1 — Implement sequential forecasts.** At each origin, fit using observations
+- [x] **F1 — Implement sequential forecasts.** At each origin, fit using observations
   available at or before that time and predict the next target. Start with an
   expanding window and a stated refit schedule. It is valid to update on earlier
   evaluation observations after they become available; it is not valid to use
   later observations. Fit scaling, cleaning thresholds and tuning only within
   the allowed information set. Save origin, target, training end, model and status.
-- [ ] **F2 — Define log-to-variance conversion.** For a log-variance forecast,
+- [x] **F2 — Define log-to-variance conversion.** For a log-variance forecast,
   `exp(predicted_log)/10000` does not generally equal conditional mean variance.
   Specify a bias correction estimated from training information, such as an
   appropriately justified residual smearing factor. Do not use test residuals to
   estimate it. Distinguish log-scale forecasts from mean-variance forecasts.
-- [ ] **F3 — Score the same target on the same dates.** Use a predeclared primary
-  variance loss such as QLIKE, with variance MSE and log-scale RMSE as supporting
-  measures. For positive observed variance v and forecast h, one QLIKE convention
+- [x] **F3 — Score the same target on the same dates.** The recorded exploratory
+  design retains log-MSE as primary to match the existing contribution, with
+  variance MSE, QLIKE and log RMSE/MAE as supporting losses. It is not a claim
+  that the choice preceded all evaluation inspection. For positive observed variance v and forecast h, one QLIKE convention
   is `v/h - log(v/h) - 1`. Keep units consistent and do not substitute volatility
   into a variance formula. Report failed forecasts and missing targets explicitly.
   Robustness of proxy-based scoring relies on assumptions; QLIKE does not repair
@@ -337,11 +459,14 @@ Dependencies: frozen design and viable specifications. Outputs:
   Diebold–Mariano test is not automatically appropriate for a nested AR/VAR
   comparison; Clark–West is an option under its squared-error assumptions, not a
   generic replacement for QLIKE tests. [Nested-model reference](https://www.nber.org/papers/t0326).
-- [ ] **F5 — Prevent multiple-comparison fishing.** Predeclare the principal model
+- [x] **F5 — Prevent multiple-comparison fishing.** Principal comparison recorded,
+  all results labelled exploratory, within-scenario Holm adjustment reported;
+  no unexamined confirmation sample is claimed. For subsequent work, predeclare the principal model
   comparison. Separate the final test from validation and label exploratory
   comparisons. Report null/negative results: evidence that cross-market signals
   do not improve forecasts is still an answer to the research question.
-- [ ] **F6 — Match the horizon exactly.** Add a five-session horizon only after
+- [ ] **F6 — Optional five-session extension, deferred.** The current one-step
+  common-row horizon is documented and tested. Add a five-session horizon only after
   one-step forecasts work. Distinguish variance on session t+5 from the sum/average
   over sessions t+1 through t+5. Account for overlapping forecast errors in any
   inference. In recursive VAR forecasts, never feed in realised future oil/rate
@@ -360,12 +485,14 @@ labelled secondary figures, not an uncontrolled search across specifications.
   log-variance response d, variance changes by `100*(exp(d)-1)%` and standard
   deviation by `100*(exp(d/2)-1)%`. State horizon and shock normalization; avoid
   presenting a single coefficient as the complete dynamic effect.
-- [ ] **I2 — Run a short planned robustness set (P1).** Compare RK with RV5 or
+- [x] **I2 — Run a short robustness set (P1).** RK, retrospective suspect mask
+  and C/NG extension executed on the same targets; estimator/sample differences
+  explicitly reported. This set was not preregistered. Compare RK with RV5 or
   subsampled RV5 after anomaly review; assess documented anomaly treatments and
   the small versus extended variable set. Keep evaluation dates comparable and
   disclose when changing the variance estimator also changes the evaluation proxy.
   Add a rolling-window or lag sensitivity check if motivated by diagnostics.
-- [ ] **I3 — Check whether gains are concentrated (P1).** Show performance across
+- [x] **I3 — Check whether gains are concentrated (P1).** Show performance across
   prespecified periods and a loss-difference time plot. Determine whether one
   crisis or flagged date drives the conclusion. Report sample sizes and avoid
   definitive claims from small subsamples or treating event timing as causation.
@@ -382,7 +509,7 @@ labelled secondary figures, not an uncontrolled search across specifications.
   provides point responses only. Generalized FEVD requires its own implementation
   and normalization; it is not obtained merely by calling standard `fevd()`.
   Avoid interpreting cumulative log-variance responses as cumulative returns.
-- [ ] **I6 — Add a strong simple benchmark before more complexity (P2).** A HAR
+- [x] **I6 — Add a strong simple benchmark before more complexity (P2).** A HAR
   model using daily, weekly and monthly variance history can assess whether VAR
   gains simply reflect an inadequate equity-only baseline. Keep definitions of
   averaging and log transformation consistent. Do not replace the entire project
@@ -403,10 +530,10 @@ a reproducible code/data-access package.
   methodology, principal findings, interpretation, robustness/limitations,
   conclusion and division of labour. Put large VAR coefficient tables and
   supporting diagnostics in the appendix.
-- [ ] **S2 — Produce a minimal evidence set.** Include a data/sample table, time
+- [x] **S2 — Produce a minimal evidence set.** Include a data/sample table, time
   plot, benchmark-versus-VAR forecast table and compact robustness table. Add an
   IRF only if its interpretation supports the question and is defensible.
-- [ ] **S3 — Record reproducibility information.** Save configuration, source
+- [x] **S3 — Record reproducibility information.** Save configuration, source
   hashes, dependency versions, random seeds where used, run date and code revision.
   Explain how to acquire data without assuming everyone has a private Drive or
   permission to redistribute provider files.
@@ -431,17 +558,21 @@ by reproducible evidence. Significant cross-market effects are not a requirement
 
 | Date | Decision | Reason/evidence | Owner |
 |---|---|---|---|
-| Pending | Research scope and final instruments | R1–R2 | |
-| Pending | Target, session calendar and information cutoff | R3, D6, D8 | |
-| Pending | Anomaly policy and unresolved observations | D3–D5 | |
-| Pending | Split, model ladder and primary metric | R4–R5, F3 | |
-| Pending | Final specification and limitations | M2–M6 | |
+| 2026-10-04 | User confirms ES/CL/GC main; C/NG extension; no rates | R1–R2; research_design.md | User |
+| 2026-10-04 | Next main common row; provider session/cutoff still unverified | R3, D6, D8; research_design.md | Codex; provider facts pending |
+| 2026-10-04 | Preserve main source; retrospective 22-row suspect exposure sensitivity only | D3–D5; config/var_analysis.json | Codex; quote adjudication pending |
+| 2026-10-04 | Preserve 3236/809 split, initial fixed orders, expanding refits, primary log-MSE; exploratory | R4–R5, F3; research_design.md | Codex |
+| 2026-10-04 | VAR(5) principal; VAR(15)/differences secondary; stability passes, residual diagnostics fail | M2–M6; VAR_REPORT_SECTION.md | Codex |
 
 ## Current file map
 
 | File | Current purpose / issue |
 |---|---|
 | `datasets/realized_variance_futures.csv` | Original VOLARE export; preserve unchanged |
+| `config/var_analysis.json` | Recorded main/extension design and sensitivity policy |
+| `R/var_pipeline.R` | Canonical shared VAR/AR estimation, forecast and diagnostic functions |
+| `scripts/run_var.R`, `scripts/verify_var.R` | Fresh-session analysis and independent result verification |
+| `reports/var_final/` | Research design, reproducible guide and report draft; generated outputs local |
 | `datasets/volatility_model_QTFE_data.csv` | Derived panel; recreate through a tracked pipeline |
 | `timadditions/var_analysis.R` | Reproduced teammate ES/CL/GC log-RV5 analysis; run with `scripts/run_teammate_var.R` |
 | `VAR_GPRD_OIL_GAS.ipynb` | Legacy log-variance VAR; stale name, private imports, full-sample estimation |
