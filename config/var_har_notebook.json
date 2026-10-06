@@ -12,5 +12,12 @@
   "selection": "BIC on initial-history five-market plain VAR; same order for every VAR comparison",
   "calendar": "Exact current HAR preparation; source-grid volatility windows, then all-five complete-case matching; provider timing unverified",
   "evaluation": "802 shared next-row targets; expanding fits; already examined and exploratory",
-  "fallback": "last ES log variance when fit fails, dynamics are unstable or inputs are unavailable"
+  "fallback": "last ES log variance when fit fails, dynamics are unstable or inputs are unavailable",
+  "irf": {
+    "model": "VAR + Downside (All 4: Oil + Corn + Gold + NG)",
+    "horizon": 20,
+    "draws": 2000,
+    "seed": 20261005,
+    "method": "Conditional generalized IRFs; initial training only; pointwise joint-HAC parameter-simulation bands"
+  }
 }

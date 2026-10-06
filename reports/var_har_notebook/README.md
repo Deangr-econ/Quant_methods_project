@@ -95,6 +95,41 @@ interpretation. HAC errors do not fix residual misspecification. Variance-scale
 QLIKE uses historical residual smearing, with its conditional-mean limitations;
 there are no Gaussian prediction intervals.
 
+## Training-only IRF curves and the 2011/split audit
+
+Section 8 now shows four commodity-to-ES generalized responses from the initial
+five-market downside VAR(5), using 3,165 training outcomes only. Innovations are
+one residual SD of commodity log variance, with contemporaneously correlated
+innovations; downside controls have the same fixed path in both scenarios.
+These conditional responses are ordering invariant, not identified causal effects.
+The horizon counts retained common observations. Plot/table percentages
+back-transform the log-model path, not a separately estimated arithmetic
+conditional-variance mean. The saved table also supplies volatility percentages.
+
+Exploratory 95% pointwise bands jointly simulate OLS coefficients and innovation
+covariance using Bartlett HAC(22), including their cross covariance. Seed 20261005;
+all 2,000 draws were stable/positive-definite in this run. Conditional point root:
+0.978582. This asymptotic construction requires weak dependence and stationarity;
+bands do not fix residual misspecification or demonstrate causal significance.
+
+At horizon five, implied ES variance responses are oil +8.31%, corn +3.71%, gold
++8.55% and gas +5.24%. They generally fade; at horizon 20 corn's band includes zero.
+Large correlated responses, especially horizon zero, need not imply incremental
+forecast value beyond equity history. Shock SDs differ across markets.
+Method: [Pesaran–Shin (1998)](https://www.sciencedirect.com/science/article/pii/S0165176597002140).
+
+The raw availability audit finds 25 incomplete all-five dates in 2009–2010 and
+42 from 2011 onward, with **no gold-only RV5 dates** in this export. Retaining the
+2011 start is reasonable for compatibility/early-sample exclusion but does not
+eliminate calendar mismatches or later quote/roll concerns. Missing-market dates
+and coverage counts are saved, without imputing RV5 or modifying the raw file.
+
+The frozen initial cutoff gives 79.78% training / 20.22% evaluation, approximately
+80/20. Expanding refits are already implemented: first fit 3,165 known target
+outcomes; last fit 3,966. Keep the shared cutoff rather than recomputing exactly
+80% and changing evaluation dates. A rolling-window sensitivity remains optional.
+The focused plan is `VAR_NEXT_STEPS.md` at the repository root.
+
 ## Reproduce
 
 Use the environment recorded in `requirements-var-notebook.txt`. The source
@@ -104,7 +139,7 @@ is required. Select the project's `.venv` Python kernel in Jupyter and run all.
 For the checked command-line execution:
 
 ```sh
-.venv/bin/python -m unittest tests.test_var_har_notebook -v
+.venv/bin/python -m unittest tests.test_var_har_notebook tests.test_var_irf -v
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
 ```
@@ -119,10 +154,13 @@ template and clears displayed outputs; **do not run it to view results**. Run th
 executor afterwards if deliberately rebuilding. Future content edits should be
 kept in the generator as well as the delivered notebook.
 
-Five new focused checks pass, alongside the existing 16 Python checks (21 total).
+Ten focused notebook/IRF checks pass, alongside the existing 16 Python checks (26 total).
 They verify exact reviewed HAR preparation, identical LHAR coefficients/HAC
 covariance, standard VAR fits/forecasts, downside-window definitions, target
 chronology, future-data invariance, daily restrictions and common sample sizes.
+IRF tests also verify native lag/MA matrices, shock impact and market-order
+invariance, the joint-HAC coefficient block against statsmodels, uncertainty
+in residual covariance, seed reproducibility and initial-training isolation.
 
 Generated CSVs and provenance remain local in `generated/`. They include the
 HAR reference, common-sample fit tables, lag selection, exclusions, stationarity,

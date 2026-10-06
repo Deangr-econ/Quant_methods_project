@@ -7,14 +7,20 @@ markets improves forecasts of equity volatility. Better data, valid comparisons
 and clear economic interpretation take priority over adding more models.
 
 Items marked `[x]` are completed within the scope recorded in the progress notes.
-The canonical VAR is now the shared R pipeline, not the legacy notebooks.
+The earlier ES/CL/GC analysis uses the shared R pipeline. The current five-market
+HAR comparison and IRFs use `VAR_QTFE.ipynb`; the legacy notebooks are preserved.
 Completed coding does not certify provider data or solve remaining model
 limitations. Earlier progress notes describe the state at their own dates.
 
 ## Start here
 
-1. Review the [VAR report draft](reports/var_final/VAR_REPORT_SECTION.md) and
-   integrate it into the group report; main scope is ES/CL/GC, extension C/NG.
+For the current four priorities, use [VAR_NEXT_STEPS.md](VAR_NEXT_STEPS.md):
+data/start date, IRFs, chronological expanding forecasts and the later code walkthrough.
+
+1. Review [the current notebook guide](reports/var_har_notebook/README.md) and
+   [focused next steps](VAR_NEXT_STEPS.md). Integrate the HAR-matched results into
+   the report, keeping the earlier [ES/CL/GC draft](reports/var_final/VAR_REPORT_SECTION.md)
+   separate where its sample differs.
 2. Confirm provider session/publication timing and contract handling; adjudicate
    flagged quotes where evidence is available. These are still open.
 3. Explain the remaining residual dependence and ARCH. Do not call a stable VAR
@@ -44,6 +50,11 @@ See [the matching-methods guide](reports/var_har_notebook/README.md).
   diagnostics, forecast metrics and source/code provenance.
 - [x] Passed five focused alignment/forecast checks plus the existing 16 Python
   tests. Native VAR and original LHAR calculations independently agree.
+- [x] Audited pre/post-2011 RV5 availability; kept 2011 with the explicit
+  remaining common-calendar limitations. Confirmed approximate 80/20 expanding refits.
+- [x] Added initial-training commodity-to-ES generalized IRFs, exploratory
+  joint-HAC parameter-simulation bands and five independent IRF checks (26 total).
+  Pointwise associations do not establish causal effects or forecast gains.
 
 This advances C3's replacement pathway; the original stale notebook is preserved
 as legacy rather than repaired in place. Common provider-date matching follows
@@ -496,19 +507,18 @@ labelled secondary figures, not an uncontrolled search across specifications.
   prespecified periods and a loss-difference time plot. Determine whether one
   crisis or flagged date drives the conclusion. Report sample sizes and avoid
   definitive claims from small subsamples or treating event timing as causation.
-- [ ] **I4 — Repair impulse-response interpretation if retained (P2).** The notebook
-  calls `irf.plot(impulse='log_rv_scaled_ES')`, which plots responses to an ES shock,
-  not the desired oil-to-equity direction. Specify `impulse`, `response`, shock
-  size and `orth` explicitly. Reduced-form, orthogonalized and generalized IRFs
-  answer different questions. [Plot defaults](https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.irf.IRAnalysis.plot.html).
-- [ ] **I5 — Justify identification and uncertainty if using IRFs/FEVD (P2).**
-  Cholesky results depend on ordering; the current alphabetical pivot order is
-  not an economic justification. Generalized IRFs remove that ordering choice
-  but do not identify exogenous causal shocks. Provide appropriate confidence
-  bands and ordering sensitivity for retained results. The existing GIRF helper
-  provides point responses only. Generalized FEVD requires its own implementation
-  and normalization; it is not obtained merely by calling standard `fevd()`.
-  Avoid interpreting cumulative log-variance responses as cumulative returns.
+- [x] **I4 — Repair impulse-response interpretation in the replacement notebook (P2).**
+  `VAR_QTFE.ipynb` now explicitly plots CL/C/GC/NG innovations → ES log-variance
+  responses, transformed to implied variance percentages. Shock size is one
+  residual SD; horizons are retained common observations. The legacy notebook's
+  ES-impulse plot remains legacy. No cumulative-return interpretation is used.
+- [x] **I5 — Document identification and exploratory IRF uncertainty (P2).**
+  Replacement curves use ordering-invariant generalized responses and condition
+  on an identical downside-control path. They do not identify causal shocks.
+  Joint HAC(22) simulations include coefficient and residual-covariance uncertainty;
+  pointwise, asymptotic/stationarity limits and draw exclusions are reported.
+  Tests confirm permutation invariance, avoiding Cholesky ordering sensitivity.
+  This closes the retained-IRF task only; FEVD is not implemented or required.
 - [x] **I6 — Add a strong simple benchmark before more complexity (P2).** A HAR
   model using daily, weekly and monthly variance history can assess whether VAR
   gains simply reflect an inadequate equity-only baseline. Keep definitions of
@@ -563,6 +573,7 @@ by reproducible evidence. Significant cross-market effects are not a requirement
 | 2026-10-04 | Preserve main source; retrospective 22-row suspect exposure sensitivity only | D3–D5; config/var_analysis.json | Codex; quote adjudication pending |
 | 2026-10-04 | Preserve 3236/809 split, initial fixed orders, expanding refits, primary log-MSE; exploratory | R4–R5, F3; research_design.md | Codex |
 | 2026-10-04 | VAR(5) principal; VAR(15)/differences secondary; stability passes, residual diagnostics fail | M2–M6; VAR_REPORT_SECTION.md | Codex |
+| 2026-10-05 | Keep current HAR-aligned 2011 sample and frozen July 2023 expanding cutoff; add training-only generalized commodity-to-ES IRFs | VAR_NEXT_STEPS.md; VAR_QTFE.ipynb; residual/provider limitations remain | Codex; group wording pending |
 
 ## Current file map
 
@@ -571,6 +582,8 @@ by reproducible evidence. Significant cross-market effects are not a requirement
 | `datasets/realized_variance_futures.csv` | Original VOLARE export; preserve unchanged |
 | `config/var_analysis.json` | Recorded main/extension design and sensitivity policy |
 | `R/var_pipeline.R` | Canonical shared VAR/AR estimation, forecast and diagnostic functions |
+| `VAR_QTFE.ipynb`, `var_har_notebook.py` | Current five-market HAR-aligned comparison and expanding forecasts |
+| `var_irf.py`, `VAR_NEXT_STEPS.md` | Initial-training conditional generalized IRFs and focused decisions/learning plan |
 | `scripts/run_var.R`, `scripts/verify_var.R` | Fresh-session analysis and independent result verification |
 | `reports/var_final/` | Research design, reproducible guide and report draft; generated outputs local |
 | `datasets/volatility_model_QTFE_data.csv` | Derived panel; recreate through a tracked pipeline |

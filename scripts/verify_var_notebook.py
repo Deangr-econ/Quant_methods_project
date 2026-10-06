@@ -14,12 +14,21 @@ assert notebook["nbformat"] == 4
 assert [c["execution_count"] for c in code] == list(range(1, len(code) + 1))
 assert all(o["output_type"] != "error" for c in code for o in c["outputs"])
 assert notebook["metadata"]["validated_execution"]["errors"] == 0
-assert sum("image/png" in o.get("data", {}) for c in code for o in c["outputs"]) == 3
+assert sum("image/png" in o.get("data", {}) for c in code for o in c["outputs"]) == 4
 manifest = json.loads((out / "provenance.json").read_text())
 sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
 assert sha(ROOT / manifest["config"]["source"]) == manifest["source_sha256"]
 assert sha(ROOT / manifest["config"]["har_reference"]) == manifest["har_notebook_sha256"]
 assert sha(ROOT / "var_har_notebook.py") == manifest["module_sha256"]
+assert sha(ROOT / "var_irf.py") == manifest["irf_module_sha256"]
+assert manifest['irf']['n'] == manifest['initial_fit_targets']
+assert manifest['irf']['last_target'] == manifest['config']['training_end']
+irfs = pd.read_csv(out / 'training_generalized_irfs.csv')
+assert len(irfs) == 5 * (manifest['irf']['horizon'] + 1)
+assert not irfs.duplicated(['impulse', 'response', 'horizon']).any()
+assert (irfs.log_lower <= irfs.log_upper).all()
+np.testing.assert_allclose(irfs.variance_pct, 100 * np.expm1(irfs.log_response), atol=1e-12)
+np.testing.assert_allclose(irfs.volatility_pct, 100 * np.expm1(irfs.log_response/2), atol=1e-12)
 for name, value in manifest["output_sha256"].items():
     assert sha(out / name) == value
 raw = pd.read_csv(ROOT / manifest["config"]["source"], float_precision="round_trip")
@@ -50,4 +59,4 @@ for name, frame in forecasts.groupby("model", sort=False):
                 np.mean(ratio - np.log(ratio) - 1)]
     np.testing.assert_allclose(metrics.loc[name, ["MSE", "RMSE", "MAE", "Variance_MSE", "QLIKE"]], expected, rtol=1e-12)
     assert metrics.loc[name, "Fallbacks"] == frame.status.ne("ok").sum()
-print(f"Verified {len(code)} executed cells, 3 figures, source/code/output hashes and all {len(forecasts):,} dated forecast records across {len(metrics)} models.")
+print(f"Verified {len(code)} executed cells, 4 figures, training-only IRF metadata, source/code/output hashes and all {len(forecasts):,} dated forecast records across {len(metrics)} models.")

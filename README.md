@@ -9,9 +9,12 @@ ES downside-return controls, HAC(22), comparison tables and residual plots.
 It also recomputes VAR and LHAR forecasts on the same 802 targets. See
 [the matching-methods guide](reports/var_har_notebook/README.md) for definitions,
 results and the differences from the earlier 809-target analysis.
+The notebook includes training-only commodity-to-ES generalized IRF curves with
+exploratory uncertainty bands. [VAR_NEXT_STEPS.md](VAR_NEXT_STEPS.md) records
+the data/sample decision, expanding-window explanation and remaining learning/report tasks.
 
 ```sh
-.venv/bin/python -m unittest tests.test_var_har_notebook -v
+.venv/bin/python -m unittest tests.test_var_har_notebook tests.test_var_irf -v
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
 ```
