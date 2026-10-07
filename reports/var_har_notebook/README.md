@@ -1,5 +1,11 @@
 # HAR-aligned VAR notebook — 5 October 2026
 
+**7 October status update:** the HAR notebook has subsequently changed. Exact
+alignment and the fresh-run verification described below apply to the reviewed
+5 October version. The current suite has 24 passing checks and two HAR-reference
+errors; saved VAR execution counts are out of order. See the repository-root
+`PROJECT_CHECKLIST.md` before using the latest HAR scores in a direct comparison.
+
 Open `VAR_QTFE.ipynb` at the repository root. All code cells have been executed
 in order in a fresh project Python Jupyter kernel; results and figures are saved
 inside the notebook. The user's current request is to match the asymmetric HAR

@@ -1,5 +1,11 @@
 # VAR: next steps and decisions
 
+**7 October status update:** the HAR reference has changed since this review.
+Two HAR-alignment checks now error (24 of 26 Python checks pass), and the saved
+VAR execution counts are out of order. See `PROJECT_CHECKLIST.md` for the current
+priorities. The completed verification and matched results below describe the
+5 October run, rather than certification against the latest HAR.
+
 Updated 5 October 2026. Current entry point: `VAR_QTFE.ipynb`, aligned with
 the current asymmetric HAR. Earlier ES/oil/gold R results remain a separate
 analysis with a different calendar. This focused list supplements `VAR_TODO.md`.
