@@ -1,10 +1,13 @@
 # HAR-aligned VAR notebook — 5 October 2026
 
-**7 October status update:** the HAR notebook has subsequently changed. Exact
-alignment and the fresh-run verification described below apply to the reviewed
-5 October version. The current suite has 24 passing checks and two HAR-reference
-errors; saved VAR execution counts are out of order. See the repository-root
-`PROJECT_CHECKLIST.md` before using the latest HAR scores in a direct comparison.
+**7 October reconciliation completed:** read
+[the current comparison and validation](HAR_VAR_RECONCILIATION.md).
+All 30 tests pass; a fresh notebook run and saved-output verification pass.
+The latest HAR function independently matches all 4,010 LHAR forecasts on the
+same 802 targets. The main calendar is the frozen commodity core; the newer HAR
+bond join is separately audited and removes 232 panel observations. Controls now
+use decimal return units. The detailed sections below document the historical
+5 October run, rather than the original HAR's newer bond-joined results.
 
 Open `VAR_QTFE.ipynb` at the repository root. All code cells have been executed
 in order in a fresh project Python Jupyter kernel; results and figures are saved

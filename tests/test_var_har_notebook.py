@@ -1,5 +1,3 @@
-import ast
-import json
 from pathlib import Path
 import unittest
 
@@ -10,7 +8,8 @@ from statsmodels.tsa.api import VAR
 
 from var_har_notebook import (prepare_har_data, aligned_design, select_shared_lag,
     model_specifications, fit_models, expanding_forecasts, columns_for,
-    reference_har_function)
+    reference_har_function, reference_har_preparation, load_yield_snapshot,
+    audit_reference_har_forecasts)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -25,12 +24,35 @@ class AlignedVARTests(unittest.TestCase):
         cls.specs = model_specifications(cls.p)
 
     def test_preparation_exactly_matches_current_har_cell(self):
-        notebook = json.loads((ROOT / "HAR_QTFE.ipynb").read_text())
-        env = dict(pd=pd, np=np, data_futures=self.raw)
-        source = next("".join(c["source"]) for c in notebook["cells"]
-                      if c["cell_type"] == "code" and "data.groupby" in "".join(c["source"]) and "rv5_scaled_m" in "".join(c["source"]))
-        exec(compile(ast.parse(source), "reviewed HAR preparation", "exec"), env)
-        pd.testing.assert_frame_equal(self.wide, env["df"])
+        # A complete synthetic yield input isolates commodity preparation from
+        # the latest notebook's separately audited bond-calendar restriction.
+        dates = pd.DatetimeIndex(pd.to_datetime(self.raw.date).unique()).sort_values()
+        yields = pd.DataFrame({"dgs10": 2.5}, index=dates)
+        reference = reference_har_preparation(self.raw, yields, ROOT / "HAR_QTFE.ipynb")
+        pd.testing.assert_frame_equal(self.wide,
+            reference.drop(columns=["dgs10", "abs_dyield_10", "rv_yield_10"]))
+
+    def test_latest_yield_join_matches_reference_without_imputation(self):
+        # Include a genuinely absent date and a missing yield, so the test
+        # detects changes to inner matching and diff-before-dropna semantics.
+        dates = pd.DatetimeIndex(pd.to_datetime(self.raw.date).unique()).sort_values()
+        yields = pd.DataFrame({"dgs10": np.linspace(2, 4, len(dates))}, index=dates)
+        absent, missing = self.wide.index[50], self.wide.index[80]
+        yields = yields.drop(index=absent)
+        yields.loc[missing, "dgs10"] = np.nan
+        prepared, _ = prepare_har_data(self.raw, yields=yields)
+        reference = reference_har_preparation(self.raw, yields, ROOT / "HAR_QTFE.ipynb")
+        pd.testing.assert_frame_equal(prepared, reference)
+        self.assertNotIn(absent, prepared.index)
+        self.assertNotIn(missing, prepared.index)
+        pd.testing.assert_frame_equal(self.wide, prepare_har_data(self.raw)[0])
+
+    def test_saved_yield_snapshot_matches_current_har_preparation(self):
+        yields = load_yield_snapshot(ROOT / "datasets/raw/fred_dgs10_2011_2026.csv")
+        prepared, _ = prepare_har_data(self.raw, yields=yields)
+        reference = reference_har_preparation(self.raw, yields, ROOT / "HAR_QTFE.ipynb")
+        pd.testing.assert_frame_equal(prepared, reference)
+        self.assertLess(len(prepared), len(self.wide))
 
     def test_native_var_same_es_equation_and_forecast(self):
         name = "VAR (All 4: Oil + Corn + Gold + NG)"
@@ -69,7 +91,7 @@ class AlignedVARTests(unittest.TestCase):
         self.assertEqual(result.iloc[0].training_end, origin)
         self.assertGreater(result.iloc[0].date, origin)
         for window, label in [(1, "d"), (5, "w"), (22, "m")]:
-            expected = -min(float(small.loc[:origin, "ret_ES"].tail(window).mean()), 0)
+            expected = -min(float((small.loc[:origin, "ret_ES"] / 100).tail(window).mean()), 0)
             self.assertAlmostEqual(d["x"].loc[origin, f"ES_down_{label}"], expected)
         altered = small.copy()
         future = altered.index > origin
@@ -80,6 +102,31 @@ class AlignedVARTests(unittest.TestCase):
         np.testing.assert_allclose(result.iloc[0][["predicted_log", "predicted_variance", "smearing"]].astype(float),
                                    second.iloc[0][["predicted_log", "predicted_variance", "smearing"]].astype(float), atol=1e-12)
         self.assertNotEqual(result.iloc[0].actual_log, second.iloc[0].actual_log)
+
+    def test_latest_har_forecasts_share_cutoff_origins_targets_and_predictions(self):
+        small = self.wide.iloc[:130]
+        design = aligned_design(small)
+        cutoff = small.index[-8]
+        names = ["LHAR (Baseline)", "LHAR (No Corn: Oil + NG + Gold)"]
+        specs = {name: self.specs[name] for name in names}
+        forecasts = expanding_forecasts(design, specs, cutoff)
+        audit = audit_reference_har_forecasts(small, design, specs, forecasts,
+            cutoff, ROOT / "HAR_QTFE.ipynb")
+        self.assertEqual(audit.N.tolist(), [7, 7])
+        self.assertTrue((audit.Max_prediction_difference < 1e-9).all())
+        self.assertTrue((audit.First_origin < audit.First_target).all())
+        self.assertTrue((forecasts.training_end == forecasts.origin_date).all())
+
+    def test_return_rescaling_changes_coefficients_but_not_predictions(self):
+        name = "VAR + Downside (Baseline)"
+        spec = {name: self.specs[name]}
+        decimal, _ = fit_models(self.design, spec)
+        percent_design = dict(self.design, x=self.design['x'].copy())
+        cols = [f"ES_down_{h}" for h in ["d", "w", "m"]]
+        percent_design['x'][cols] *= 100
+        percent, _ = fit_models(percent_design, spec)
+        np.testing.assert_allclose(decimal[name].fittedvalues, percent[name].fittedvalues, atol=1e-10)
+        np.testing.assert_allclose(decimal[name].params[cols], percent[name].params[cols]*100, atol=1e-8)
 
     def test_daily_restrictions_and_common_sample(self):
         daily = self.specs["Restricted VAR + Downside (All 4: Oil + Corn + Gold + NG; Daily Only)"]

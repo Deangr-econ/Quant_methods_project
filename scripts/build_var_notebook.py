@@ -23,11 +23,16 @@ md("""
 improve forecasts of ES realised variance beyond equity history and the same
 downside-return information used by asymmetric HAR?
 
-This notebook mirrors `HAR_QTFE.ipynb`: RV5 from 2011, all five markets, the same
-ES downside terms, HAC(22), fit-comparison tables, a corn/no-corn matrix,
+This notebook uses the latest `HAR_QTFE.ipynb` commodity specifications: RV5 from
+2011, all five markets, the same decimal-unit ES downside terms, HAC(22),
+fit-comparison tables, a corn/no-corn matrix,
 coefficient results and a four-panel residual plot. All fitted comparison tables
 use identical rows. A separate section evaluates sequential forecasts on shared
-dates and recomputes LHAR controls in this notebook.
+dates and independently reruns the latest LHAR function on those same inputs.
+The **commodity-core calendar is frozen**, with no bond-data join. The latest
+HAR's bond join is audited separately because it removes commodity observations
+even from models that do not use bonds. Its standalone scores are not the scores
+in our shared comparison. No bond regressor is added to VAR.
 
 **Definitions:** the outcome is `log(rv5_ES)`, a log **variance**, as in the current
 HAR code. No square root or annualisation is introduced. Volatility is its square
@@ -50,7 +55,8 @@ ROOT = next(p for p in [Path.cwd(), *Path.cwd().parents] if (p / 'config/var_har
 sys.path.insert(0, str(ROOT))
 from var_har_notebook import (prepare_har_data, reference_har_function, aligned_design,
     select_shared_lag, model_specifications, fit_models, expanding_forecasts,
-    forecast_metrics, stationarity_table, plot_residual_diagnostics, columns_for)
+    forecast_metrics, stationarity_table, plot_residual_diagnostics, columns_for,
+    load_yield_snapshot, reference_har_preparation, audit_reference_har_forecasts)
 from var_irf import estimate_irf, plot_commodity_irfs
 cfg = json.loads((ROOT / 'config/var_har_notebook.json').read_text())
 OUTPUT = ROOT / 'reports/var_har_notebook/generated'
@@ -72,16 +78,28 @@ print('Local source:', source_path.name, '| no API key or private Drive required
 md("""
 ## 1. Match the HAR data and dates
 
-The reviewed HAR preparation computes returns and 5/22-observation variance
+The reviewed HAR commodity preparation computes returns and 5/22-observation variance
 windows on each asset's source dates, then matches all five markets and removes
 incomplete rows. We deliberately reproduce that policy for compatibility;
 it is not a verified exchange calendar. The first 21 retained origins are then
 used to warm up the downside-return windows. Every regression shares the same
 remaining origin/target pairs, including baseline models without commodities.
 
-ES returns are percentage close-to-close log returns. Downside terms equal
-`abs(min(mean(return over 1/5/22 retained rows), 0))`: the negative part is taken
-**after averaging**, exactly as in HAR. Returns remain unadjusted for rolls.
+ES close-to-close log returns are stored in percentage units, then divided by
+100 when constructing downside terms, as in the latest HAR function. Those terms
+equal `abs(min(mean(decimal return over 1/5/22 retained rows), 0))`: the negative
+part is taken **after averaging**. Rescaling the three controls changes their
+coefficient units, not equivalent unconstrained OLS fitted predictions.
+Returns remain unadjusted for rolls.
+
+**Separate bond-calendar audit:** reproduce the latest HAR's inner DGS10 join,
+yield differences and complete-case removal using a saved, hashed
+[public FRED DGS10 snapshot](https://fred.stlouisfed.org/series/DGS10).
+That is a daily yield in percent, not intraday RV5; its squared change in basis
+points is the HAR bond proxy. The original HAR computes changes before final
+dropna, so a missing yield can also remove the next difference. We reproduce
+that behaviour for the audit without imputing missing values. We do not certify
+provider publication timing or historical real-time availability.
 """)
 code("""
 raw = pd.read_csv(source_path, float_precision='round_trip')
@@ -96,6 +114,24 @@ display(coverage_table)
 coverage_table.to_csv(OUTPUT / 'raw_rv5_calendar_coverage.csv')
 coverage.isna().loc[coverage.isna().any(axis=1)].to_csv(OUTPUT / 'raw_rv5_missing_markets.csv')
 wide, excluded = prepare_har_data(raw, cfg['sample_start'])
+yield_path = ROOT / cfg['yield_snapshot']
+yield_manifest = json.loads((ROOT / cfg['yield_manifest']).read_text())
+assert sha(yield_path) == yield_manifest['sha256'], 'Yield snapshot differs from recorded retrieval'
+yields = load_yield_snapshot(yield_path)
+yield_wide, yield_excluded = prepare_har_data(raw, cfg['sample_start'], yields=yields)
+pd.testing.assert_frame_equal(yield_wide, reference_har_preparation(raw, yields, ROOT / cfg['har_reference']))
+calendar_rows = []
+for label, panel in [('Commodity core (shared comparison)', wide), ('Latest HAR with yield join (separate)', yield_wide)]:
+    audit_design = aligned_design(panel, cfg['max_lag'], cfg['common_warmup'])
+    known = audit_design['target_dates'] <= pd.Timestamp(cfg['training_end'])
+    calendar_rows.append({'Calendar': label, 'Panel rows': len(panel), 'Common target rows': len(audit_design['y']),
+        'Initial training': int(known.sum()), 'Evaluation at fixed cutoff': int((~known).sum())})
+calendar_audit = pd.DataFrame(calendar_rows).set_index('Calendar')
+display(Markdown('**Calendar audit: these samples must not be mixed in a performance ranking.**'))
+display(calendar_audit)
+print('Commodity-core observations removed by the yield join:', len(wide.index.difference(yield_wide.index)))
+calendar_audit.to_csv(OUTPUT / 'har_calendar_audit.csv')
+pd.DataFrame({'date_removed_by_yield_join': wide.index.difference(yield_wide.index)}).to_csv(OUTPUT / 'har_yield_join_removed_dates.csv', index=False)
 design = aligned_design(wide, cfg['max_lag'], cfg['common_warmup'])
 training_mask = design['target_dates'] <= pd.Timestamp(cfg['training_end'])
 test_dates = pd.DatetimeIndex(design['target_dates'][~training_mask])
@@ -106,7 +142,7 @@ sample_table = pd.DataFrame([
     ['Shared evaluation targets', len(test_dates), test_dates.min(), test_dates.max()],
 ], columns=['Sample', 'N', 'First target/date', 'Last target/date']).set_index('Sample')
 display(sample_table)
-print('Dates rejected by the HAR preparation, including initial rolling warm-up:', len(excluded))
+print('Dates rejected by commodity preparation, including initial rolling warm-up:', len(excluded))
 excluded.to_csv(OUTPUT / 'har_preparation_exclusions.csv')
 sample_table.to_csv(OUTPUT / 'sample_counts.csv')
 print(f'Initial fitted split: {100*training_mask.mean():.2f}% training / {100*(1-training_mask.mean()):.2f}% evaluation; fixed 2023-07-12 cutoff.')
@@ -142,10 +178,12 @@ stationarity.to_csv(OUTPUT / 'training_stationarity.csv')
 lag_table.to_csv(OUTPUT / 'initial_lag_selection.csv')
 """)
 md("""
-## 3. Reproduce the asymmetric HAR reference
+## 3. Latest HAR specifications on the frozen commodity inputs
 
-These are the current notebook's original full-sample fits, reconstructed from
-its reviewed `fit_har_x` definition. They verify data/method alignment. Original
+These fits use the current notebook's inspected `fit_har_x` definition, supplied
+with **our frozen commodity-core panel**. They are not a reproduction of its
+saved results on the newer yield-joined sample. They verify the latest commodity
+features and decimal-unit downside controls. Baseline
 HAR and LHAR have different warm-up samples; compare their R² descriptively,
 not their raw AIC/BIC across unequal samples. Below, the aligned VAR and LHAR
 tables instead use **the same regression rows** for every model.
@@ -344,6 +382,13 @@ variance-unit MSE and QLIKE use `exp(log forecast) × historical residual smeari
 The smearing factor is estimated at each origin; it need not track changing
 conditional dispersion perfectly. Failed or unstable VAR fits use persistence,
 retain their dates and are counted. No Gaussian forecast intervals are claimed.
+
+**Independent latest-HAR check:** rerun its actual `fit_har_x` forecasting branch
+for all five LHAR specifications. Override its default per-model 80/20 split
+with the shared cutoff. Its returned index labels the **origin**, not the next
+target; map that index explicitly to our target dates. The audit below requires
+matching origins, targets, actual outcomes and every log forecast. The HAR
+source notebook and its standalone saved outputs are not modified.
 """)
 code("""
 print(f'Fitting {len(specs)} models on {len(test_dates)} shared forecast targets...')
@@ -361,6 +406,11 @@ show_table(metrics)
 forecasts.to_csv(OUTPUT / 'shared_forecasts.csv', index=False)
 metrics.to_csv(OUTPUT / 'shared_forecast_metrics.csv')
 print('Scored target dates:', test_dates.min().date(), 'to', test_dates.max().date())
+har_forecast_audit = audit_reference_har_forecasts(wide, design, specs, forecasts,
+    cfg['training_end'], ROOT / cfg['har_reference'], cfg['hac_lags'])
+display(Markdown('**Latest HAR function independently reproduces the shared LHAR forecasts:**'))
+show_table(har_forecast_audit)
+har_forecast_audit.to_csv(OUTPUT / 'latest_har_forecast_audit.csv')
 """)
 code("""
 pairs = [('Add commodities to plain VAR', 'VAR (All 4: Oil + Corn + Gold + NG)', 'VAR (Baseline)'),
@@ -386,16 +436,20 @@ md("""
 ## 10. Validation and reproducibility
 
 These checks verify matching targets, training chronology, finite predictions
-and recomputed losses. The focused tests separately verify exact current HAR
-preparation, identical LHAR features/HAC covariance, native VAR predictions,
+and recomputed losses. The focused tests separately verify the latest HAR
+commodity preparation, its separately reproduced yield join, identical decimal-unit
+LHAR features/HAC covariance, native VAR predictions,
 daily restrictions and forecast invariance to future-data changes.
 IRF checks independently verify native VAR lag/MA matrices, market-order
 invariance, HAC covariance against statsmodels, seed reproducibility and
 invariance to changed evaluation observations.
 
-Run from the repository: `.venv/bin/python -m unittest tests.test_var_har_notebook -v`.
+Run from the repository: `.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v`.
 Restart-and-run-all execution is provided by `scripts/execute_var_notebook.py`.
 Generated CSVs remain local; this notebook saves displayed results for review.
+For the separate calendar audit, retrieve the public snapshot once with
+`.venv/bin/python scripts/fetch_fred_dgs10.py`; execution thereafter uses that
+local file and verifies its recorded hash, without a live download or API key.
 """)
 code("""
 assert summary.N.nunique() == 1
@@ -408,10 +462,16 @@ for name, frame in forecasts.groupby('model', sort=False):
     recomputed = np.mean((frame.actual_log - frame.predicted_log) ** 2)
     assert np.isclose(recomputed, metrics.loc[name, 'MSE'], rtol=0, atol=1e-12)
 assert sha(source_path) == source_hash
+assert sha(yield_path) == yield_manifest['sha256']
+assert har_forecast_audit.N.eq(len(test_dates)).all()
+assert har_forecast_audit.Max_prediction_difference.lt(1e-9).all()
 assert irf_metadata['n'] == int(training_mask.sum())
 assert irf_metadata['last_target'] == cfg['training_end']
 assert irf_metadata['draws_accepted'] + irf_metadata['rejected_unstable'] + irf_metadata['rejected_nonpositive_covariance'] == cfg['irf']['draws']
 provenance = {'source_sha256': source_hash, 'har_notebook_sha256': sha(ROOT / cfg['har_reference']),
+    'yield_snapshot_sha256': sha(yield_path), 'yield_manifest_sha256': sha(ROOT / cfg['yield_manifest']),
+    'yield_join_panel_rows': len(yield_wide), 'yield_join_removed_core_rows': len(wide.index.difference(yield_wide.index)),
+    'har_reference_forecasts_checked': int(har_forecast_audit.N.sum()),
     'module_sha256': sha(ROOT / 'var_har_notebook.py'), 'config': cfg,
     'irf_module_sha256': sha(ROOT / 'var_irf.py'), 'irf': irf_metadata,
     'run_time': pd.Timestamp.now(tz='Europe/Amsterdam').isoformat(),
@@ -437,7 +497,9 @@ restrictions test a different representation of commodity history. Report all
 these exploratory comparisons, including negative results and fallback counts.
 Conditional joint significance does not establish improved forecasting or causality.
 
-These numbers are recomputed on the current HAR's all-five retained calendar;
+These numbers are recomputed on the frozen all-five commodity calendar using
+the latest HAR commodity features. Its bond-data join and any yield-augmented
+results use a separately restricted calendar and must be labelled separately;
 they must not be mixed with the earlier 809-target ES/CL/GC analysis. Data gaps,
 unadjusted futures returns, uncertain provider publication timing, model residual
 dependence and prior inspection of the test period remain limitations.

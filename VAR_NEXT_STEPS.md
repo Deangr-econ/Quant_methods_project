@@ -1,10 +1,12 @@
 # VAR: next steps and decisions
 
-**7 October status update:** the HAR reference has changed since this review.
-Two HAR-alignment checks now error (24 of 26 Python checks pass), and the saved
-VAR execution counts are out of order. See `PROJECT_CHECKLIST.md` for the current
-priorities. The completed verification and matched results below describe the
-5 October run, rather than certification against the latest HAR.
+**7 October update:** the HAR reconciliation is complete. All 30 tests and
+fresh saved-notebook verification pass. Latest HAR commodity forecasts match on
+the frozen 802-target comparison; its newer bond join is audited separately.
+Downside controls now use decimal return units, with equivalent predictions.
+See `reports/var_har_notebook/HAR_VAR_RECONCILIATION.md` and
+`PROJECT_CHECKLIST.md`. The detailed tables and IRF simulation bands below
+describe the historical 5 October run.
 
 Updated 5 October 2026. Current entry point: `VAR_QTFE.ipynb`, aligned with
 the current asymmetric HAR. Earlier ES/oil/gold R results remain a separate

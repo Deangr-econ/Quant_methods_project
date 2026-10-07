@@ -1,0 +1,16 @@
+{
+  "series": "DGS10",
+  "source": "Board of Governors of the Federal Reserve System, via FRED",
+  "series_url": "https://fred.stlouisfed.org/series/DGS10",
+  "download_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd=2011-01-01&coed=2026-08-31",
+  "retrieved_at": "2026-10-07T18:17:58.351959+02:00",
+  "units": "Percent per annum; daily, not seasonally adjusted",
+  "first_date": "2011-01-03",
+  "last_date": "2026-08-31",
+  "rows": 4086,
+  "missing_yields": 169,
+  "path": "datasets/raw/fred_dgs10_2011_2026.csv",
+  "sha256": "d77181a5a5080f6c84e09aa33c53b5b19a1b263a3b97720d97a712cb0c3f5e44",
+  "purpose": "Audit the latest HAR yield-joined calendar; not a VAR regressor",
+  "vintage_note": "Retrieved snapshot; not historical real-time vintages. No missing values imputed."
+}

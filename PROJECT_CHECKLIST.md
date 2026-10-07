@@ -4,6 +4,11 @@ Reviewed 7 October 2026. This review covers the data, code, results and preparat
 for explaining the analysis. The group is writing the final report and slides
 elsewhere; their progress is outside this checklist.
 
+**Priority 1 completed later on 7 October:** the latest HAR commodity function
+matches the shared VAR comparison, all 30 tests pass and fresh notebook execution
+and verification pass. The bond join is audited separately. Detailed evidence:
+`reports/var_har_notebook/HAR_VAR_RECONCILIATION.md`.
+
 ## Assignment requirements
 
 Source: `context/quant techniques syllabus.pdf`, final-assignment section.
@@ -29,49 +34,51 @@ Source: `context/quant techniques syllabus.pdf`, final-assignment section.
 | Training-only lag comparison | Implemented for orders 1–20; BIC chooses 5 and AIC 10 for the initial five-market plain VAR |
 | Expanding-window forecasts | Implemented, with the existing matched comparison scoring 802 common targets |
 | Generalized VAR IRFs and bands | Implemented; five dedicated IRF tests pass |
-| Match with the latest HAR notebook | Needs updating: HAR now joins 10-year yield data and has changed preparation/forecast code |
-| Fresh saved-notebook verification | Needs repeating after reconciliation; current saved VAR execution counts are out of order |
-| Full Python suite | **24 pass, 2 errors**; both errors concern matching the changed HAR reference |
+| Match with the latest HAR notebook | Latest commodity function independently matches all 4,010 shared LHAR forecasts; bond join audited separately |
+| Fresh saved-notebook verification | Passes: 13 sequential code cells, four figures, 16,040 verified forecast records |
+| Full Python suite | **30 pass**, including four additional reconciliation checks |
 | GARCH contribution, if retained | Needs an implementation and comparability review; oil regressor issue identified below |
 
-The VAR calculations are largely built. The existing tests still check agreement
+The VAR calculations are largely built. The tests check agreement
 with native VAR fits/forecasts, forecast timing, future-data invariance, daily
-restrictions and IRF calculations. Two broken HAR-reference checks do not prove
-that those VAR calculations are wrong, but we cannot currently certify that the
-notebook matches the latest HAR or that the saved outputs are a fresh full run.
+restrictions and IRF calculations. The two HAR-reference errors found during the
+initial audit are resolved. Current HAR commodity forecasts are reproduced on
+the frozen comparison inputs; the original HAR's newer yield-joined sample and
+standalone scores remain separate. No bond regressor is added to VAR.
 
-Earlier completion statements in `VAR_NEXT_STEPS.md` and
-`reports/var_har_notebook/README.md` describe the **5 October** state. Their
-26-passing-test and exact-HAR-alignment statements are historical.
+Detailed historical sections in `VAR_NEXT_STEPS.md` and
+`reports/var_har_notebook/README.md` describe the **5 October** state. Both now
+link to the completed 7 October reconciliation and its current validation.
 
 ## Priority 1 — restore a fair, reproducible comparison
 
-- [ ] Freeze the final research-question wording and distinguish the commodity
-  core from any separate bond-yield extension. The previously agreed VAR scope
+- [x] Document the commodity research question for this matched notebook and
+  distinguish it from the separate bond-yield extension. The previously agreed VAR scope
   remains ES/oil/gold with corn/gas comparisons; this audit does not add yields
   to VAR.
-- [ ] Specify one common forecasting target, origin/target dates, initial cutoff,
+- [x] Specify one common forecasting target, origin/target dates, initial cutoff,
   evaluation dates and information set for direct HAR/VAR comparisons. Models
   using a different sample must have separately labelled results.
-- [ ] Resolve the new HAR yield join before claiming identical preparation. Save
+- [x] Resolve the new HAR yield join before claiming identical preparation. Save
   the permitted 10-year yield input locally with source, retrieval date and units
   if the group retains it; avoid a comparison that depends on a live download.
-- [ ] Record that the new yield variable is a **squared daily yield change**,
+- [x] Record that the new yield variable is a **squared daily yield change**,
   rather than a squared yield level or intraday realized variance.
-- [ ] Reconcile percentage versus decimal return units. Constant rescaling alone
+- [x] Reconcile percentage versus decimal return units. Constant rescaling alone
   does not change equivalent unconstrained OLS predictions, but it changes
   coefficient magnitudes and breaks literal coefficient-equality checks.
-- [ ] Audit the new HAR forecast date labels: its current function records the
+- [x] Audit the new HAR forecast date labels: its current function records the
   predictor/origin index while its outcome is the next retained observation.
   Keep origins and target dates explicit, and use common scored outcomes rather
-  than independently computing an 80/20 split for each model.
-- [ ] Repair the HAR-reference loader and the meaningful alignment tests. One
-  current error is an unavailable `dgs10_raw` preparation input; the other is
-  parsing the new notebook shell command `!pip install fredapi` as Python.
-- [ ] Recalculate the matched comparison after resolving these choices. Do not
+  than independently computing an 80/20 split for each model. The shared audit
+  maps the unchanged original function's origin labels to actual target dates.
+- [x] Repair the HAR-reference loader and the meaningful alignment tests. The
+  earlier errors were an unavailable `dgs10_raw` preparation input and parsing
+  `!pip install fredapi` as Python; neither is executed during reference loading.
+- [x] Recalculate the matched comparison after resolving these choices. Do not
   compare the latest HAR's standalone MSE with the older VAR table as if their
   evaluation samples were identical.
-- [ ] Execute the final notebook from a fresh kernel, run the full tests and
+- [x] Execute the final notebook from a fresh kernel, run the full tests and
   saved-output verifier, and refresh provenance after the final changes.
 
 ## Priority 2 — finish the data and model checks that matter
@@ -127,7 +134,7 @@ is a code/API review, not an independently reproduced GARCH execution.
 - [ ] Have another member reproduce the final code using the documented local
   inputs and dependencies, without private Drive paths or embedded credentials.
 
-Existing matched-result takeaway, pending the latest reconciliation: equity
+Verified matched-result takeaway after the latest reconciliation: equity
 downside information helps substantially. Adding all four commodities to the
 downside VAR raises forecast MSE by about **0.35%** relative to the matching
 equity-only downside benchmark. Gas alone lowers MSE by about **0.40%**. These
@@ -146,7 +153,9 @@ question; improving the project's quality does not require making VAR win.
 - [ ] Learn the main HAR mechanism and result, plus GARCH if retained, so any
   member can explain the full group analysis.
 
-Recommended next task: **Priority 1**, before further model additions.
+Recommended next task: **Priority 2**, beginning with the remaining data checks
+and selecting a focused robustness exercise. The group should carry the
+documented commodity-core/bond-extension distinction into its final question.
 
 ## Verification commands after reconciliation
 

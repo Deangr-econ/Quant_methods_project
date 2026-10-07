@@ -4,8 +4,9 @@
 
 The original `realized_variance_futures.csv` is the input. The older
 `volatility_model_QTFE_data.csv` currently contains RV5 columns without dates;
-keep it for reference but do not use it for dated forecast evaluation. The VAR
-notebook still constructs RK. The pipeline below makes the estimator explicit.
+keep it for reference but do not use it for dated forecast evaluation. The current
+`VAR_QTFE.ipynb` uses RV5; the older `VAR_GPRD_OIL_GAS.ipynb` constructs RK.
+The pipeline below makes the estimator explicit.
 
 Run from the project root:
 
@@ -101,6 +102,31 @@ screening thresholds. They flag potential problems, including genuine crisis
 moves and contract switches, without deciding which observations are wrong.
 The VOLARE retrieval date is unknown and is recorded as such; preparation time
 is recorded separately. [Provider methodology](https://volare.unime.it/documentation).
+
+## FRED DGS10: separate latest-HAR calendar audit
+
+The current VAR notebook uses `raw/fred_dgs10_2011_2026.csv` solely to audit the
+latest HAR's bond-data join. It does not add a bond regressor to VAR or remove
+bond-missing dates from the shared commodity forecasts. Obtain the public,
+key-free snapshot from the project root:
+
+```sh
+.venv/bin/python scripts/fetch_fred_dgs10.py
+```
+
+Install `requirements-var-notebook.txt` first in a fresh environment. The script
+downloads DGS10 from 2011 through the last date of the local Volare export, and
+records retrieval time, URL, units, missingness and SHA-256 in
+`fred_dgs10_manifest.json`. Model execution uses the saved file offline and
+checks its hash. Re-running retrieval deliberately replaces that snapshot and
+manifest, so preserve the old pair when comparing vintages.
+
+[DGS10](https://fred.stlouisfed.org/series/DGS10) is the daily 10-year
+constant-maturity Treasury yield in percent per annum. Missing yields remain
+missing. HAR's squared daily change in basis points is a proxy, not intraday
+RV5. The original yield join/difference policy removes 232 observations from
+the commodity panel in the 7 October audit. See
+`reports/var_har_notebook/HAR_VAR_RECONCILIATION.md` for the separate calendars.
 
 ## FRED: original daily-market dataset
 
