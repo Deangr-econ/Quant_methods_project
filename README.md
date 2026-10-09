@@ -1,20 +1,26 @@
 # Quant_methods_project
 Group project
 
-## HAR-aligned VAR results notebook — 5 October 2026
+## Current VAR results notebook — 7 October 2026
 
 Open [VAR_QTFE.ipynb](VAR_QTFE.ipynb) for the newly executed Python notebook
-matching the current asymmetric HAR's RV5 data, ES/oil/corn/gold/gas instruments,
+using the latest asymmetric HAR commodity specification on the frozen RV5 calendar,
 ES downside-return controls, HAC(22), comparison tables and residual plots.
-It also recomputes VAR and LHAR forecasts on the same 802 targets. See
+The main model is ES/oil/gold, with corn/gas extensions. VAR and LHAR forecasts
+score the same 802 targets; the latest HAR bond-data join is audited separately.
+See
 [the matching-methods guide](reports/var_har_notebook/README.md) for definitions,
 results and the differences from the earlier 809-target analysis.
 The notebook includes training-only commodity-to-ES generalized IRF curves with
 exploratory uncertainty bands. [VAR_NEXT_STEPS.md](VAR_NEXT_STEPS.md) records
 the data/sample decision, expanding-window explanation and remaining learning/report tasks.
+**Section 10** adds the 5/10 lag comparison, five data scenarios and paired-loss
+uncertainty; read [the findings](reports/var_har_notebook/DATA_AND_ROBUSTNESS_RESULTS.md).
+All 38 Python tests pass. Saved-output verification covers 18,446 main forecasts,
+4,812 independent latest-HAR matches and 50,526 sensitivity forecasts.
 
 ```sh
-.venv/bin/python -m unittest tests.test_var_har_notebook tests.test_var_irf -v
+.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
 ```
@@ -23,11 +29,14 @@ Use `requirements-var-notebook.txt` and the project Python kernel. Notebook
 outputs are saved; generated CSVs stay local. The original HAR and legacy VAR
 notebooks are preserved. The prior R path below remains reproducible for its
 separately documented ES/CL/GC calendar; do not mix its scores with this notebook.
+For the separate bond-calendar audit, retrieve the public FRED snapshot once with
+`.venv/bin/python scripts/fetch_fred_dgs10.py`; subsequent execution uses the
+saved input offline. See [the project checklist](PROJECT_CHECKLIST.md).
 
-## Main VAR analysis — 4 October 2026
+## Earlier R VAR analysis — 4 October 2026
 
 The agreed VAR scope is **ES, WTI oil (CL) and gold (GC)**, with **corn and natural
-gas as an extension**. The canonical analysis now uses one shared R module and
+gas as an extension**. This earlier analysis uses one shared R module and
 local repository data. See the [VAR guide](reports/var_final/README.md),
 [research design](reports/var_final/research_design.md) and
 [report draft](reports/var_final/VAR_REPORT_SECTION.md).
@@ -45,8 +54,9 @@ Generated forecasts, diagnostics, figures and provenance stay local in
 `reports/var_final/generated/`. No API key is required. The VOLARE source export
 must already be present; see the [data-access guide](datasets/README.md).
 
-This implementation replaces the legacy VAR notebooks as the authoritative VAR
-entry point. It reproduces the original main forecast results and adds robust
+This implementation replaced the legacy VAR notebooks for the earlier analysis;
+the current Python notebook above is the entry point for HAR-aligned comparisons.
+The R path reproduces the original main forecast results and adds robust
 joint tests, variance-scale losses, RK/anomaly checks and a matched corn/gas
 extension. The forecasts are exploratory because the evaluation period has
 already been inspected. Provider session timing and contract/quote validation

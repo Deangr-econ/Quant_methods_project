@@ -71,6 +71,8 @@ try:
         if error:
             raise RuntimeError(f"Cell {i}: {error['ename']}: {error['evalue']}")
         print(f"Executed cell {i}: {len(cell['outputs'])} saved outputs", flush=True)
+    notebook["metadata"].setdefault("language_info", {})["version"] = sys.version.split()[0]
+    notebook["metadata"]["kernelspec"]["display_name"] = "Python 3 (project .venv)"
     notebook["metadata"]["validated_execution"] = {"python": sys.version.split()[0], "errors": 0,
         "executed_at": datetime.now(ZoneInfo('Europe/Amsterdam')).isoformat(), "method": "fresh Jupyter kernel; all code cells in order"}
     path.write_text(json.dumps(notebook, indent=1, ensure_ascii=False) + "\n")

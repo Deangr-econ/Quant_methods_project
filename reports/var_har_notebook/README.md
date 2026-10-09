@@ -1,12 +1,23 @@
-# HAR-aligned VAR notebook — 5 October 2026
+# HAR-aligned VAR notebook — status 9 October 2026
+
+**9 October readiness check:** all 38 tests and a fresh notebook execution and
+saved-output verification pass again. The agreed downside-augmented VAR code is
+complete. Saved results were restored after an editor selected an unsupported
+Python environment; the project `.venv` (Python 3.13.0) runs the notebook. No
+model source or specification changed. Provider timing/contract confirmation
+and explaining the results remain open.
 
 **7 October reconciliation completed:** read
 [the current comparison and validation](HAR_VAR_RECONCILIATION.md).
-All 30 tests pass; a fresh notebook run and saved-output verification pass.
-The latest HAR function independently matches all 4,010 LHAR forecasts on the
+All 38 tests pass; a fresh notebook run and saved-output verification pass.
+The latest HAR function independently matches all 4,812 LHAR forecasts on the
 same 802 targets. The main calendar is the frozen commodity core; the newer HAR
 bond join is separately audited and removes 232 panel observations. Controls now
-use decimal return units. The detailed sections below document the historical
+use decimal return units. **Section 10** now contains lag/data robustness;
+read [the findings](DATA_AND_ROBUSTNESS_RESULTS.md). The main ES/oil/gold model
+is explicit, with corn/gas extensions. There are 14 executed code cells, five
+figures, 18,446 main forecasts and 50,526 sensitivity records.
+The detailed sections below document the historical
 5 October run, rather than the original HAR's newer bond-joined results.
 
 Open `VAR_QTFE.ipynb` at the repository root. All code cells have been executed
@@ -144,6 +155,9 @@ The focused plan is `VAR_NEXT_STEPS.md` at the repository root.
 Use the environment recorded in `requirements-var-notebook.txt`. The source
 export must exist locally; no API key, internet download or private Drive helper
 is required. Select the project's `.venv` Python kernel in Jupyter and run all.
+If an editor selects another Python and reports missing `ipykernel`, switch its
+notebook kernel to `.venv/bin/python`; the tested dependencies are installed in
+that environment.
 
 For the checked command-line execution:
 

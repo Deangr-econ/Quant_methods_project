@@ -168,6 +168,7 @@ def select_shared_lag(design, training_end, max_lag=20):
 
 def model_specifications(p):
     sets = {"Baseline": [], "Oil": ["CL"], "NatGas": ["NG"],
+            "Oil + Gold": ["CL", "GC"],
             "Energy: Oil + NG": ["CL", "NG"], "No Corn: Oil + NG + Gold": ["CL", "NG", "GC"],
             "All 4: Oil + Corn + Gold + NG": ["CL", "C", "GC", "NG"]}
     specs = {}
@@ -180,7 +181,7 @@ def model_specifications(p):
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
         specs[f"Restricted VAR + Downside ({label}; Daily Only)"] = dict(
             family="VAR", p=p, commodities=sets[label], downside=True, daily_only=True)
-    for label in ["Baseline", "No Corn: Oil + NG + Gold", "All 4: Oil + Corn + Gold + NG"]:
+    for label in ["Baseline", "Oil + Gold", "No Corn: Oil + NG + Gold", "All 4: Oil + Corn + Gold + NG"]:
         specs[f"LHAR ({label})"] = dict(family="LHAR", p=0, commodities=sets[label],
                                         downside=True, daily_only=False)
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
@@ -212,8 +213,16 @@ def fit_models(design, specs, hac_lags=22, mask=None):
     return fits, pd.DataFrame(summaries).set_index("Model")
 
 
-def expanding_forecasts(design, specs, training_end):
+def expanding_forecasts(design, specs, training_end, training_eligible=None):
     xdf, ydf, dates = design["x"], design["y"], design["target_dates"]
+    if training_eligible is None:
+        eligible = np.ones(len(xdf), dtype=bool)
+    else:
+        if not isinstance(training_eligible, pd.Series) or not training_eligible.index.equals(xdf.index):
+            raise ValueError("Training mask must match the unchanged origin grid")
+        if training_eligible.isna().any() or training_eligible.dtype != bool:
+            raise ValueError("Training mask must contain explicit boolean decisions")
+        eligible = training_eligible.to_numpy()
     records = []
     for name, spec in specs.items():
         columns = columns_for(spec)
@@ -222,7 +231,7 @@ def expanding_forecasts(design, specs, training_end):
         y = ydf[symbols].to_numpy()
         for i in np.flatnonzero((dates > pd.Timestamp(training_end)).to_numpy()):
             origin, target = xdf.index[i], dates.iloc[i]
-            train = (dates <= origin).to_numpy()
+            train = (dates <= origin).to_numpy() & eligible
             last = float(xdf.iloc[i]["ES.l1"])
             predicted, variance, smear, root = last, np.exp(last), 1.0, np.nan
             status, detail = "ok", ""

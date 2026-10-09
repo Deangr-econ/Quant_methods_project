@@ -1,0 +1,34 @@
+{
+  "lags": [5, 10],
+  "main_lag": 5,
+  "scenarios": ["baseline_rv5", "reviewed_training_windows", "broad_flag_training_windows", "open_to_close_returns", "rk_proxy"],
+  "reviewed_issues": [
+    {"date": "2018-03-26", "symbol": "GC"},
+    {"date": "2020-04-16", "symbol": "CL"},
+    {"date": "2021-03-29", "symbol": "ES"}
+  ],
+  "crisis_decision_to_retain": "retain_crisis_move_provisional",
+  "exposure_window": 22,
+  "models": [
+    "VAR (Baseline)",
+    "VAR (Oil + Gold)",
+    "VAR (All 4: Oil + Corn + Gold + NG)",
+    "VAR + Downside (Baseline)",
+    "VAR + Downside (Oil + Gold)",
+    "VAR + Downside (NatGas)",
+    "VAR + Downside (No Corn: Oil + NG + Gold)",
+    "VAR + Downside (All 4: Oil + Corn + Gold + NG)",
+    "LHAR (Baseline)",
+    "LHAR (Oil + Gold)",
+    "LHAR (All 4: Oil + Corn + Gold + NG)"
+  ],
+  "pairs": [
+    ["VAR + Downside (Baseline)", "VAR (Baseline)"],
+    ["VAR + Downside (Oil + Gold)", "VAR + Downside (Baseline)"],
+    ["VAR + Downside (All 4: Oil + Corn + Gold + NG)", "VAR + Downside (Baseline)"],
+    ["VAR + Downside (NatGas)", "VAR + Downside (Baseline)"],
+    ["LHAR (Baseline)", "VAR + Downside (Baseline)"]
+  ],
+  "bootstrap": {"blocks": [5, 20, 60], "draws": 2000, "seed": 20261007},
+  "interpretation": "Exploratory sensitivity fixed before these runs; prior forecast period already inspected. No scenario is a verified data correction; retain RV5/close-to-close/VAR(5) as primary."
+}

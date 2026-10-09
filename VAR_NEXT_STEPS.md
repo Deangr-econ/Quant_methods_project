@@ -1,10 +1,14 @@
 # VAR: next steps and decisions
 
-**7 October update:** the HAR reconciliation is complete. All 30 tests and
+**7 October update:** the HAR reconciliation and focused robustness runs are
+complete. All 38 tests and
 fresh saved-notebook verification pass. Latest HAR commodity forecasts match on
 the frozen 802-target comparison; its newer bond join is audited separately.
 Downside controls now use decimal return units, with equivalent predictions.
-See `reports/var_har_notebook/HAR_VAR_RECONCILIATION.md` and
+Section 10 now contains the 5/10 lag comparison and data sensitivities; the
+main ES/oil/gold model is explicit. See
+`reports/var_har_notebook/DATA_AND_ROBUSTNESS_RESULTS.md`,
+`reports/var_har_notebook/HAR_VAR_RECONCILIATION.md` and
 `PROJECT_CHECKLIST.md`. The detailed tables and IRF simulation bands below
 describe the historical 5 October run.
 

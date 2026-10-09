@@ -1,5 +1,12 @@
 # Matched HAR–VAR comparison — 7 October 2026
 
+**Subsequent 7 October expansion:** the exact main ES/oil/gold specification and
+its matched LHAR are now included. Current validation covers 38 tests, six LHAR
+specifications (4,812 forecasts), 23 main models (18,446 forecasts), 14 code cells
+and five figures. Read [the data/lag follow-up](DATA_AND_ROBUSTNESS_RESULTS.md).
+The step-1 counts below document the earlier reconciliation run; its shared
+802-target calendar and cutoff remain unchanged.
+
 Open `VAR_QTFE.ipynb`: section 1 contains the calendar audit; section 9 contains
 the common-date forecast results and independent latest-HAR check.
 

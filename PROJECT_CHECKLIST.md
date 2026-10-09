@@ -1,13 +1,24 @@
 # Project analysis checklist
 
-Reviewed 7 October 2026. This review covers the data, code, results and preparation
+Reviewed 9 October 2026. This review covers the data, code, results and preparation
 for explaining the analysis. The group is writing the final report and slides
 elsewhere; their progress is outside this checklist.
 
-**Priority 1 completed later on 7 October:** the latest HAR commodity function
-matches the shared VAR comparison, all 30 tests pass and fresh notebook execution
-and verification pass. The bond join is audited separately. Detailed evidence:
-`reports/var_har_notebook/HAR_VAR_RECONCILIATION.md`.
+**9 October readiness check:** the agreed downside-augmented VAR implementation
+is complete. All 38 tests pass again, and a fresh run verifies 14 code cells,
+five figures, 18,446 main forecasts and 50,526 sensitivity forecasts. The saved
+notebook had lost its outputs after an editor selected a different Python
+installation without notebook support. Outputs are restored using the project
+`.venv` (Python 3.13.0), with the notebook's version metadata corrected. Model
+sources and specifications are unchanged. Provider confirmation, interpretation
+and group handover remain separate from implementation completion.
+
+**7 October update:** priorities 1 and the focused priority-2 sensitivity work
+are complete. All 38 tests and fresh notebook verification pass. The main
+ES/oil/gold specification is explicit, with corn/gas extensions; the bond join
+is audited separately. Exact provider sessions/availability and quote/contract
+validation remain unresolved. Read `reports/var_har_notebook/HAR_VAR_RECONCILIATION.md`
+and `reports/var_har_notebook/DATA_AND_ROBUSTNESS_RESULTS.md`.
 
 ## Assignment requirements
 
@@ -34,9 +45,10 @@ Source: `context/quant techniques syllabus.pdf`, final-assignment section.
 | Training-only lag comparison | Implemented for orders 1–20; BIC chooses 5 and AIC 10 for the initial five-market plain VAR |
 | Expanding-window forecasts | Implemented, with the existing matched comparison scoring 802 common targets |
 | Generalized VAR IRFs and bands | Implemented; five dedicated IRF tests pass |
-| Match with the latest HAR notebook | Latest commodity function independently matches all 4,010 shared LHAR forecasts; bond join audited separately |
-| Fresh saved-notebook verification | Passes: 13 sequential code cells, four figures, 16,040 verified forecast records |
-| Full Python suite | **30 pass**, including four additional reconciliation checks |
+| Match with the latest HAR notebook | Latest commodity function independently matches all 4,812 shared LHAR forecasts; bond join audited separately |
+| Lag and data robustness | Implemented: 5/10 lag comparison, five data scenarios, 725-target retrospective subset and descriptive paired-loss intervals |
+| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 18,446 main and 50,526 sensitivity forecast records |
+| Full Python suite | **38 pass**, including reconciliation and sensitivity checks |
 | GARCH contribution, if retained | Needs an implementation and comparability review; oil regressor issue identified below |
 
 The VAR calculations are largely built. The tests check agreement
@@ -86,20 +98,21 @@ link to the completed 7 October reconciliation and its current validation.
 - [ ] Document provider session dates, RV5 measurement intervals and when each
   market's measurement is available. Explain the complete-case calendar: “next
   observation” can skip an otherwise observed ES trading date.
-- [ ] Review flagged post-2011 prices and contract transitions before assigning
-  economic meaning to downside returns. Keep raw data unchanged and do not
-  invent observations with zero filling or forward filling.
-- [ ] Choose a small, prespecified robustness check for these concerns on a
-  clearly documented sample; compare alternatives on the same scored targets.
-- [ ] If the group wants a lag robustness result, compare VAR(5) with VAR(10)
+- [x] Review all 20 flagged post-2011 asset/date records, including corn/gas.
+  Save estimator ratios and opening-gap/open-to-close decompositions. Cases
+  remain unresolved candidates, not confirmed errors; retain source values.
+- [x] Fix and run focused robustness checks on the documented common sample:
+  reviewed/broader training-window masks, open-to-close ES returns, RK proxy,
+  retrospective evaluation subset and descriptive paired-loss uncertainty.
+- [x] Compare VAR(5) with VAR(10)
   using the agreed forecasting protocol. Treat this as a sensitivity check:
   BIC's preferred training fit does not prove the best out-of-sample forecast.
   An independently selected equity-only AR lag is another useful benchmark
   check. Avoid searching repeatedly for a specification that wins on the already
   inspected test period.
-- [ ] Carry mixed stationarity evidence, residual dependence, heavy tails and
-  data limitations into the interpretation. Stable conditional roots and HAC
-  errors do not establish a perfectly specified or causal model.
+- [x] Record mixed stationarity evidence, residual dependence, heavy tails and
+  data limitations in the notebook/report-ready findings note. Final report
+  integration remains with its authors. Roots/HAC do not certify specification.
 - [ ] If GARCH remains in the project, audit its target, dates and regressor
   implementation before including it in a shared forecast ranking. In
   `GARCH_QTFE.ipynb`, `x=x_oil_clean` with `mean="Constant"` is currently
@@ -153,9 +166,13 @@ question; improving the project's quality does not require making VAR win.
 - [ ] Learn the main HAR mechanism and result, plus GARCH if retained, so any
   member can explain the full group analysis.
 
-Recommended next task: **Priority 2**, beginning with the remaining data checks
-and selecting a focused robustness exercise. The group should carry the
-documented commodity-core/bond-extension distinction into its final question.
+Recommended next task: review **notebook section 10** and the results note,
+then prepare the compact final tables and practise explaining the result.
+Provider confirmation remains open. The group should carry the documented
+commodity-core/bond-extension distinction into its final question. VAR(10)
+forecasts better on these inspected dates; retain VAR(5) as the initial-training
+BIC main specification with VAR(10) reported as sensitivity, without claiming
+either is proven optimal or that gas's tiny point gain is reliable.
 
 ## Verification commands after reconciliation
 

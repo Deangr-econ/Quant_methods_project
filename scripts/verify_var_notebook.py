@@ -14,7 +14,7 @@ assert notebook["nbformat"] == 4
 assert [c["execution_count"] for c in code] == list(range(1, len(code) + 1))
 assert all(o["output_type"] != "error" for c in code for o in c["outputs"])
 assert notebook["metadata"]["validated_execution"]["errors"] == 0
-assert sum("image/png" in o.get("data", {}) for c in code for o in c["outputs"]) == 4
+assert sum("image/png" in o.get("data", {}) for c in code for o in c["outputs"]) == 5
 manifest = json.loads((out / "provenance.json").read_text())
 sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
 assert sha(ROOT / manifest["config"]["source"]) == manifest["source_sha256"]
@@ -42,7 +42,7 @@ metrics = pd.read_csv(out / "shared_forecast_metrics.csv", index_col=0, float_pr
 summary = pd.read_csv(out / "common_sample_insample_results.csv", index_col=0)
 har_audit = pd.read_csv(out / "latest_har_forecast_audit.csv", index_col=0)
 calendar_audit = pd.read_csv(out / "har_calendar_audit.csv", index_col=0)
-assert len(har_audit) == 5
+assert len(har_audit) == 6
 assert har_audit.N.eq(manifest['evaluation_targets']).all()
 assert har_audit.Initial_training.eq(manifest['initial_fit_targets']).all()
 assert (har_audit.Max_prediction_difference < 1e-9).all()
@@ -73,4 +73,6 @@ for name, frame in forecasts.groupby("model", sort=False):
                 np.mean(ratio - np.log(ratio) - 1)]
     np.testing.assert_allclose(metrics.loc[name, ["MSE", "RMSE", "MAE", "Variance_MSE", "QLIKE"]], expected, rtol=1e-12)
     assert metrics.loc[name, "Fallbacks"] == frame.status.ne("ok").sum()
-print(f"Verified {len(code)} executed cells, 4 figures, training-only IRF metadata, source/code/output hashes and all {len(forecasts):,} dated forecast records across {len(metrics)} models; {manifest['har_reference_forecasts_checked']:,} latest-HAR forecasts independently matched and the separate yield calendar audited.")
+from verify_var_robustness import verify
+verify()
+print(f"Verified {len(code)} executed cells, 5 figures, training-only IRF metadata, source/code/output hashes and all {len(forecasts):,} dated forecast records across {len(metrics)} models; {manifest['har_reference_forecasts_checked']:,} latest-HAR forecasts independently matched and the separate yield calendar audited.")

@@ -19,9 +19,9 @@ def code(source):
 md("""
 # VAR results aligned with the asymmetric HAR
 
-**Research question:** does oil, corn, gold and natural-gas variance information
-improve forecasts of ES realised variance beyond equity history and the same
-downside-return information used by asymmetric HAR?
+**Research question:** does oil/gold variance information improve forecasts of
+ES realised variance beyond equity history and the same downside-return
+information used by asymmetric HAR? Corn and natural gas are extensions.
 
 This notebook uses the latest `HAR_QTFE.ipynb` commodity specifications: RV5 from
 2011, all five markets, the same decimal-unit ES downside terms, HAC(22),
@@ -58,7 +58,9 @@ from var_har_notebook import (prepare_har_data, reference_har_function, aligned_
     forecast_metrics, stationarity_table, plot_residual_diagnostics, columns_for,
     load_yield_snapshot, reference_har_preparation, audit_reference_har_forecasts)
 from var_irf import estimate_irf, plot_commodity_irfs
+from var_robustness import run_robustness, plot_lag_comparison
 cfg = json.loads((ROOT / 'config/var_har_notebook.json').read_text())
+robust_cfg = json.loads((ROOT / 'config/var_robustness.json').read_text())
 OUTPUT = ROOT / 'reports/var_har_notebook/generated'
 OUTPUT.mkdir(parents=True, exist_ok=True)
 sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -69,7 +71,8 @@ pd.set_option('display.max_colwidth', 70)
 plt.rcParams.update({'figure.dpi': 110, 'axes.spines.top': False, 'axes.spines.right': False})
 def show_table(table):
     formats = {c: ('{:.3e}' if c in ['Prob(F-Stat)', 'p (HAC)', 'Variance_MSE'] else '{:.4f}')
-               for c in table.select_dtypes(include='number').columns if c not in ['N', 'Params (k)', 'System params', 'Lag p', 'Fallbacks']}
+               for c in table.select_dtypes(include='number').columns
+               if not pd.api.types.is_integer_dtype(table[c])}
     display(HTML(table.to_html(formatters={c: (lambda value, pattern=pattern: pattern.format(value))
         for c, pattern in formats.items()}, na_rep='—', border=0)))
 print('Python', platform.python_version(), '| statsmodels', statsmodels.__version__)
@@ -218,6 +221,7 @@ HAC(22) affects reported inference, not OLS coefficient estimates or forecasts.
 code("""
 fits, summary = fit_models(design, specs, cfg['hac_lags'])
 sets_in_first_table = ['Baseline', 'Oil', 'NatGas', 'Energy: Oil + NG', 'No Corn: Oil + NG + Gold']
+sets_in_first_table.insert(1, 'Oil + Gold')
 first_names = [f'{prefix} ({label})' for prefix in ['VAR', 'VAR + Downside'] for label in sets_in_first_table]
 summary_columns = ['N', 'Lag p', 'Params (k)', 'R²', 'Adj. R²', 'AIC', 'BIC', 'F-Stat', 'Prob(F-Stat)', 'Log-Likelihood']
 show_table(summary.loc[first_names, summary_columns])
@@ -233,13 +237,13 @@ Those rows are restricted VAR systems. HAR's full d/w/m averages and VAR's full
 lag history are different representations of memory, not identical regressors.
 """)
 code("""
-corn_names = ['VAR + Downside (Baseline)',
+corn_names = ['VAR + Downside (Baseline)', 'VAR + Downside (Oil + Gold)',
     'VAR + Downside (All 4: Oil + Corn + Gold + NG)',
     'Restricted VAR + Downside (All 4: Oil + Corn + Gold + NG; Daily Only)',
     'VAR + Downside (No Corn: Oil + NG + Gold)',
     'Restricted VAR + Downside (No Corn: Oil + NG + Gold; Daily Only)']
 show_table(summary.loc[corn_names, summary_columns + ['System params', 'Max root']])
-lhar_names = ['LHAR (Baseline)', 'LHAR (All 4: Oil + Corn + Gold + NG)',
+lhar_names = ['LHAR (Baseline)', 'LHAR (Oil + Gold)', 'LHAR (All 4: Oil + Corn + Gold + NG)',
     'LHAR (All 4: Oil + Corn + Gold + NG; Daily Only)', 'LHAR (No Corn: Oil + NG + Gold)',
     'LHAR (No Corn: Oil + NG + Gold; Daily Only)']
 display(Markdown('**Asymmetric HAR on exactly the same target rows, for reference:**'))
@@ -248,14 +252,14 @@ show_table(summary.loc[lhar_names, summary_columns])
 md("""
 ## 6. Coefficients and joint commodity tests
 
-As in HAR, show a detailed equity-equation summary. This is the downside-augmented
-VAR without corn; all-four-market results remain in the comparison tables.
+As in HAR, show a detailed equity-equation summary. This is the main
+ES/oil/gold downside VAR; corn/gas extensions remain in the comparison tables.
 Joint HAC tests use initial-history outcomes and condition on ES history and
 the same downside signals. They test predictive associations, not economic causality
 or out-of-sample gains. Displayed p-values are exploratory and unadjusted.
 """)
 code("""
-selected_name = 'VAR + Downside (No Corn: Oil + NG + Gold)'
+selected_name = 'VAR + Downside (Oil + Gold)'
 print(fits[selected_name].summary())
 training_fits, training_summary = fit_models(design, specs, cfg['hac_lags'], training_mask)
 joint_rows = []
@@ -321,7 +325,7 @@ towards zero means the association dissipates. The horizon counts retained
 all-five observations, not necessarily consecutive ES trading days.
 
 Downside-return controls follow the **same fixed path** in both scenarios.
-These are conditional VAR-X responses; they do not model feedback through future
+This five-market extension's responses are conditional VAR-X responses; they do not model feedback through future
 returns or constitute a nonlinear leverage-shock experiment. A log response `d`
 becomes `100*(exp(d)-1)` percent implied variance, and `100*(exp(d/2)-1)` percent
 volatility. These back-transformations describe the log-model path, not a
@@ -384,7 +388,7 @@ conditional dispersion perfectly. Failed or unstable VAR fits use persistence,
 retain their dates and are counted. No Gaussian forecast intervals are claimed.
 
 **Independent latest-HAR check:** rerun its actual `fit_har_x` forecasting branch
-for all five LHAR specifications. Override its default per-model 80/20 split
+for all six LHAR specifications. Override its default per-model 80/20 split
 with the shared cutoff. Its returned index labels the **origin**, not the next
 target; map that index explicitly to our target dates. The audit below requires
 matching origins, targets, actual outcomes and every log forecast. The HAR
@@ -413,7 +417,8 @@ show_table(har_forecast_audit)
 har_forecast_audit.to_csv(OUTPUT / 'latest_har_forecast_audit.csv')
 """)
 code("""
-pairs = [('Add commodities to plain VAR', 'VAR (All 4: Oil + Corn + Gold + NG)', 'VAR (Baseline)'),
+pairs = [('Add oil/gold to downside VAR', 'VAR + Downside (Oil + Gold)', 'VAR + Downside (Baseline)'),
+    ('Add commodities to plain VAR', 'VAR (All 4: Oil + Corn + Gold + NG)', 'VAR (Baseline)'),
     ('Add commodities to downside VAR', 'VAR + Downside (All 4: Oil + Corn + Gold + NG)', 'VAR + Downside (Baseline)'),
     ('Add corn to downside VAR', 'VAR + Downside (All 4: Oil + Corn + Gold + NG)', 'VAR + Downside (No Corn: Oil + NG + Gold)'),
     ('Add commodities to LHAR', 'LHAR (All 4: Oil + Corn + Gold + NG)', 'LHAR (Baseline)'),
@@ -433,7 +438,71 @@ ax.set(xlabel='Out-of-sample log-variance MSE (lower is better)', title=f'Shared
 ax.grid(axis='x', alpha=.25); fig.tight_layout(); plt.show()
 """)
 md("""
-## 10. Validation and reproducibility
+## 10. Data checks and focused robustness
+
+The main VAR is **ES/oil/gold**; corn/gas specifications are extensions on the
+same comparison calendar. Read `reports/var_har_notebook/DATA_AND_ROBUSTNESS_PLAN.md`
+for the plan fixed before these runs. Earlier results and this evaluation period
+have already been inspected, so the checks are exploratory.
+
+**Data flags are unresolved candidates, not confirmed errors.** Display all
+post-2011 flags and decompose each large close return into its measured opening
+gap and open-to-close movement. The raw file and review ledger remain intact.
+Daily aggregates cannot verify the underlying bid/ask quotes, contract identity,
+daily interval or estimate publication cutoff. [VOLARE's methodology paper](https://arxiv.org/html/2602.19732v1)
+and [Kibot rollover documentation](https://www.kibot.com/futures/rollover-rules.html)
+provide context, rather than an independent reconstruction of these records.
+
+Compare **VAR(5) and VAR(10)** on identical inputs and 802 outcomes; keep order five
+as the training-BIC main specification, rather than retuning it on inspected scores.
+The equity-only rows are AR(5)/AR(10). Larger systems estimate more coefficients.
+
+At order five, compare unchanged RV5 with: training-window exclusions around the
+three previously reviewed suspect records; broader non-crisis flag exclusions;
+open-to-close ES downside returns; and RK predictors/outcomes. Features are built
+before training rows are masked, preserving source-grid monthly averages,
+retained-grid lags and following ES returns. **All 802 targets remain scored.**
+Open-to-close removes genuine opening-gap information too, and may retain an
+intraday switch. No scenario is certified as cleaned or back-adjusted data.
+RK scores a different variance proxy: use within-scenario benchmark gains, not
+raw cross-proxy MSE rankings.
+
+The additional evaluation subset excludes broadly exposed windows retrospectively
+and uses identical remaining dates for every model. It is a diagnostic, not a
+new holdout or a reason to delete stress observations from the primary results.
+Descriptive 95% circular-block intervals resample paired fixed forecast losses
+(2,000 draws; blocks 5/20/60). They do not refit models, test a centred nested-model
+null or correct prior model selection. A band containing zero does not prove
+equal predictive performance.
+""")
+code("""
+assert p == robust_cfg['main_lag'], 'Frozen lag sensitivity assumes the recorded main lag'
+ledger_path = ROOT / 'datasets/volare_review_decisions.csv'
+robustness = run_robustness(raw, wide, design, forecasts, pd.read_csv(ledger_path),
+    source_hash, robust_cfg, cfg['training_end'])
+for name, table in robustness.items():
+    table.to_csv(OUTPUT / f'robustness_{name}.csv', index=False)
+display(Markdown('**Post-2011 data flags: no observation is certified as erroneous.**'))
+flag_columns = ['date', 'symbol', 'rk_to_rv5', 'unadjusted_close_log_return_pct',
+    'opening_gap_pct', 'open_to_close_pct', 'decision']
+show_table(robustness['flags'][flag_columns])
+display(Markdown('**Lag comparison: same dates, target and downside information.**'))
+show_table(robustness['lag_metrics'].set_index(['Model', 'Lag'])[
+    ['N', 'ES_parameters', 'System_parameters', 'Fallbacks', 'MSE', 'RMSE']])
+plot_lag_comparison(robustness['lag_metrics']); plt.show()
+display(Markdown('**Scenario sample counts: masks affect estimation, not the lag/date grid.**'))
+show_table(robustness['sample_flow'].set_index('Scenario'))
+display(Markdown('**Within-scenario MSE gains (%): positive favours the candidate; RK has its own outcome.**'))
+show_table(robustness['gains'].pivot(index=['Candidate', 'Benchmark'], columns='Scenario', values='MSE_gain_pct'))
+display(Markdown('**Retrospective subset diagnostic: omit exposed evaluation windows for every model.**'))
+show_table(robustness['subset_gains'].set_index(['Candidate', 'Benchmark']))
+display(Markdown('**Baseline paired-loss intervals: descriptive, not formal nested-model significance tests.**'))
+show_table(robustness['intervals'].loc[robustness['intervals'].block.eq(20)].set_index(['Candidate', 'Benchmark'])[
+    ['gain_pct', 'lower_pct', 'upper_pct', 'block', 'draws']])
+print('Full interval block-size sensitivity and dated forecasts are saved in robustness CSVs.')
+""")
+md("""
+## 11. Validation and reproducibility
 
 These checks verify matching targets, training chronology, finite predictions
 and recomputed losses. The focused tests separately verify the latest HAR
@@ -465,6 +534,10 @@ assert sha(source_path) == source_hash
 assert sha(yield_path) == yield_manifest['sha256']
 assert har_forecast_audit.N.eq(len(test_dates)).all()
 assert har_forecast_audit.Max_prediction_difference.lt(1e-9).all()
+assert robustness['metrics'].N.eq(len(test_dates)).all()
+assert robustness['forecasts'].origin_date.lt(robustness['forecasts'].date).all()
+assert robustness['forecasts'].training_end.le(robustness['forecasts'].origin_date).all()
+assert not robustness['forecasts'].duplicated(['scenario', 'lag', 'model', 'date']).any()
 assert irf_metadata['n'] == int(training_mask.sum())
 assert irf_metadata['last_target'] == cfg['training_end']
 assert irf_metadata['draws_accepted'] + irf_metadata['rejected_unstable'] + irf_metadata['rejected_nonpositive_covariance'] == cfg['irf']['draws']
@@ -472,6 +545,10 @@ provenance = {'source_sha256': source_hash, 'har_notebook_sha256': sha(ROOT / cf
     'yield_snapshot_sha256': sha(yield_path), 'yield_manifest_sha256': sha(ROOT / cfg['yield_manifest']),
     'yield_join_panel_rows': len(yield_wide), 'yield_join_removed_core_rows': len(wide.index.difference(yield_wide.index)),
     'har_reference_forecasts_checked': int(har_forecast_audit.N.sum()),
+    'robustness': {'settings': robust_cfg, 'records': len(robustness['forecasts']),
+        'input_sha256': {name: sha(ROOT / name) for name in ['var_robustness.py', 'har_return_audit.py',
+            'volare_data.py', 'volare_review.py', 'config/var_robustness.json',
+            'reports/var_har_notebook/DATA_AND_ROBUSTNESS_PLAN.md', 'datasets/volare_review_decisions.csv']}},
     'module_sha256': sha(ROOT / 'var_har_notebook.py'), 'config': cfg,
     'irf_module_sha256': sha(ROOT / 'var_irf.py'), 'irf': irf_metadata,
     'run_time': pd.Timestamp.now(tz='Europe/Amsterdam').isoformat(),
@@ -483,7 +560,7 @@ provenance = {'source_sha256': source_hash, 'har_notebook_sha256': sha(ROOT / cf
 print('All notebook checks passed. Saved results:', OUTPUT)
 """)
 md("""
-## 11. Interpretation for the report
+## 12. Interpretation for the report
 
 Assess commodity contribution against the **matching equity-only model**:
 plain VAR versus AR, or downside VAR versus AR with the same downside controls.
