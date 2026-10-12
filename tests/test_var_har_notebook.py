@@ -81,7 +81,7 @@ class AlignedVARTests(unittest.TestCase):
         self.assertEqual(summary.iloc[0]["N"], int(reference.nobs))
 
     def test_downside_definition_timing_and_future_invariance(self):
-        name = "VAR + Downside (All 4: Oil + Corn + Gold + NG)"
+        name = "LVAR (All 4: Oil + Corn + Gold + NG)"
         spec = {name: self.specs[name]}
         cutoff = self.wide.index[100]
         small = self.wide.iloc[:105]
@@ -118,7 +118,7 @@ class AlignedVARTests(unittest.TestCase):
         self.assertTrue((forecasts.training_end == forecasts.origin_date).all())
 
     def test_return_rescaling_changes_coefficients_but_not_predictions(self):
-        name = "VAR + Downside (Baseline)"
+        name = "LVAR (Baseline)"
         spec = {name: self.specs[name]}
         decimal, _ = fit_models(self.design, spec)
         percent_design = dict(self.design, x=self.design['x'].copy())
@@ -129,7 +129,7 @@ class AlignedVARTests(unittest.TestCase):
         np.testing.assert_allclose(decimal[name].params[cols], percent[name].params[cols]*100, atol=1e-8)
 
     def test_daily_restrictions_and_common_sample(self):
-        daily = self.specs["Restricted VAR + Downside (All 4: Oil + Corn + Gold + NG; Daily Only)"]
+        daily = self.specs["Restricted LVAR (All 4: Oil + Corn + Gold + NG; Daily Only)"]
         columns = columns_for(daily)
         self.assertIn("ES.l5", columns) if self.p >= 5 else None
         self.assertIn("C.l1", columns)

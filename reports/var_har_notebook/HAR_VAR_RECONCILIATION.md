@@ -73,8 +73,8 @@ Lower MSE means smaller squared forecast errors in log variance.
 |---|---:|---:|
 | Equity-only AR(5) | 0.409476 | 802 |
 | Equity-only AR(5) + downside | 0.371498 | 802 |
-| All-four-commodity VAR(5) + downside | 0.372801 | 802 |
-| Gas-only VAR(5) + downside | 0.370016 | 802 |
+| All-four-commodity LVAR(5) | 0.372801 | 802 |
+| Gas-only LVAR(5) | 0.370016 | 802 |
 | Equity-only asymmetric HAR | 0.362110 | 802 |
 | All-four-commodity asymmetric HAR | 0.363237 | 802 |
 

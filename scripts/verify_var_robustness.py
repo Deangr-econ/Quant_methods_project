@@ -62,7 +62,7 @@ def verify():
         if fallback.any():
             np.testing.assert_allclose(frame.loc[fallback, 'predicted_variance'],
                 es[proxy].reindex(frame.loc[fallback, 'origin_date']), rtol=1e-12)
-        if name.startswith('VAR'):
+        if name.startswith(('VAR', 'LVAR')):
             assert frame.loc[~fallback, 'root'].lt(1).all()
         error = frame.actual_log-frame.predicted_log
         ratio = frame.actual_variance/frame.predicted_variance

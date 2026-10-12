@@ -49,7 +49,7 @@ The notebook saves the coverage counts and date-by-market missingness audit.
 
 ## 2. IRFs — show the response, then explain its limits
 
-- [x] Fit the initial-training five-market downside VAR(5), through 12 July 2023.
+- [x] Fit the initial-training five-market LVAR(5), through 12 July 2023.
 - [x] Add four commodity-to-ES generalized IRF curves over horizons 0–20.
 - [x] State the shock, response, units, time steps and treatment of downside controls.
 - [x] Add reproducible exploratory uncertainty bands and accepted/rejected draw counts.
@@ -96,7 +96,7 @@ misspecification limit strong significance claims. They are not prediction bands
 **Connection to the research question:** IRFs describe fitted dynamic associations.
 Forecast comparisons test whether commodities add useful information beyond ES
 history and downside returns. A positive correlated IRF does not imply a forecast
-improvement. Our all-four downside VAR has slightly higher forecast MSE than its
+improvement. Our all-four LVAR has slightly higher forecast MSE than its
 equity-only downside benchmark (+0.35%). NG alone gives a small descriptive
 improvement (about 0.40%); neither comparison establishes a significant gain.
 
@@ -108,7 +108,7 @@ for MA representations and the ordering dependence of Cholesky IRFs.
 
 - [x] Verify the current split and expanding-window chronology.
 - [x] Confirm that lag selection uses only the initial training sample.
-- [x] Use identical 802 evaluation targets for VAR, downside VAR, LHAR and persistence.
+- [x] Use identical 802 evaluation targets for VAR, LVAR, LHAR and persistence.
 - [x] Keep the fixed 12 July 2023 initial cutoff; document approximate 80/20.
 - [ ] Confirm Tim's and Dean's final report comparisons use this same target,
   cutoff, evaluation dates, return units and information availability. Different
@@ -147,7 +147,7 @@ The already-inspected test period is exploratory, not an untouched final holdout
   the three downside controls. Distinguish variance from volatility.
 - [ ] Trace one forecast from inputs to prediction, smearing and forecast loss.
 - [ ] Read R², HAC coefficient tests, lag criteria, roots and residual diagnostics.
-- [ ] Compare original Tim VAR, matched downside VAR and Dean's LHAR without
+- [ ] Compare original Tim VAR, matched LVAR and Dean's LHAR without
   confusing sample changes with model improvements.
 - [ ] Practise explaining the main finding: downside equity information helps;
   additional commodity information gives limited incremental forecast value.

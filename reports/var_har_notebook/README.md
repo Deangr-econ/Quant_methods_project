@@ -1,7 +1,7 @@
 # HAR-aligned VAR notebook — status 9 October 2026
 
 **9 October readiness check:** all 38 tests and a fresh notebook execution and
-saved-output verification pass again. The agreed downside-augmented VAR code is
+saved-output verification pass again. The agreed LVAR code is
 complete. Saved results were restored after an editor selected an unsupported
 Python environment; the project `.venv` (Python 3.13.0) runs the notebook. No
 model source or specification changed. Provider timing/contract confirmation
@@ -25,6 +25,13 @@ in order in a fresh project Python Jupyter kernel; results and figures are saved
 inside the notebook. The user's current request is to match the asymmetric HAR
 methods, assets and presentation, including corn and natural gas.
 
+**LVAR (leverage-augmented VAR)** adds three predetermined ES downside-return
+controls to every equation: the negative parts of the latest decimal return
+and its 5- and 22-observation means, taking the negative part after averaging.
+Leverage here refers to the asymmetric association between negative equity
+returns and variance, not borrowing. LVAR remains a linear VAR with exogenous
+controls (VAR-X); its variance-lag coefficients do not switch across regimes.
+
 ## What matches HAR
 
 - RV5, 2011 start, ES/CL/C/GC/NG, percentage close-to-close returns and the exact
@@ -46,7 +53,7 @@ The later matched tables give every model the same 3,967 target rows.
 
 VAR uses individual lags; HAR uses d/w/m averages. The shared initial-training
 five-market VAR BIC selects order 5 from candidates 1–20, fixed for all VAR
-comparisons. The downside-augmented system adds the three predetermined ES
+comparisons. LVAR adds the three predetermined ES
 return controls to each equation. Those controls are not endogenous market
 variables. Its roots describe the conditional VAR dynamics only.
 
@@ -74,14 +81,14 @@ values or returns enter forecasts. All forecasts in this run have zero fallbacks
 | Equity-only AR(5) | 0.409476 | 0.639903 |
 | Five-market VAR(5) | 0.412453 | 0.642225 |
 | Equity AR(5) + downside controls | 0.371498 | 0.609507 |
-| Five-market VAR(5) + downside controls | 0.372801 | 0.610574 |
-| No-corn VAR(5) + downside controls | 0.371957 | 0.609883 |
+| Five-market LVAR(5) | 0.372801 | 0.610574 |
+| No-corn LVAR(5) | 0.371957 | 0.609883 |
 | Equity-only asymmetric HAR | 0.362110 | 0.601756 |
 | All-four-commodity asymmetric HAR | 0.363237 | 0.602692 |
 
 All-four-commodity VAR MSE is 0.73% higher than equity-only AR. With matching
 downside controls, adding all four commodities raises MSE by 0.35%. Adding corn
-to the no-corn downside system raises MSE by 0.23%. The all-four downside VAR has
+to the no-corn downside system raises MSE by 0.23%. The all-four LVAR has
 2.63% higher MSE than all-four LHAR on these shared dates. Natural-gas-only
 variants have small descriptive improvements over their matching equity-only
 controls; report the full table instead of claiming every commodity variant loses.
@@ -118,7 +125,7 @@ there are no Gaussian prediction intervals.
 ## Training-only IRF curves and the 2011/split audit
 
 Section 8 now shows four commodity-to-ES generalized responses from the initial
-five-market downside VAR(5), using 3,165 training outcomes only. Innovations are
+five-market LVAR(5), using 3,165 training outcomes only. Innovations are
 one residual SD of commodity log variance, with contemporaneously correlated
 innovations; downside controls have the same fixed path in both scenarios.
 These conditional responses are ordering invariant, not identified causal effects.

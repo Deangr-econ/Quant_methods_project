@@ -146,6 +146,6 @@ def plot_commodity_irfs(curves):
         ax.set_xlabel('Retained observations after innovation (0 = contemporaneous)')
         ax.grid(alpha=.2)
     axes[0, 0].legend(fontsize=8)
-    fig.suptitle('Conditional generalized IRFs: initial-training five-market VAR(5) + downside controls', fontsize=12)
+    fig.suptitle('Conditional generalized IRFs: initial-training five-market LVAR(5)', fontsize=12)
     fig.tight_layout()
     return fig

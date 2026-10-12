@@ -4,7 +4,7 @@ Reviewed 9 October 2026. This review covers the data, code, results and preparat
 for explaining the analysis. The group is writing the final report and slides
 elsewhere; their progress is outside this checklist.
 
-**9 October readiness check:** the agreed downside-augmented VAR implementation
+**9 October readiness check:** the agreed LVAR implementation
 is complete. All 38 tests pass again, and a fresh run verifies 14 code cells,
 five figures, 18,446 main forecasts and 50,526 sensitivity forecasts. The saved
 notebook had lost its outputs after an editor selected a different Python
@@ -41,7 +41,7 @@ Source: `context/quant techniques syllabus.pdf`, final-assignment section.
 | Component | Status on 7 October |
 |---|---|
 | Local Volare export and preparation | Implemented; provider timing, calendar and contract-roll limitations remain |
-| VAR/AR and downside specifications | Implemented, including oil, corn, gold and gas comparisons |
+| VAR/AR and LVAR specifications | Implemented, including oil, corn, gold and gas comparisons |
 | Training-only lag comparison | Implemented for orders 1–20; BIC chooses 5 and AIC 10 for the initial five-market plain VAR |
 | Expanding-window forecasts | Implemented, with the existing matched comparison scoring 802 common targets |
 | Generalized VAR IRFs and bands | Implemented; five dedicated IRF tests pass |
@@ -149,7 +149,7 @@ is a code/API review, not an independently reproduced GARCH execution.
 
 Verified matched-result takeaway after the latest reconciliation: equity
 downside information helps substantially. Adding all four commodities to the
-downside VAR raises forecast MSE by about **0.35%** relative to the matching
+LVAR raises forecast MSE by about **0.35%** relative to the matching
 equity-only downside benchmark. Gas alone lowers MSE by about **0.40%**. These
 small exploratory differences do not establish a reliable forecasting gain.
 The weak incremental commodity result is a valid answer to the research

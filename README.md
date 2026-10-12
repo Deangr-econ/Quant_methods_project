@@ -6,7 +6,9 @@ Group project
 Open [VAR_QTFE.ipynb](VAR_QTFE.ipynb) for the newly executed Python notebook
 using the latest asymmetric HAR commodity specification on the frozen RV5 calendar,
 ES downside-return controls, HAC(22), comparison tables and residual plots.
-The main model is ES/oil/gold, with corn/gas extensions. VAR and LHAR forecasts
+The main model is ES/oil/gold, with corn/gas extensions. **LVAR** means
+**leverage-augmented VAR**: a linear VAR-X with daily, 5- and 22-observation
+ES downside-return controls in every equation. VAR, LVAR and LHAR forecasts
 score the same 802 targets; the latest HAR bond-data join is audited separately.
 See
 [the matching-methods guide](reports/var_har_notebook/README.md) for definitions,

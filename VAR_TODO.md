@@ -41,7 +41,7 @@ notebook entry point for that comparison; the earlier R analysis remains intact.
 See [the matching-methods guide](reports/var_har_notebook/README.md).
 
 - [x] Reproduced the current HAR preparation and actual saved R² values.
-- [x] Added plain and downside-augmented VAR families with the same ES return
+- [x] Added plain and LVAR families with the same ES return
   terms and HAC(22); added corn/no-corn and daily-restriction tables.
 - [x] Used one training-selected lag order, identical fit rows and 802 common
   forecast targets; recomputed matching LHAR controls instead of importing

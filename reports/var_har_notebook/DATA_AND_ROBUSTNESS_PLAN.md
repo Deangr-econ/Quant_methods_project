@@ -11,7 +11,7 @@ Keep the frozen five-market commodity calendar, initial 12 July 2023 cutoff,
 22-row common warm-up and all 802 evaluation targets. Retain the main RV5,
 close-to-close return, training-BIC-selected VAR(5) specification.
 
-Add the previously requested **ES/oil/gold** VAR and its downside version,
+Add the previously requested **ES/oil/gold** VAR and LVAR,
 plus a matching LHAR, to the shared comparison. Corn/gas versions remain
 extensions. All models still use the same five-market comparison calendar, so
 market inclusion changes regressors rather than target availability.

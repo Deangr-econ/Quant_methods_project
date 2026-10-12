@@ -182,8 +182,8 @@ def run_robustness(raw, wide, design, main_forecasts, ledger, source_sha256, set
 
 def plot_lag_comparison(metrics):
     import matplotlib.pyplot as plt
-    names = ["VAR + Downside (Baseline)", "VAR + Downside (Oil + Gold)",
-        "VAR + Downside (All 4: Oil + Corn + Gold + NG)", "VAR + Downside (NatGas)"]
+    names = ["LVAR (Baseline)", "LVAR (Oil + Gold)",
+        "LVAR (All 4: Oil + Corn + Gold + NG)", "LVAR (NatGas)"]
     table = metrics.pivot(index="Model", columns="Lag", values="MSE").loc[names]
     table.index = ["Equity only", "Oil + gold (main)", "All four commodities", "Gas only"]
     fig, ax = plt.subplots(figsize=(10, 5))

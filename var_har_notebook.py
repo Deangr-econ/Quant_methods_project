@@ -174,12 +174,12 @@ def model_specifications(p):
     specs = {}
     for downside in [False, True]:
         for label, commodities in sets.items():
-            prefix = "VAR + Downside" if downside else "VAR"
+            prefix = "LVAR" if downside else "VAR"
             name = f"{prefix} ({label})"
             specs[name] = dict(family="VAR", p=p, commodities=commodities,
                                downside=downside, daily_only=False)
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
-        specs[f"Restricted VAR + Downside ({label}; Daily Only)"] = dict(
+        specs[f"Restricted LVAR ({label}; Daily Only)"] = dict(
             family="VAR", p=p, commodities=sets[label], downside=True, daily_only=True)
     for label in ["Baseline", "Oil + Gold", "No Corn: Oil + NG + Gold", "All 4: Oil + Corn + Gold + NG"]:
         specs[f"LHAR ({label})"] = dict(family="LHAR", p=0, commodities=sets[label],

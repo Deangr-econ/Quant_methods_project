@@ -17,7 +17,7 @@ class IRFTests(unittest.TestCase):
     def setUpClass(cls):
         cls.wide, _ = prepare_har_data(pd.read_csv(ROOT / 'datasets/realized_variance_futures.csv'))
         cls.design = aligned_design(cls.wide)
-        cls.spec = model_specifications(5)['VAR + Downside (All 4: Oil + Corn + Gold + NG)']
+        cls.spec = model_specifications(5)['LVAR (All 4: Oil + Corn + Gold + NG)']
 
     def test_native_var_moving_average_and_named_lag_mapping(self):
         symbols = ['ES', 'CL', 'C', 'GC', 'NG']

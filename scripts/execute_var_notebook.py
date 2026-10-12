@@ -39,6 +39,8 @@ try:
         if cell["cell_type"] != "code":
             continue
         source = "".join(cell["source"])
+        if not source.strip():
+            continue
         cell["outputs"] = []
         msg_id = client.execute(source, stop_on_error=True)
         deadline = time.monotonic() + 900

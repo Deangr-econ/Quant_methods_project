@@ -13,21 +13,21 @@
     "VAR (Baseline)",
     "VAR (Oil + Gold)",
     "VAR (All 4: Oil + Corn + Gold + NG)",
-    "VAR + Downside (Baseline)",
-    "VAR + Downside (Oil + Gold)",
-    "VAR + Downside (NatGas)",
-    "VAR + Downside (No Corn: Oil + NG + Gold)",
-    "VAR + Downside (All 4: Oil + Corn + Gold + NG)",
+    "LVAR (Baseline)",
+    "LVAR (Oil + Gold)",
+    "LVAR (NatGas)",
+    "LVAR (No Corn: Oil + NG + Gold)",
+    "LVAR (All 4: Oil + Corn + Gold + NG)",
     "LHAR (Baseline)",
     "LHAR (Oil + Gold)",
     "LHAR (All 4: Oil + Corn + Gold + NG)"
   ],
   "pairs": [
-    ["VAR + Downside (Baseline)", "VAR (Baseline)"],
-    ["VAR + Downside (Oil + Gold)", "VAR + Downside (Baseline)"],
-    ["VAR + Downside (All 4: Oil + Corn + Gold + NG)", "VAR + Downside (Baseline)"],
-    ["VAR + Downside (NatGas)", "VAR + Downside (Baseline)"],
-    ["LHAR (Baseline)", "VAR + Downside (Baseline)"]
+    ["LVAR (Baseline)", "VAR (Baseline)"],
+    ["LVAR (Oil + Gold)", "LVAR (Baseline)"],
+    ["LVAR (All 4: Oil + Corn + Gold + NG)", "LVAR (Baseline)"],
+    ["LVAR (NatGas)", "LVAR (Baseline)"],
+    ["LHAR (Baseline)", "LVAR (Baseline)"]
   ],
   "bootstrap": {"blocks": [5, 20, 60], "draws": 2000, "seed": 20261007},
   "interpretation": "Exploratory sensitivity fixed before these runs; prior forecast period already inspected. No scenario is a verified data correction; retain RV5/close-to-close/VAR(5) as primary."

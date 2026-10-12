@@ -38,6 +38,13 @@ in our shared comparison. No bond regressor is added to VAR.
 HAR code. No square root or annualisation is introduced. Volatility is its square
 root. VAR uses individual lags; HAR uses daily/weekly/monthly averages.
 
+**LVAR (leverage-augmented VAR)** adds three predetermined ES downside-return
+controls to every equation: the negative parts of the latest decimal return
+and its 5- and 22-observation means, taking the negative part after averaging.
+Leverage here refers to the asymmetric association between negative equity
+returns and variance, not borrowing. LVAR remains a linear VAR with exogenous
+controls (VAR-X); its variance-lag coefficients do not switch across regimes.
+
 Full-sample results are descriptive. The evaluation period has already been
 examined. Provider session timing and contract/quote issues remain unresolved.
 """)
@@ -45,6 +52,7 @@ code("""
 %matplotlib inline
 from pathlib import Path
 import hashlib, json, platform, sys
+import importlib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -53,6 +61,9 @@ import statsmodels
 from statsmodels.stats.diagnostic import acorr_ljungbox, het_arch
 ROOT = next(p for p in [Path.cwd(), *Path.cwd().parents] if (p / 'config/var_har_notebook.json').exists())
 sys.path.insert(0, str(ROOT))
+# Refresh local modules when setup is rerun in an existing notebook kernel.
+for module_name in ('var_har_notebook', 'var_irf', 'var_robustness'):
+    importlib.reload(importlib.import_module(module_name))
 from var_har_notebook import (prepare_har_data, reference_har_function, aligned_design,
     select_shared_lag, model_specifications, fit_models, expanding_forecasts,
     forecast_metrics, stationarity_table, plot_residual_diagnostics, columns_for,
@@ -205,12 +216,12 @@ show_table(reference_table)
 reference_table.to_csv(OUTPUT / 'current_har_reference.csv')
 """)
 md("""
-## 4. Plain VAR versus VAR with the same downside information
+## 4. Plain VAR versus LVAR
 
 Each system includes ES and the indicated commodities. The baseline is the
-one-variable AR analogue. Downside versions add HAR's three predetermined ES
-return terms to every equation; they are **VARs with exogenous downside controls**,
-not HAR models and not systems treating returns as another endogenous market.
+one-variable AR analogue. LVAR adds HAR's three predetermined ES downside-return
+terms to every equation. These are **linear VAR-X models** with exogenous controls;
+returns are not treated as another endogenous market.
 
 The table mirrors HAR's R², adjusted R², AIC/BIC, robust F statistic and
 log-likelihood layout. These statistics refer to the **ES equation** on identical
@@ -219,10 +230,11 @@ Gaussian ES-equation criteria, whereas the earlier lag search used system criter
 HAC(22) affects reported inference, not OLS coefficient estimates or forecasts.
 """)
 code("""
+specs = model_specifications(p)
 fits, summary = fit_models(design, specs, cfg['hac_lags'])
 sets_in_first_table = ['Baseline', 'Oil', 'NatGas', 'Energy: Oil + NG', 'No Corn: Oil + NG + Gold']
 sets_in_first_table.insert(1, 'Oil + Gold')
-first_names = [f'{prefix} ({label})' for prefix in ['VAR', 'VAR + Downside'] for label in sets_in_first_table]
+first_names = [f'{prefix} ({label})' for prefix in ['VAR', 'LVAR'] for label in sets_in_first_table]
 summary_columns = ['N', 'Lag p', 'Params (k)', 'R²', 'Adj. R²', 'AIC', 'BIC', 'F-Stat', 'Prob(F-Stat)', 'Log-Likelihood']
 show_table(summary.loc[first_names, summary_columns])
 summary.to_csv(OUTPUT / 'common_sample_insample_results.csv')
@@ -237,11 +249,11 @@ Those rows are restricted VAR systems. HAR's full d/w/m averages and VAR's full
 lag history are different representations of memory, not identical regressors.
 """)
 code("""
-corn_names = ['VAR + Downside (Baseline)', 'VAR + Downside (Oil + Gold)',
-    'VAR + Downside (All 4: Oil + Corn + Gold + NG)',
-    'Restricted VAR + Downside (All 4: Oil + Corn + Gold + NG; Daily Only)',
-    'VAR + Downside (No Corn: Oil + NG + Gold)',
-    'Restricted VAR + Downside (No Corn: Oil + NG + Gold; Daily Only)']
+corn_names = ['LVAR (Baseline)', 'LVAR (Oil + Gold)',
+    'LVAR (All 4: Oil + Corn + Gold + NG)',
+    'Restricted LVAR (All 4: Oil + Corn + Gold + NG; Daily Only)',
+    'LVAR (No Corn: Oil + NG + Gold)',
+    'Restricted LVAR (No Corn: Oil + NG + Gold; Daily Only)']
 show_table(summary.loc[corn_names, summary_columns + ['System params', 'Max root']])
 lhar_names = ['LHAR (Baseline)', 'LHAR (Oil + Gold)', 'LHAR (All 4: Oil + Corn + Gold + NG)',
     'LHAR (All 4: Oil + Corn + Gold + NG; Daily Only)', 'LHAR (No Corn: Oil + NG + Gold)',
@@ -253,13 +265,13 @@ md("""
 ## 6. Coefficients and joint commodity tests
 
 As in HAR, show a detailed equity-equation summary. This is the main
-ES/oil/gold downside VAR; corn/gas extensions remain in the comparison tables.
+ES/oil/gold LVAR; corn/gas extensions remain in the comparison tables.
 Joint HAC tests use initial-history outcomes and condition on ES history and
 the same downside signals. They test predictive associations, not economic causality
 or out-of-sample gains. Displayed p-values are exploratory and unadjusted.
 """)
 code("""
-selected_name = 'VAR + Downside (Oil + Gold)'
+selected_name = 'LVAR (Oil + Gold)'
 print(fits[selected_name].summary())
 training_fits, training_summary = fit_models(design, specs, cfg['hac_lags'], training_mask)
 joint_rows = []
@@ -311,7 +323,7 @@ md("""
 An **impulse response function (IRF)** traces how an unexpected change today
 propagates through the fitted lag system. Here the shock is **one residual
 standard deviation of commodity log RV5**, not a price jump or a negative return.
-The full five-market downside VAR is estimated on initial history only (through
+The full five-market LVAR is estimated on initial history only (through
 12 July 2023), with the same training-selected five lags. No evaluation outcomes
 enter this fit. The four panels cover oil, corn, gold and natural gas.
 
@@ -417,12 +429,12 @@ show_table(har_forecast_audit)
 har_forecast_audit.to_csv(OUTPUT / 'latest_har_forecast_audit.csv')
 """)
 code("""
-pairs = [('Add oil/gold to downside VAR', 'VAR + Downside (Oil + Gold)', 'VAR + Downside (Baseline)'),
+pairs = [('Add oil/gold to LVAR', 'LVAR (Oil + Gold)', 'LVAR (Baseline)'),
     ('Add commodities to plain VAR', 'VAR (All 4: Oil + Corn + Gold + NG)', 'VAR (Baseline)'),
-    ('Add commodities to downside VAR', 'VAR + Downside (All 4: Oil + Corn + Gold + NG)', 'VAR + Downside (Baseline)'),
-    ('Add corn to downside VAR', 'VAR + Downside (All 4: Oil + Corn + Gold + NG)', 'VAR + Downside (No Corn: Oil + NG + Gold)'),
+    ('Add commodities to LVAR', 'LVAR (All 4: Oil + Corn + Gold + NG)', 'LVAR (Baseline)'),
+    ('Add corn to LVAR', 'LVAR (All 4: Oil + Corn + Gold + NG)', 'LVAR (No Corn: Oil + NG + Gold)'),
     ('Add commodities to LHAR', 'LHAR (All 4: Oil + Corn + Gold + NG)', 'LHAR (Baseline)'),
-    ('Downside VAR versus matched LHAR', 'VAR + Downside (All 4: Oil + Corn + Gold + NG)', 'LHAR (All 4: Oil + Corn + Gold + NG)')]
+    ('LVAR versus matched LHAR', 'LVAR (All 4: Oil + Corn + Gold + NG)', 'LHAR (All 4: Oil + Corn + Gold + NG)')]
 gains = pd.DataFrame([{'Comparison': label, 'Candidate': candidate, 'Benchmark': benchmark,
     'N': int(metrics.loc[candidate, 'N']), 'MSE gain (%)': 100 * (1 - metrics.loc[candidate, 'MSE'] / metrics.loc[benchmark, 'MSE']),
     'MAE gain (%)': 100 * (1 - metrics.loc[candidate, 'MAE'] / metrics.loc[benchmark, 'MAE'])}
@@ -430,8 +442,8 @@ gains = pd.DataFrame([{'Comparison': label, 'Candidate': candidate, 'Benchmark':
 show_table(gains)
 display(Markdown('Positive gain favours the candidate. These are descriptive differences, not significance tests.'))
 gains.to_csv(OUTPUT / 'shared_forecast_gains.csv')
-plot_names = ['VAR (Baseline)', 'VAR + Downside (Baseline)',
-              'VAR + Downside (All 4: Oil + Corn + Gold + NG)', 'LHAR (Baseline)']
+plot_names = ['VAR (Baseline)', 'LVAR (Baseline)',
+              'LVAR (All 4: Oil + Corn + Gold + NG)', 'LHAR (Baseline)']
 fig, ax = plt.subplots(figsize=(11, 5))
 metrics.loc[plot_names, 'MSE'].plot.barh(ax=ax, color=['#7d8a96', '#235789', '#4aa3a2', '#e2a03a'])
 ax.set(xlabel='Out-of-sample log-variance MSE (lower is better)', title=f'Shared-date forecasts: {len(test_dates)} targets')
@@ -563,7 +575,7 @@ md("""
 ## 12. Interpretation for the report
 
 Assess commodity contribution against the **matching equity-only model**:
-plain VAR versus AR, or downside VAR versus AR with the same downside controls.
+plain VAR versus AR, or LVAR versus AR with the same downside controls.
 Assess VAR versus LHAR using shared assets, dates and return information.
 R² measures full-sample fit; forecast MSE answers the predictive question.
 VAR's selected individual variance lags and LHAR's 22-observation variance

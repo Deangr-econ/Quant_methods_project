@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 out = ROOT / "reports/var_har_notebook/generated"
 notebook = json.loads((ROOT / "VAR_QTFE.ipynb").read_text())
-code = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+code = [c for c in notebook["cells"] if c["cell_type"] == "code" and "".join(c["source"]).strip()]
 assert notebook["nbformat"] == 4
 assert [c["execution_count"] for c in code] == list(range(1, len(code) + 1))
 assert all(o["output_type"] != "error" for c in code for o in c["outputs"])
@@ -64,7 +64,7 @@ for name, frame in forecasts.groupby("model", sort=False):
     np.testing.assert_allclose(frame.predicted_variance, np.exp(frame.predicted_log) * frame.smearing, rtol=1e-12)
     if name == "Persistence":
         np.testing.assert_allclose(frame.predicted_variance, es.reindex(frame.origin_date), rtol=1e-12)
-    elif name.startswith("VAR") or name.startswith("Restricted VAR"):
+    elif name.startswith(("VAR", "LVAR", "Restricted VAR", "Restricted LVAR")):
         assert (frame.loc[frame.status.eq("ok"), "root"] < 1).all()
     error = frame.actual_log - frame.predicted_log
     ratio = frame.actual_variance / frame.predicted_variance
