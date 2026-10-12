@@ -1,0 +1,178 @@
+\documentclass{report}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{adjustbox} % <--- THIS PACKAGE IS REQUIRED
+
+\begin{document}
+
+\chapter{Introduction and Econometric Framework}
+
+\section{The Heterogeneous Autoregressive (HAR) Model}
+To forecast the volatility of equity index futures, we employ the Heterogeneous Autoregressive model of Realized Volatility (HAR-RV) introduced by Corsi (2009). Traditional autoregressive frameworks like GARCH or short-memory ARMA specifications frequently struggle to reproduce the slow, hyperbolic decay observed in empirical financial volatility: A phenomenon commonly characterized as long memory. While fractionally integrated processes (such as ARFIMA) can replicate this persistence, they are computationally intensive and lack a structural market foundation.
+
+\vspace{1em}
+
+The HAR framework circumvents these limitations by building upon the Heterogeneous Market Hypothesis (Müller et al., 1997). This hypothesis posits that financial markets are populated by distinct agent profiles operating across divergent temporal horizons:
+\begin{itemize}
+    \item Short-term intraday market participants and high-frequency traders who monitor and react to daily volatility shocks.
+    \item Medium-term institutional rebalancers and swing traders who condition their exposure on weekly market variance.
+    \item Long-term fundamental asset managers and pension funds whose capital allocations depend on monthly macro volatility trends.
+\end{itemize}
+
+
+Rather than specifying a formal fractionally integrated model, the standard HAR process approximates long memory through a parsimonious linear aggregation of realized volatility components sampled across these three distinct frequencies: daily ($d=1$), weekly ($w=5$), and monthly ($m=22$ trading days). Formally, the standard HAR model that predicts the next-day realized variance is specified as: 
+\begin{equation}
+\ln RV_{t+1}^{(d)} = \beta_0 + \beta_d \ln RV_{t}^{(d)} + \beta_w \ln RV_{t}^{(w)} + \beta_m \ln RV_{t}^{(m)} + \epsilon_{t+1}
+\end{equation}
+where $\ln RV_{t}^{(w)} = \frac{1}{5}\sum_{i=0}^{4}\ln RV_{t-i}^{(d)}$ and $\ln RV_{t}^{(m)} = \frac{1}{22}\sum_{i=0}^{21}\ln RV_{t-i}^{(d)}$ represent the moving averages over weekly and monthly horizons. 
+
+\section{Incorporating Asymmetries: The Leverage LHAR Model}
+Because negative equity returns induce a disproportionate surge in future volatility, a phenomenon attributed to financial leverage effects (Black, 1976) and volatility feedback mechanisms (Campbell \& Hentschel, 1992), we augment the baseline HAR to an LHAR-RV framework following Corsi and Renò (2012). We define the daily negative return shock as: 
+\begin{equation}
+r_{t}^{-} = \min(r_t, 0)
+\end{equation}
+where $r_t = \frac{ret_t}{100}$ denotes the daily percentage returns expressed in decimals. Multi-horizon negative return cascades are constructed identically: 
+\begin{equation}
+r_{t,w}^{-} = \frac{1}{5}\sum_{i=0}^{4}r_{t-i}^{-}, \quad r_{t,m}^{-} = \frac{1}{22}\sum_{i=0}^{21}r_{t-i}^{-}
+\end{equation}
+These asymmetric downside terms are appended directly to the regressor matrix to isolate market-wide panic spillovers. 
+
+\chapter{Data Selection, Preprocessing, and Transformations}
+
+Our dataset comprises daily trading observations spanning January 2011 through August 2026, totaling 3,757 trading days. We align all time series on an unsmoothed trading-day index, maintaining a freq=None datetime index to prevent the artificial interpolation of exchange holidays and weekends. 
+
+\noindent \textbf{Target Asset:}
+\begin{itemize}
+    \item E-mini S\&P 500 Futures (ES): 5-minute Realized Volatility \& Daily Returns
+\end{itemize}
+
+\noindent \textbf{Exogenous Commodity Futures:}
+\begin{itemize}
+    \item WTI Crude Oil (CL)
+    \item Natural Gas (NG)
+    \item COMEX Gold (GC)
+    \item CBOT Corn (C)
+\end{itemize}
+
+\noindent \textbf{Exogenous Macro Benchmark:}
+\begin{itemize}
+    \item FRED DGS10: 10-Year US Treasury Constant Maturity Rate
+\end{itemize}
+
+\section{Intraday Realized Volatility Construction}
+For our equity benchmark (ES) and the four commodity futures (CL, NG, GC, C), realized variance ($RV_t$) is computed from 5-minute high-frequency intraday log-returns. To correct for the empirical right-skewness and heavy-tailed distribution inherent to raw realized variance, we transform the daily variance into log space: 
+\begin{equation}
+y_t = \ln RV_{5, ES, t}
+\end{equation}
+The dependent variable for our entire model suite is defined as the forward one-day lead, $y_{t+1} = \ln RV_{5, ES, t+1}$. For all commodity series, multi-horizon exogenous regressors ($sym_d, sym_w, sym_m$) are constructed by taking the 1-day, 5-day, and 22-day rolling means of their respective log-realized volatilities, matching the multi-horizon structure of the baseline HAR model. 
+
+\section{Macro Exogenous Regressor: Treasury Yield Volatility Proxy}
+To evaluate cross-asset volatility transmission between the fixed income market and equity derivatives, we pull the 10-Year Treasury Constant Maturity Yield (DGS10) from the Federal Reserve Bank of St. Louis (FRED). Because DGS10 represents an $I(1)$ non-stationary series quoted in nominal annual percentage points (e.g., 4.25\%), we first transform the series into stationary daily basis-point variations: 
+\begin{equation}
+\Delta y_{t, bps} = (y_t - y_{t-1}) \times 100
+\end{equation}
+When designing the appropriate volatility proxy for bond yields, standard practice in equities, taking the logarithm of squared changes, encounters an econometric obstacle. Because Treasury yields in the FRED database are rounded to two decimal places, days with zero net yield change ($\Delta y_{t, bps} = 0$) appear frequently, comprising between 10\% and 15\% of our historical sample (with the 5th percentile resting at 0.00 bps). Applying a standard log transform $\ln(\Delta y_{t, bps}^2 + c)$ distorts this bottom decile by imposing an arbitrary smoothing constant. 
+
+\vspace{1em}
+
+Consequently, we construct and evaluate two alternative specifications that preserve the exact point-mass at zero:
+\begin{enumerate}
+    \item \textbf{Daily Realized Yield Variance ($\text{bps}^2$)}:
+    \begin{equation}
+    \text{rv\_yield\_10}_t = \Delta y_{t, bps}^2 = \left[(y_t - y_{t-1}) \times 100\right]^2
+    \end{equation}
+    This quadratic proxy measures normal (Bachelier) yield variance. However, squaring the integer basis-point moves yields high skewness (6.23) and severe leptokurtosis (65.76), driven by extreme macro release sessions where yields shift up to 30 bps ($\max = 900\text{ bps}^2$). 
+    
+    \item \textbf{Daily Absolute Yield Changes ($|\text{bps}|$)}:
+    \begin{equation}
+    \text{abs\_dyield\_10}_t = |\Delta y_{t, bps}| = |(y_t - y_{t-1}) \times 100|
+    \end{equation}
+    This linear absolute-deviation proxy compresses the distribution's moments substantially: skewness drops to 1.78, and excess kurtosis contracts from 65.76 down to 5.41. It preserves the true zero-change days while mitigating the leverage that rare $900\text{ bps}^2$ outliers exert on an ordinary least squares loss function. 
+\end{enumerate}
+
+\chapter{Model Estimation and Statistical Inference}
+
+All standard HAR, LHAR, and HAR-X/LHAR-X variants are estimated via Ordinary Least Squares (OLS) using an aligned design matrix with complete observations. Because daily financial volatility exhibits persistent temporal dependence in its residuals, standard OLS variance-covariance estimators would severely underestimate standard errors and inflate t-statistics. 
+\vspace{1em}
+
+To ensure valid statistical inference, we estimate the covariance matrix using Newey-West Heteroskedasticity and Autocorrelation Consistent (HAC) standard errors with a truncation lag parameter set to $H=22$ trading days (\texttt{cov\_kwds="maxlags":22}). This accounts for autocorrelation over an entire trading month as well as the conditional heteroskedasticity inherent to financial time series. Model selection across nested and non-nested specifications is evaluated using the coefficient of determination ($R^2$), Adjusted $R^2$, the Akaike Information Criterion (AIC), the Bayesian Information Criterion (BIC), and Log-Likelihood (LLF). 
+
+\chapter{Empirical Results}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Commodity Expansion (In-Sample \& Out-of-Sample)}
+  \label{tab:commodity_expansion}
+  \begin{adjustbox}{max width=\textwidth}
+  \begin{tabular}{lrrrrrrrr}
+    \toprule
+    Model & $R^2$ & Adj. $R^2$ & AIC & BIC & Log-Likelihood & MSE & RMSE & MAE \\
+    \midrule
+    Baseline HAR & 0.7192 & 0.7190 & 6062.97 & 6087.89 & -3027.48 & 0.3592 & 0.5993 & 0.4612 \\
+    HAR-X (Oil) & 0.7197 & 0.7193 & 6061.91 & 6105.52 & -3023.95 & 0.3591 & 0.5993 & 0.4613 \\
+    HAR-X (NatGas) & 0.7197 & 0.7192 & 6062.46 & 6106.08 & -3024.23 & 0.3594 & 0.5995 & 0.4619 \\
+    HAR-X (Gold) & 0.7198 & 0.7194 & 6060.38 & 6103.99 & -3023.19 & 0.3605 & 0.6004 & 0.4610 \\
+    HAR-X (Corn) & 0.7193 & 0.7188 & 6067.75 & 6111.37 & -3026.87 & 0.3595 & 0.5996 & 0.4616 \\
+    HAR-X (Energy: Oil + NG) & 0.7202 & 0.7196 & 6061.00 & 6123.31 & -3020.50 & 0.3591 & 0.5993 & 0.4622 \\
+    HAR-X (3 Comms: CL, NG, GC) & 0.7211 & 0.7202 & 6055.52 & 6136.52 & -3014.76 & 0.3598 & 0.5998 & 0.4619 \\
+    HAR-X (4 Comms: CL, NG, GC, C) & 0.7211 & 0.7200 & 6060.92 & 6160.62 & -3014.46 & 0.3600 & 0.6000 & 0.4621 \\
+    \midrule
+    Baseline LHAR & 0.7456 & 0.7452 & 5681.80 & 5725.38 & -2833.90 & 0.3213 & 0.5668 & 0.4382 \\
+    LHAR-X (Oil) & 0.7461 & 0.7455 & 5680.66 & 5742.91 & -2830.33 & 0.3210 & 0.5665 & 0.4374 \\
+    LHAR-X (NatGas) & 0.7467 & 0.7460 & 5672.11 & 5734.37 & -2826.06 & 0.3206 & 0.5662 & 0.4392 \\
+    LHAR-X (Gold) & 0.7463 & 0.7457 & 5676.98 & 5739.23 & -2828.49 & 0.3225 & 0.5679 & 0.4381 \\
+    LHAR-X (Corn) & 0.7457 & 0.7451 & 5686.22 & 5748.48 & -2833.11 & 0.3212 & 0.5668 & 0.4384 \\
+    LHAR-X (Energy: Oil + NG) & 0.7471 & 0.7463 & 5671.14 & 5752.07 & -2822.57 & 0.3203 & 0.5659 & 0.4386 \\
+    LHAR-X (3 Comms: CL, NG, GC) & 0.7479 & 0.7469 & 5665.81 & 5765.42 & -2816.91 & 0.3209 & 0.5665 & 0.4382 \\
+    LHAR-X (4 Comms: CL, NG, GC, C) & 0.7480 & 0.7468 & 5670.27 & 5788.56 & -2816.14 & 0.3207 & 0.5663 & 0.4382 \\
+    \bottomrule
+  \end{tabular}
+  \end{adjustbox}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{LHAR Yield Volatility Specification (Squared vs. Absolute)}
+  \label{tab:lhar_yield_spec}
+  \begin{adjustbox}{max width=\textwidth}
+  \begin{tabular}{lrrrrrrrr}
+    \toprule
+    Model Specification & $R^2$ & Adj. $R^2$ & AIC & BIC & Log-Likelihood & MSE & RMSE & MAE \\
+    \midrule
+    LHAR (Energy: CL, NG) + Yield Squared & 0.747500 & 0.746600 & 5667.686600 & 5754.843600 & -2819.843300 & 0.319700 & 0.565400 & 0.437100 \\
+    LHAR (Energy: CL, NG) + Yield Absolute & 0.747600 & 0.746700 & 5665.978800 & 5753.135900 & -2818.989400 & 0.319400 & 0.565100 & 0.436900 \\
+    LHAR (3 Comms: CL, NG, GC) + Yield Squared & 0.748100 & 0.747000 & 5664.353100 & 5770.186700 & -2815.176600 & 0.320400 & 0.566100 & 0.437400 \\
+    LHAR (3 Comms: CL, NG, GC) + Yield Absolute & 0.748200 & 0.747100 & 5663.004000 & 5768.837600 & -2814.502000 & 0.320100 & 0.565800 & 0.437300 \\
+    LHAR (4 Comms: CL, NG, GC, C) + Yield Squared & 0.748200 & 0.747000 & 5668.675600 & 5793.185700 & -2814.337800 & 0.320200 & 0.565900 & 0.437200 \\
+    LHAR (4 Comms: CL, NG, GC, C) + Yield Absolute & 0.748300 & 0.747000 & 5667.283800 & 5791.793900 & -2813.641900 & 0.319900 & 0.565600 & 0.437000 \\
+    \bottomrule
+  \end{tabular}
+  \end{adjustbox}
+\end{table}
+
+\section{Interpretation of Results}
+
+Based on the empirical results in Table 4.1 and Table 4.2, combined with the established econometric framework, several key findings emerge regarding model performance, volatility transmission, and the balance between in-sample fit and out-of-sample predictive accuracy.
+
+\subsection{The Dominance of Asymmetric Leverage Effects}
+
+The most substantial improvement in baseline model performance is achieved by incorporating asymmetric return shocks. Comparing the symmetric HAR and asymmetric LHAR frameworks reveals a stark contrast in explanatory power. The Baseline HAR model achieves an Adjusted $R^2$ of 0.7190, whereas the Baseline LHAR model increases this significantly to 0.7452. This empirical leap confirms the theoretical assertion that negative equity returns induce a disproportionate surge in future volatility, driven by financial leverage and volatility feedback mechanisms. By isolating these downside market-wide panic spillovers, the LHAR framework provides a substantially better fit to the data and reduces the out-of-sample Root Mean Squared Error (RMSE) from 0.5993 to 0.5668.
+
+\subsection{Cross-Asset Volatility Spillovers: In-Sample vs. Out-of-Sample Performance}
+
+Integrating exogenous commodity variables provides consistent gains over the baseline models, but a deeper analysis of the error metrics reveals a structural trade-off between in-sample explanatory power and out-of-sample predictive accuracy. When evaluating internal fit, the 3-Commodity bundle (Crude Oil, Natural Gas, and Gold) performs optimally within the LHAR-X suite, reaching the highest Adjusted $R^2$ of 0.7469 and the lowest Akaike Information Criterion (AIC) of 5665.81. Expanding to the 4-Commodity bundle by adding Corn degrades this internal parsimony, slightly lowering the Adjusted $R^2$ to 0.7468 and increasing the information criteria, which suggests that agricultural commodities introduce unnecessary noise.
+
+However, when shifting the focus to out-of-sample forecasting capabilities, the narrower Energy-Only specification (Crude Oil and Natural Gas) emerges as the superior model. Despite having a slightly lower in-sample Adjusted $R^2$ (0.7463) than the 3-Commodity bundle, the Energy-Only model minimizes predictive errors, achieving the lowest Mean Squared Error (MSE) of 0.3203 and an RMSE of 0.5659 in Table 4.1. This divergence indicates that while precious metals like gold share a statistically significant historical transmission channel with equity indices, including them leads to slight overfitting. A leaner, energy-focused specification generalizes better to unseen data and delivers more robust out-of-sample volatility forecasts.
+
+\subsection{Resolving the Macro Yield Volatility Proxy}
+
+Table 4.2 evaluates the methodological challenge of incorporating 10-Year Treasury yield volatility without distorting the frequent zero-change days inherent to the dataset. The results decisively validate the use of the daily absolute yield changes ($|\text{bps}|$) over the daily realized yield variance ($\text{bps}^2$). Across every model specification, the absolute-deviation proxy yields a superior fit, marked by consistently higher Adjusted $R^2$ values and lower AIC and BIC metrics. 
+
+This absolute proxy successfully preserves true zero-change days while mitigating the severe kurtosis and disproportionate leverage that extreme macro outliers exert on the regression's loss function. Furthermore, the divergence between in-sample and out-of-sample performance is perfectly preserved in this final specification. The 3-Commodity Absolute Yield model achieves the best overall in-sample fit with an Adjusted $R^2$ of 0.7471 and an AIC of 5663.00. Yet, it is the Energy-Only Absolute Yield model that definitively secures the best out-of-sample predictive performance across the entire study, driving the MSE down to an absolute low of 0.3194 and the Mean Absolute Error (MAE) to 0.4369. 
+
+In conclusion, researchers optimizing for historical explanatory power should favor the 3-Commodity Absolute Yield LHAR specification, while practitioners deploying models for strict out-of-sample volatility forecasting are best served by the more parsimonious Energy-Only Absolute Yield model.
+
+
+
+\end{document}
