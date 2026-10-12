@@ -1,5 +1,12 @@
 # Project analysis checklist
 
+**12 October gold-only extension:** `VAR (Gold)` and `LVAR (Gold)` now appear
+in the common-sample fit table, training diagnostics and shared-date forecast
+comparison, each using ES and GC with the existing five-lag order and 802 targets.
+There are now 25 scored models (including persistence) and 20,050 main forecasts.
+All 38 tests pass, including native VAR/VAR-X checks for both gold-only models.
+The earlier focused sensitivity set remains unchanged.
+
 Reviewed 9 October 2026. This review covers the data, code, results and preparation
 for explaining the analysis. The group is writing the final report and slides
 elsewhere; their progress is outside this checklist.
@@ -47,7 +54,7 @@ Source: `context/quant techniques syllabus.pdf`, final-assignment section.
 | Generalized VAR IRFs and bands | Implemented; five dedicated IRF tests pass |
 | Match with the latest HAR notebook | Latest commodity function independently matches all 4,812 shared LHAR forecasts; bond join audited separately |
 | Lag and data robustness | Implemented: 5/10 lag comparison, five data scenarios, 725-target retrospective subset and descriptive paired-loss intervals |
-| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 18,446 main and 50,526 sensitivity forecast records |
+| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 20,050 main and 50,526 sensitivity forecast records |
 | Full Python suite | **38 pass**, including reconciliation and sensitivity checks |
 | GARCH contribution, if retained | Needs an implementation and comparability review; oil regressor issue identified below |
 

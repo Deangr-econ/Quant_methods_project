@@ -1,5 +1,12 @@
 # VAR: next steps and decisions
 
+**12 October gold-only extension:** `VAR (Gold)` and `LVAR (Gold)` now appear
+in the common-sample fit table, training diagnostics and shared-date forecast
+comparison, each using ES and GC with the existing five-lag order and 802 targets.
+There are now 25 scored models (including persistence) and 20,050 main forecasts.
+All 38 tests pass, including native VAR/VAR-X checks for both gold-only models.
+The earlier focused sensitivity set remains unchanged.
+
 **7 October update:** the HAR reconciliation and focused robustness runs are
 complete. All 38 tests and
 fresh saved-notebook verification pass. Latest HAR commodity forecasts match on

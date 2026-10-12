@@ -223,6 +223,9 @@ one-variable AR analogue. LVAR adds HAR's three predetermined ES downside-return
 terms to every equation. These are **linear VAR-X models** with exogenous controls;
 returns are not treated as another endogenous market.
 
+Gold-only VAR and LVAR include ES and gold (GC), using the same five-lag order
+and common dates. They assess gold information without oil or other commodities.
+
 The table mirrors HAR's R², adjusted R², AIC/BIC, robust F statistic and
 log-likelihood layout. These statistics refer to the **ES equation** on identical
 full-sample target rows. System parameter counts are separate. AIC/BIC here are
@@ -232,7 +235,7 @@ HAC(22) affects reported inference, not OLS coefficient estimates or forecasts.
 code("""
 specs = model_specifications(p)
 fits, summary = fit_models(design, specs, cfg['hac_lags'])
-sets_in_first_table = ['Baseline', 'Oil', 'NatGas', 'Energy: Oil + NG', 'No Corn: Oil + NG + Gold']
+sets_in_first_table = ['Baseline', 'Oil', 'Gold', 'NatGas', 'Energy: Oil + NG', 'No Corn: Oil + NG + Gold']
 sets_in_first_table.insert(1, 'Oil + Gold')
 first_names = [f'{prefix} ({label})' for prefix in ['VAR', 'LVAR'] for label in sets_in_first_table]
 summary_columns = ['N', 'Lag p', 'Params (k)', 'R²', 'Adj. R²', 'AIC', 'BIC', 'F-Stat', 'Prob(F-Stat)', 'Log-Likelihood']
@@ -274,8 +277,9 @@ code("""
 selected_name = 'LVAR (Oil + Gold)'
 print(fits[selected_name].summary())
 training_fits, training_summary = fit_models(design, specs, cfg['hac_lags'], training_mask)
+diagnostic_names = corn_names + ['VAR (Gold)', 'LVAR (Gold)']
 joint_rows = []
-for name in corn_names:
+for name in diagnostic_names:
     fit = training_fits[name]
     for group, markets in [('Oil', ['CL']), ('Natural gas', ['NG']), ('Gold', ['GC']), ('Corn', ['C']), ('All included commodities', specs[name]['commodities'])]:
         indices = [i for i, col in enumerate(fit.params.index) if any(col.startswith(s + '.l') for s in markets)]
@@ -306,7 +310,7 @@ code("""
 plot_residual_diagnostics(fits[selected_name], selected_name)
 plt.show()
 diagnostic_rows = []
-for name in corn_names:
+for name in diagnostic_names:
     fit = training_fits[name]
     lb = acorr_ljungbox(fit.resid, lags=[30], model_df=0, return_df=True).iloc[0]
     arch = het_arch(fit.resid, nlags=5, ddof=len(fit.params))
@@ -429,7 +433,9 @@ show_table(har_forecast_audit)
 har_forecast_audit.to_csv(OUTPUT / 'latest_har_forecast_audit.csv')
 """)
 code("""
-pairs = [('Add oil/gold to LVAR', 'LVAR (Oil + Gold)', 'LVAR (Baseline)'),
+pairs = [('Add gold to plain VAR', 'VAR (Gold)', 'VAR (Baseline)'),
+    ('Add gold to LVAR', 'LVAR (Gold)', 'LVAR (Baseline)'),
+    ('Add oil/gold to LVAR', 'LVAR (Oil + Gold)', 'LVAR (Baseline)'),
     ('Add commodities to plain VAR', 'VAR (All 4: Oil + Corn + Gold + NG)', 'VAR (Baseline)'),
     ('Add commodities to LVAR', 'LVAR (All 4: Oil + Corn + Gold + NG)', 'LVAR (Baseline)'),
     ('Add corn to LVAR', 'LVAR (All 4: Oil + Corn + Gold + NG)', 'LVAR (No Corn: Oil + NG + Gold)'),

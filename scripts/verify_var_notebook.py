@@ -40,6 +40,9 @@ es = raw.loc[raw.symbol.eq("ES")].set_index("date").rv5
 forecasts = pd.read_csv(out / "shared_forecasts.csv", float_precision="round_trip")
 metrics = pd.read_csv(out / "shared_forecast_metrics.csv", index_col=0, float_precision="round_trip")
 summary = pd.read_csv(out / "common_sample_insample_results.csv", index_col=0)
+for name in ["VAR (Gold)", "LVAR (Gold)"]:
+    assert name in summary.index and name in metrics.index
+    assert summary.loc[name, "Lag p"] == manifest["shared_lag"]
 har_audit = pd.read_csv(out / "latest_har_forecast_audit.csv", index_col=0)
 calendar_audit = pd.read_csv(out / "har_calendar_audit.csv", index_col=0)
 assert len(har_audit) == 6

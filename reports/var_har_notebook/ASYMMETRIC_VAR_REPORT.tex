@@ -110,10 +110,12 @@ Model & MSE & Gain (\%) \\
 \midrule
 \multicolumn{3}{l}{\textit{Variance history only with the plain AR benchmark}} \\
 Equity AR & 0.409476 & +0.000 \\
+Gold VAR & 0.412495 & -0.737 \\
 Oil and gold VAR & 0.413082 & -0.881 \\
 All four commodity VAR & 0.412453 & -0.727 \\
 \addlinespace\multicolumn{3}{l}{\textit{Downside information with the downside AR benchmark}} \\
 Equity AR with downside & 0.371498 & +0.000 \\
+Gold LVAR & 0.374554 & -0.823 \\
 Oil and gold LVAR & 0.374172 & -0.720 \\
 Gas LVAR & 0.370016 & +0.399 \\
 Oil gold and gas LVAR & 0.371957 & -0.123 \\
@@ -130,6 +132,11 @@ However, the oil--gold LVAR has 0.72\% higher MSE than the matched downside
 AR. Adding all four commodities raises MSE by 0.35\%; gas alone lowers it by 0.40\%.
 The useful additional information therefore comes mainly from equity downside
 signals. The small commodity differences do not establish reliable forecast gains.
+
+Gold-only VAR and LVAR were added as exploratory comparisons on 12 October 2026.
+They include ES and gold, with the same five lags, calendar and expanding protocol.
+Their MSEs exceed the matching equity-only benchmarks by 0.74\%
+and 0.82\%, respectively. They do not improve forecasting in this evaluation.
 
 \clearpage
 \section*{Sensitivity evidence and interpretation}
@@ -476,10 +483,12 @@ the log-model path, not a separately estimated arithmetic conditional-variance m
 Model & MSE & RMSE & MAE & Gain (\%) \\
 \midrule
 Equity AR & 0.409476 & 0.639903 & 0.487944 & +0.000 \\
+Gold VAR & 0.412495 & 0.642257 & 0.488358 & -0.737 \\
 Oil and gold VAR & 0.413082 & 0.642715 & 0.488721 & -0.881 \\
 All four VAR & 0.412453 & 0.642225 & 0.488647 & -0.727 \\
 \addlinespace
 Equity AR + downside & 0.371498 & 0.609507 & 0.465084 & +0.000 \\
+Gold LVAR & 0.374554 & 0.612008 & 0.465820 & -0.823 \\
 Oil and gold LVAR & 0.374172 & 0.611696 & 0.465399 & -0.720 \\
 Gas LVAR & 0.370016 & 0.608290 & 0.464493 & +0.399 \\
 Oil gold and gas LVAR & 0.371957 & 0.609883 & 0.464719 & -0.123 \\

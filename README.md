@@ -1,7 +1,7 @@
 # Quant_methods_project
 Group project
 
-## Current VAR results notebook — 7 October 2026
+## Current VAR results notebook — 12 October 2026
 
 Open [VAR_QTFE.ipynb](VAR_QTFE.ipynb) for the newly executed Python notebook
 using the latest asymmetric HAR commodity specification on the frozen RV5 calendar,
@@ -18,7 +18,8 @@ exploratory uncertainty bands. [VAR_NEXT_STEPS.md](VAR_NEXT_STEPS.md) records
 the data/sample decision, expanding-window explanation and remaining learning/report tasks.
 **Section 10** adds the 5/10 lag comparison, five data scenarios and paired-loss
 uncertainty; read [the findings](reports/var_har_notebook/DATA_AND_ROBUSTNESS_RESULTS.md).
-All 38 Python tests pass. Saved-output verification covers 18,446 main forecasts,
+Gold-only VAR and LVAR comparisons are included on the same dates and lag order.
+All 38 Python tests pass. Saved-output verification covers 20,050 main forecasts,
 4,812 independent latest-HAR matches and 50,526 sensitivity forecasts.
 
 ```sh

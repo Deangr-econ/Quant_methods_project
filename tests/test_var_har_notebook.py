@@ -55,18 +55,31 @@ class AlignedVARTests(unittest.TestCase):
         self.assertLess(len(prepared), len(self.wide))
 
     def test_native_var_same_es_equation_and_forecast(self):
-        name = "VAR (All 4: Oil + Corn + Gold + NG)"
-        fits, _ = fit_models(self.design, {name: self.specs[name]})
-        native_values = self.wide[[f"log_rv5_{s}" for s in ["ES", "CL", "C", "GC", "NG"]]].iloc[22 - self.p:]
-        # Retained observations are deliberately irregular provider dates.
-        native = VAR(native_values.to_numpy()).fit(self.p)
-        np.testing.assert_allclose(fits[name].fittedvalues, native.fittedvalues[:, 0], atol=1e-10)
-        frame = self.design["x"]
-        row = pd.DataFrame({f"{s}.l{lag}": [self.wide[f"log_rv5_{s}"].iloc[-lag]]
-              for s in ["ES", "CL", "C", "GC", "NG"] for lag in range(1, self.p + 1)})
-        expected = native.forecast(native_values.to_numpy()[-self.p:], 1)[0, 0]
-        got = fits[name].predict(sm.add_constant(row[columns_for(self.specs[name])], has_constant="add"))[0]
-        self.assertAlmostEqual(expected, got, places=10)
+        for name in ["VAR (All 4: Oil + Corn + Gold + NG)", "VAR (Gold)", "LVAR (Gold)"]:
+            with self.subTest(model=name):
+                spec = self.specs[name]
+                symbols = ["ES", *spec["commodities"]]
+                fits, _ = fit_models(self.design, {name: spec})
+                native_values = self.wide[[f"log_rv5_{s}" for s in symbols]].iloc[22 - self.p:]
+                controls = [f"ES_down_{h}" for h in ["d", "w", "m"]]
+                exog = None
+                if spec["downside"]:
+                    # Native VAR drops its first p rows. Pad only those unused
+                    # rows, then align each target with its origin's controls.
+                    exog = np.vstack([np.zeros((self.p, 3)), self.design["x"][controls].to_numpy()])
+                native = VAR(native_values.to_numpy(), exog=exog).fit(self.p)
+                np.testing.assert_allclose(fits[name].fittedvalues, native.fittedvalues[:, 0], atol=1e-10)
+                row = pd.DataFrame({f"{s}.l{lag}": [self.wide[f"log_rv5_{s}"].iloc[-lag]]
+                      for s in symbols for lag in range(1, self.p + 1)})
+                future_exog = None
+                if spec["downside"]:
+                    ret = self.wide.ret_ES / 100
+                    for window, column in zip([1, 5, 22], controls):
+                        row[column] = -min(float(ret.tail(window).mean()), 0)
+                    future_exog = row[controls].to_numpy()
+                expected = native.forecast(native_values.to_numpy()[-self.p:], 1, exog_future=future_exog)[0, 0]
+                got = fits[name].predict(sm.add_constant(row[columns_for(spec)], has_constant="add"))[0]
+                self.assertAlmostEqual(expected, got, places=10)
 
     def test_lhar_reference_features_and_hac_are_identical(self):
         name = "LHAR (No Corn: Oil + NG + Gold)"

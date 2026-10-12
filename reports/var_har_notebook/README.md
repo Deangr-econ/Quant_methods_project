@@ -1,5 +1,12 @@
 # HAR-aligned VAR notebook — status 9 October 2026
 
+**12 October gold-only extension:** `VAR (Gold)` and `LVAR (Gold)` now appear
+in the common-sample fit table, training diagnostics and shared-date forecast
+comparison, each using ES and GC with the existing five-lag order and 802 targets.
+There are now 25 scored models (including persistence) and 20,050 main forecasts.
+All 38 tests pass, including native VAR/VAR-X checks for both gold-only models.
+The earlier focused sensitivity set remains unchanged.
+
 **9 October readiness check:** all 38 tests and a fresh notebook execution and
 saved-output verification pass again. The agreed LVAR code is
 complete. Saved results were restored after an editor selected an unsupported
