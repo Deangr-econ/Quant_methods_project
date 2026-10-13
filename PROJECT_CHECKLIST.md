@@ -1,10 +1,11 @@
 # Project analysis checklist
 
-**12 October gold-only extension:** `VAR (Gold)` and `LVAR (Gold)` now appear
-in the common-sample fit table, training diagnostics and shared-date forecast
-comparison, each using ES and GC with the existing five-lag order and 802 targets.
-There are now 25 scored models (including persistence) and 20,050 main forecasts.
-All 38 tests pass, including native VAR/VAR-X checks for both gold-only models.
+**12 October single-commodity extensions:** gold-only and corn-only VAR and LVAR
+now appear in the common-sample fit table, training diagnostics and shared-date
+forecast comparison, alongside oil-only, gas-only and combined specifications.
+Each uses ES and the named commodity with five lags and the same 802 targets.
+There are now 27 scored models (including persistence) and 21,654 main forecasts.
+All 38 tests pass, including native VAR/VAR-X checks for gold-only and corn-only.
 The earlier focused sensitivity set remains unchanged.
 
 Reviewed 9 October 2026. This review covers the data, code, results and preparation
@@ -54,7 +55,7 @@ Source: `context/quant techniques syllabus.pdf`, final-assignment section.
 | Generalized VAR IRFs and bands | Implemented; five dedicated IRF tests pass |
 | Match with the latest HAR notebook | Latest commodity function independently matches all 4,812 shared LHAR forecasts; bond join audited separately |
 | Lag and data robustness | Implemented: 5/10 lag comparison, five data scenarios, 725-target retrospective subset and descriptive paired-loss intervals |
-| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 20,050 main and 50,526 sensitivity forecast records |
+| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 21,654 main and 50,526 sensitivity forecast records |
 | Full Python suite | **38 pass**, including reconciliation and sensitivity checks |
 | GARCH contribution, if retained | Needs an implementation and comparability review; oil regressor issue identified below |
 

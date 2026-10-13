@@ -167,7 +167,7 @@ def select_shared_lag(design, training_end, max_lag=20):
 
 
 def model_specifications(p):
-    sets = {"Baseline": [], "Oil": ["CL"], "Gold": ["GC"], "NatGas": ["NG"],
+    sets = {"Baseline": [], "Oil": ["CL"], "Gold": ["GC"], "Corn": ["C"], "NatGas": ["NG"],
             "Oil + Gold": ["CL", "GC"],
             "Energy: Oil + NG": ["CL", "NG"], "No Corn: Oil + NG + Gold": ["CL", "NG", "GC"],
             "All 4: Oil + Corn + Gold + NG": ["CL", "C", "GC", "NG"]}

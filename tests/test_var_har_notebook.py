@@ -55,7 +55,8 @@ class AlignedVARTests(unittest.TestCase):
         self.assertLess(len(prepared), len(self.wide))
 
     def test_native_var_same_es_equation_and_forecast(self):
-        for name in ["VAR (All 4: Oil + Corn + Gold + NG)", "VAR (Gold)", "LVAR (Gold)"]:
+        for name in ["VAR (All 4: Oil + Corn + Gold + NG)", "VAR (Gold)", "LVAR (Gold)",
+                     "VAR (Corn)", "LVAR (Corn)"]:
             with self.subTest(model=name):
                 spec = self.specs[name]
                 symbols = ["ES", *spec["commodities"]]
