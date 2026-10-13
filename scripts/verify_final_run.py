@@ -1,4 +1,8 @@
-"""Verify both executed notebooks and forecasts against the final wide source."""
+"""Verify Jake's executed VAR notebook and independent HAR function comparisons.
+
+The teammate's Colab HAR notebook is a read-only function reference. Its native
+80/20 outputs are not assumed to be an executed local common-date HAR run.
+"""
 import hashlib
 import json
 from pathlib import Path
@@ -79,8 +83,8 @@ def main():
         assert sha(ROOT / name) == value
     for name, value in manifest['output_sha256'].items():
         assert sha(out / name) == value
-    notebooks = [check_notebook(name) for name in ['HAR_QTFE.ipynb', 'VAR_QTFE.ipynb']]
-    assert sum('image/png' in output.get('data', {}) for cell in notebooks[1][1] for output in cell['outputs']) == 5
+    notebook, code = check_notebook('VAR_QTFE.ipynb')
+    assert sum('image/png' in output.get('data', {}) for cell in code for output in cell['outputs']) == 5
     raw = pd.read_csv(ROOT / cfg['source'], float_precision='round_trip')
     all_targets, origins, targets = expected_grid(raw, cfg)
     assert len(all_targets) == manifest['common_fit_targets']
@@ -91,6 +95,8 @@ def main():
     fits = pd.read_csv(out / 'common_sample_insample_results.csv', index_col=0)
     assert fits.N.eq(len(all_targets)).all()
     assert len(metrics) == manifest['models']
+    assert not fits.index.str.contains('Restricted', case=False).any()
+    assert not metrics.index.str.contains('Restricted', case=False).any()
     assert not forecasts.duplicated(['model', 'date']).any()
     columns = ['MSE', 'RMSE', 'MAE', 'Variance_MSE', 'QLIKE']
     for name, frame in forecasts.groupby('model', sort=False):
@@ -104,7 +110,7 @@ def main():
         if name == 'Persistence' or frame.status.ne('ok').any():
             use = np.ones(len(frame), dtype=bool) if name == 'Persistence' else frame.status.ne('ok')
             np.testing.assert_allclose(frame.loc[use, 'predicted_variance'], es.reindex(frame.loc[use, 'origin_date']), rtol=1e-12)
-        if name.startswith(('VAR', 'LVAR', 'Restricted')):
+        if name.startswith(('VAR', 'LVAR')):
             assert frame.loc[frame.status.eq('ok'), 'root'].lt(1).all()
         np.testing.assert_allclose(metrics.loc[name, columns].astype(float), scores(frame), rtol=1e-12)
         assert metrics.loc[name, 'Fallbacks'] == frame.status.ne('ok').sum()
@@ -120,30 +126,7 @@ def main():
     np.testing.assert_allclose(irfs.variance_pct, 100 * np.expm1(irfs.log_response), atol=1e-12)
     verify_lag_run(out, manifest, raw)
 
-    har_out = ROOT / cfg['har_output_dir']
-    har_manifest = json.loads((har_out / 'provenance.json').read_text())
-    assert har_manifest['source_sha256'] == manifest['source_sha256']
-    for name, value in har_manifest['output_sha256'].items():
-        assert sha(har_out / name) == value
-    har = pd.read_csv(har_out / 'har_forecasts.csv', float_precision='round_trip', parse_dates=['date', 'origin_date'])
-    assert len(har) == har_manifest['forecasts']
-    for name, frame in har.groupby('model', sort=False):
-        assert pd.DatetimeIndex(frame.date).equals(targets)
-        assert pd.DatetimeIndex(frame.origin_date).equals(origins)
-        np.testing.assert_allclose(frame.actual_log, np.log(es.reindex(frame.date)), atol=1e-12)
-        if 'Yield' in name:
-            continue
-        if name.startswith('Baseline '):
-            family = name.split()[-1]; assets = 'Baseline'
-        else:
-            family = 'LHAR' if name.startswith('LHAR') else 'HAR'
-            assets = name[name.index('(') + 1:-1]
-            assets = {'3 Comms: CL, NG, GC': 'No Corn: Oil + NG + Gold',
-                      '4 Comms: CL, NG, GC, C': 'All 4: Oil + Corn + Gold + NG'}.get(assets, assets)
-        shared = forecasts.loc[forecasts.model.eq(f'{family} ({assets})')]
-        assert len(shared) == len(frame), name
-        np.testing.assert_allclose(frame.predicted_log, shared.predicted_log, atol=1e-9)
-    print(f'Verified both fully executed notebooks, final input/code/output hashes, {len(forecasts):,} shared forecasts across {len(metrics)} models, {len(har):,} HAR/yield forecasts, and {int(native.N.sum()):,} independent HAR/LHAR forecast matches.')
+    print(f'Verified Jake\'s fully executed VAR notebook, final input/code/output hashes, {len(forecasts):,} shared forecasts across {len(metrics)} models, and {int(native.N.sum()):,} independent HAR/LHAR forecast matches. The teammate\'s HAR notebook was used as a read-only function reference.')
 
 
 if __name__ == '__main__':

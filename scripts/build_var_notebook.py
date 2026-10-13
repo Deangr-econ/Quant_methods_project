@@ -13,7 +13,8 @@ TEMPLATE = json.loads(r'''{
     "\n",
     "**Research question:** do commodity variance histories improve forecasts of ES\n",
     "log realised variance beyond ES history and the same downside-return information?\n",
-    "Oil/gold remains the main comparison; the other selected commodity sets are extensions.\n",
+    "This is Jake's leverage extension: the plain VAR is its matched benchmark.\n",
+    "Tim's seasonally controlled VAR is reported separately; oil/gold remains the main commodity comparison.\n",
     "\n",
     "The authoritative source is `datasets/vol_data_futures_yield_final_version.csv`.\n",
     "Its wide calendar, percentage log returns and embedded yield measures are preserved.\n",
@@ -33,8 +34,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-01",
    "metadata": {},
+   "outputs": [],
    "source": [
     "%matplotlib inline\n",
     "from pathlib import Path\n",
@@ -99,8 +102,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-03",
    "metadata": {},
+   "outputs": [],
    "source": [
     "raw = pd.read_csv(source_path, float_precision='round_trip')\n",
     "data_audit = audit_final_data(raw)\n",
@@ -132,8 +137,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-04",
    "metadata": {},
+   "outputs": [],
    "source": [
     "fig, axes = plt.subplots(5, 1, figsize=(12, 10), sharex=True)\n",
     "for ax, symbol in zip(axes, cfg['symbols']):\n",
@@ -160,14 +167,18 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-06",
    "metadata": {},
+   "outputs": [],
    "source": []
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "50bc389b",
    "metadata": {},
+   "outputs": [],
    "source": [
     "stationarity = stationarity_table(wide, cfg['training_end'])\n",
     "show_table(stationarity.drop(columns='Warning'))\n",
@@ -197,8 +208,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-08",
    "metadata": {},
+   "outputs": [],
    "source": [
     "har_reference = reference_har_function(ROOT / cfg['har_reference'])\n",
     "asset_sets = {name[5:-1]: spec['commodities'] for name, spec in specs.items()\n",
@@ -241,8 +254,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-10",
    "metadata": {},
+   "outputs": [],
    "source": [
     "specs = model_specifications(p)\n",
     "fits, summary = fit_models(design, specs, cfg['hac_lags'])\n",
@@ -266,25 +281,24 @@ TEMPLATE = json.loads(r'''{
    "id": "var-11",
    "metadata": {},
    "source": [
-    "## 5. With corn / without corn: full memory and daily-only commodities\n",
+    "## 5. Commodity information with and without corn\n",
     "\n",
-    "This mirrors the second asymmetric HAR results matrix. **Full memory** means\n",
-    "all selected VAR lags for every market. **Daily only** sets commodity coefficients\n",
-    "after lag one to zero, while retaining all ES lags and the same downside controls.\n",
-    "Those rows are restricted VAR systems. HAR's full d/w/m averages and VAR's full\n",
-    "lag history are different representations of memory, not identical regressors.\n"
+    "Compare the all-four and no-corn LVAR systems with their equity-only and oil/gold\n",
+    "benchmarks. Every VAR/LVAR includes all five selected lags of its included markets.\n",
+    "HAR/LHAR rows are separate common-date references using variance averages;\n",
+    "the daily-only LHAR rows remain the teammate's existing HAR specification comparison.\n"
    ]
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-12",
    "metadata": {},
+   "outputs": [],
    "source": [
     "corn_names = ['LVAR (Baseline)', 'LVAR (Oil + Gold)',\n",
     "    'LVAR (All 4: Oil + Corn + Gold + NG)',\n",
-    "    'Restricted LVAR (All 4: Oil + Corn + Gold + NG; Daily Only)',\n",
-    "    'LVAR (No Corn: Oil + NG + Gold)',\n",
-    "    'Restricted LVAR (No Corn: Oil + NG + Gold; Daily Only)']\n",
+    "    'LVAR (No Corn: Oil + NG + Gold)']\n",
     "show_table(summary.loc[corn_names, summary_columns + ['System params', 'Max root']])\n",
     "lhar_names = ['LHAR (Baseline)', 'LHAR (Oil + Gold)', 'LHAR (Energy: Oil + NG)', 'LHAR (All 4: Oil + Corn + Gold + NG)',\n",
     "    'LHAR (All 4: Oil + Corn + Gold + NG; Daily Only)', 'LHAR (No Corn: Oil + NG + Gold)',\n",
@@ -309,8 +323,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-14",
    "metadata": {},
+   "outputs": [],
    "source": [
     "selected_name = 'LVAR (Oil + Gold)'\n",
     "print(fits[selected_name].summary())\n",
@@ -352,8 +368,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-16",
    "metadata": {},
+   "outputs": [],
    "source": [
     "plot_residual_diagnostics(fits[selected_name], selected_name)\n",
     "plt.gcf().savefig(OUTPUT / 'residual_diagnostics.png', bbox_inches='tight'); plt.show()\n",
@@ -413,8 +431,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-18",
    "metadata": {},
+   "outputs": [],
    "source": [
     "irf_name = cfg['irf']['model']\n",
     "irf_curves, irf_metadata = estimate_irf(design, specs[irf_name], cfg['training_end'],\n",
@@ -462,8 +482,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-20",
    "metadata": {},
+   "outputs": [],
    "source": [
     "print(f'Fitting {len(specs)} models on {len(test_dates)} shared forecast targets...')\n",
     "forecasts = expanding_forecasts(design, specs, cfg['training_end'])\n",
@@ -502,8 +524,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-21",
    "metadata": {},
+   "outputs": [],
    "source": [
     "pairs = [('Add gold to plain VAR', 'VAR (Gold)', 'VAR (Baseline)'),\n",
     "    ('Add gold to LVAR', 'LVAR (Gold)', 'LVAR (Baseline)'),\n",
@@ -550,8 +574,10 @@ TEMPLATE = json.loads(r'''{
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-23",
    "metadata": {},
+   "outputs": [],
    "source": [
     "flags = large_return_flags(raw)\n",
     "flags.to_csv(OUTPUT / 'large_return_flags.csv', index=False)\n",
@@ -581,20 +607,23 @@ TEMPLATE = json.loads(r'''{
     "The final loader checks schema, unique ordered dates, finite/positive inputs,\n",
     "supplied returns, log variances and embedded yield identities. Tests verify causal\n",
     "features, unchanged forecasts under future-input mutations, native VAR predictions,\n",
-    "the actual HAR/LHAR function, matching cutoff/origin/target dates and restrictions.\n",
+    "the teammate's HAR/LHAR function and matching cutoff/origin/target dates.\n",
     "Saved forecasts, model scores, source hashes and supported lag sensitivities are checked.\n",
     "\n",
     "Run `.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v`, then\n",
-    "`scripts/execute_har_notebook.py`, `scripts/execute_var_notebook.py` and\n",
-    "`scripts/verify_var_notebook.py` using the project Python environment.\n",
+    "`scripts/execute_var_notebook.py` and `scripts/verify_var_notebook.py` using the\n",
+    "project Python environment. HAR_QTFE is a read-only function reference; it does\n",
+    "not need to be edited or executed locally to run Jake's notebook.\n",
     "Current output directories are in `config/var_har_notebook.json`. Earlier results\n",
-    "remain in `reports/var_har_notebook/generated`; they are not final-data results.\n"
+    "remain in `reports/var_har_notebook/generated`; they are not current results.\n"
    ]
   },
   {
    "cell_type": "code",
+   "execution_count": null,
    "id": "var-25",
    "metadata": {},
+   "outputs": [],
    "source": [
     "assert summary.N.eq(len(design['y'])).all()\n",
     "for name, frame in forecasts.groupby('model', sort=False):\n",

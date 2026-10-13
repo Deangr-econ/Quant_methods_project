@@ -1,6 +1,5 @@
 """HAR-aligned VAR results: shared dates, downside controls and HAC(22).
 
-Daily-only variants constrain commodity coefficients beyond lag one to zero.
 Negative-return terms are predetermined exogenous controls, not new endogenous
 VAR variables. Full-sample fits are descriptive; forecasts fit past targets only.
 """
@@ -188,9 +187,6 @@ def model_specifications(p):
             name = f"{prefix} ({label})"
             specs[name] = dict(family="VAR", p=p, commodities=commodities,
                                downside=downside, daily_only=False)
-    for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
-        specs[f"Restricted LVAR ({label}; Daily Only)"] = dict(
-            family="VAR", p=p, commodities=sets[label], downside=True, daily_only=True)
     for label in sets:
         specs[f"HAR ({label})"] = dict(family="HAR", p=0, commodities=sets[label],
                                        downside=False, daily_only=False)

@@ -1,18 +1,19 @@
 # Final-dataset HAR and VAR results — 13 October 2026
 
-**Later same-day update:** the teammate's Colab HAR notebook has since been
-pulled/restored. Its unchanged default-split results are distinct from the saved
-common-date run described below. For the current report draft, use
-[Jake's new LaTeX section](../../latex_report/jakes%20section.tex) and
-[the group-report reconciliation](GROUP_REPORT_REVIEW.md). The saved VAR metrics
-and their input/model/output hashes remain verified; the earlier whole-HAR
-notebook hash and local-execution claim no longer describe the current HAR file.
+[VAR_QTFE.ipynb](../../VAR_QTFE.ipynb) is Jake's leverage-extension notebook.
+It has been freshly executed on `datasets/vol_data_futures_yield_final_version.csv`
+after removing the daily-only VAR/LVAR variants. All remaining VAR/LVAR systems
+retain the full selected lag history. Tim's calendar/Treasury VAR and the
+teammate's original Colab [HAR notebook](../../HAR_QTFE.ipynb) remain unchanged.
+The latter is used as a read-only function reference for common-date HAR/LHAR
+comparisons inside Jake's notebook; it need not be executed locally.
 
-Both [HAR_QTFE.ipynb](../../HAR_QTFE.ipynb) and
-[VAR_QTFE.ipynb](../../VAR_QTFE.ipynb) have been executed in fresh project Python
-kernels using only `datasets/vol_data_futures_yield_final_version.csv` as data.
-Their saved outputs are the current results. Earlier results remain in their
-original directories and are not interchangeable with this run.
+Use [Jake's LaTeX section](../../latex_report/jakes%20section.tex) and
+[the group-report reconciliation](GROUP_REPORT_REVIEW.md) for the current draft.
+The recommended headings are **3.2 Vector autoregression (VAR)** for Tim and
+**3.3 Leverage-augmented VAR (LVAR)** for Jake. Describe controls and lag orders
+explicitly; Jake's plain VAR is his matched benchmark, rather than a duplicate
+section labelled VAR B. Earlier results and source copies are retained separately.
 
 ## Data readiness and required columns
 
@@ -65,8 +66,9 @@ contract handling or completeness against an exchange calendar.
 
 The previous cutoff, 12 July 2023, is retained. Expanding fits use only outcomes
 available through each forecast origin. Every scored commodity model uses the
-same origins and next-retained-row targets. HAR yield comparisons also score
-these 783 targets, using the CSV's embedded yield observations.
+same origins and next-retained-row targets. The original Colab HAR/LHAR
+results use their own 80/20 splits, scoring 778/774 targets; their saved yield
+comparisons are separate from Jake's common-date model grid.
 
 BIC on the initial-training five-market plain VAR selects lag 5 from candidates
 1–20; AIC selects lag 10. The selected order is fixed across main VAR/LVAR
@@ -81,9 +83,9 @@ averaging. They are not regime-switching models.
 
 All four families include the same ten selected asset sets: equity-only baseline;
 oil, gold, corn and natural gas individually; oil + gold; oil + natural gas;
-corn + gold; oil + natural gas + gold; and all four commodities. The two daily
-restrictions are additional comparisons. These are selected combinations, not
-every possible pair and triple.
+corn + gold; oil + natural gas + gold; and all four commodities. Two daily-only
+LHAR references reproduce the teammate's existing HAR comparison. These are
+selected combinations, not every possible pair and triple.
 
 ## Updated forecast results
 
@@ -112,7 +114,7 @@ rule or a causal commodity effect.
 See [all shared forecast metrics](var/generated/shared_forecast_metrics.csv),
 [matched asset comparisons](var/generated/matched_asset_forecast_metrics.csv),
 [paired-loss intervals](var/generated/robustness_intervals.csv), and
-[HAR commodity and yield results](har/generated/).
+the original Colab HAR notebook for its default-split commodity/yield results.
 
 Training diagnostics and stationarity tests are rerun on the new data. Remaining
 residual dependence means successful execution and stable dynamics should not
@@ -123,29 +125,34 @@ initial training period and have exploratory pointwise simulation bands.
 
 ```sh
 .venv/bin/python -m pip install -r requirements-var-notebook.txt
-.venv/bin/python scripts/execute_har_notebook.py
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
+.venv/bin/python scripts/build_jakes_figures.py
 ```
 
-Run HAR before VAR because the final VAR verification compares against the
-executed HAR outputs and records its notebook hash. The notebook builder is
-optional: it regenerates VAR source cells and clears saved outputs, so execution
-is required afterwards. Both notebooks use the project `.venv` Python kernel.
+Use the project `.venv` Python kernel. HAR_QTFE is read as a function reference;
+do not run its local execution wrapper to reproduce Jake's analysis. The notebook
+builder is optional: it regenerates VAR source cells and clears saved outputs,
+so execution is required afterwards.
 
-All 42 tests pass. Saved-output verification checks both complete executions,
+All 42 tests pass. Saved-output verification checks the complete VAR execution,
 input/code/output hashes, sample alignment, forecast timing and recomputed losses:
 
-- 35,235 shared forecasts across 45 scored models, including persistence;
-- 20,358 HAR commodity/yield forecasts across 26 models;
-- 17,226 independent HAR/LHAR forecast matches;
+- 33,669 shared forecasts across 43 scored models, including persistence;
+- 17,226 independent HAR/LHAR forecast matches on common dates;
 - 12,528 lag-sensitivity forecasts and 15 paired-loss interval rows;
 - five saved VAR figures and 2,000 accepted training-only IRF simulation draws.
 
-There were zero forecast fallbacks. Generated files remain local under
-`reports/final_dataset/har/generated` and `reports/final_dataset/var/generated`.
-Audit details and hashes are saved in both provenance files; source SHA-256 is
-`ad3b481455b8e8ea4e632e065f7b38cfbb0293ecd8286611c81b5cda7ea5137f`.
-Pre-update notebook/code copies are retained locally under
-`reports/var_har_notebook/generated/pre_final_dataset_20261013/`.
+The scores of all retained models exactly match their pre-removal scores. There
+were zero forecast fallbacks. Current generated files stay local under
+`reports/final_dataset/var/generated`. The earlier locally adapted HAR outputs
+under `reports/final_dataset/har/generated` describe the previous common-date run,
+not the restored original Colab notebook, and are not required by verification.
+
+Audit details and hashes are saved in the current VAR provenance file; source
+SHA-256 is `ad3b481455b8e8ea4e632e065f7b38cfbb0293ecd8286611c81b5cda7ea5137f`.
+Pre-update notebook/code copies remain under
+`reports/var_har_notebook/generated/pre_final_dataset_20261013/`; the prior
+notebook, report source and metrics before removing the extra variants are under
+`reports/var_har_notebook/generated/pre_remove_restricted_20261013/`.

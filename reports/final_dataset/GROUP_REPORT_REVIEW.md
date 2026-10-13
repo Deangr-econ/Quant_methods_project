@@ -26,7 +26,6 @@ structural change or model misspecification.
 | Implementation | Rule | Main setting | Extra detail |
 |---|---|---|---|
 | Jake VAR/LVAR | Initial five-market plain VAR; same targets for p=1..20 | BIC p=5 | AIC p=10; fixed 10-lag sensitivity; no seasonal or Treasury inputs |
-| Jake restricted LVAR | Inherit p=5; predefine commodity zero restrictions | ES lags 1..5, commodity lag 1 | Three 1/5/22-observation ES downside controls retained |
 | Tim VAR | Initial six-variable system plus calendar indicators; same targets for p=1..20 | BIC p=4 | AIC p=9; fixed across Tim's systems within each case |
 | HAR/LHAR | Predetermined HAR aggregation windows | 1, 5 and 22 observations | Not selected as a VAR lag order; each window mean enters as one regressor |
 | Jake ADF | Auxiliary test-regression lag selection | AIC autolag | Separate from the multivariate VAR lag-selection table |
@@ -53,7 +52,7 @@ criteria selected 22 individual lags.
 | LHAR formula, p.6 | Weekly/monthly controls average daily negative parts | Code takes the negative part after averaging signed returns, then its absolute magnitude. These operations differ when positive and negative daily returns mix |
 | HAR table, p.6 | Baseline HAR R2=.7192, MSE=.3592; baseline LHAR R2=.7456, MSE=.3213 | These are older results. Current pulled saved outputs, independently reproduced on the final CSV: HAR R2=.7171, MSE=.3639; LHAR R2=.7446, MSE=.3254. Refresh the entire table from the teammate's current notebook |
 | Tim VAR, p.7 | Main table and p=4/p=9 rule | These match the supplied current Tim results to displayed precision |
-| Jake, p.8 | Section 3.3 empty | Insert the new `latex_report/jakes section.tex` main section, including precise restricted-system definition and current results |
+| Jake, p.8 | Section 3.3 empty | Insert the new `latex_report/jakes section.tex` main section, defining the LVAR downside controls, matched plain benchmark and current results |
 | Economic interpretation, pp.8 and 11 | AR MSE .356682 and all-commodity increase .66% | Current Tim BIC outputs: .35668956 and .63862% (round .356690 and .64%) |
 | Economic interpretation, pp.8-12 | Discussion omits the LVAR downside contribution | Add Jake's within-specification 9.31% MSE reduction from downside controls; distinguish it from incremental commodity value and from Tim's differently controlled baseline |
 | Economic interpretation, pp.9 and 11-12 | A change below 1% in log-MSE is treated as a comparable change in VaR | Remove that numerical implication. Log-variance MSE does not map one-for-one into VaR or portfolio utility; no VaR backtest is supplied |
@@ -84,29 +83,35 @@ Jake's separate reference HAR/LHAR calculations use his common 3,867 fit outcome
 and 783 target dates; label those as common-date benchmarks, not the teammate's
 unchanged printed results. Do not directly rank AIC/BIC on unequal target samples.
 
-Jake's saved run predates the restored/pulled HAR notebook. The numerical model
-function still reproduces the baselines; the old whole-HAR notebook execution/hash
-claim is no longer current. Jake's data, model-module and saved-output hashes were
-checked for this draft. The section does not claim that the current Colab-only HAR
-notebook has been rerun locally or that Tim's R companion has been executed here.
+Jake's VAR notebook has now been rerun after the original HAR notebook was
+pulled/restored. Its current verifier checks the VAR execution and reads the
+unchanged HAR functions for independent common-date forecast matches; it does not
+require or claim a fresh local execution of the Colab notebook. All 43 retained
+model scores are identical to their pre-removal values. Data, current model code,
+HAR-reference and output hashes are checked. Tim's R companion has not been
+executed here.
 
-## Restricted VAR source and figure choices
+## Report structure and figure choices
 
-Use Lütkepohl (2005), chapter 5, *VAR Processes with Parameter Constraints*, for
-the general parameter-restriction framework:
-https://doi.org/10.1007/978-3-540-27752-1_5.
-The official `vars` manual, `restrict` entry, confirms manual zero restrictions
-and equation-by-equation OLS:
-https://cran.r-project.org/web/packages/vars/vars.pdf.
-These support a restricted VAR as a method, not this project's particular choice
-to omit commodity lags 2-5. That choice is a transparent project specification
-comparison and should be described as such. It is a restriction on lag
-coefficients, not an SVAR identification restriction.
+Keep **3.2 Vector autoregression (VAR)** for Tim's calendar/Treasury specification
+and **3.3 Leverage-augmented VAR (LVAR)** for Jake's return-control extension.
+Give a common VAR equation once, then explain the different information sets and
+lag choices. Avoid VAR A/VAR B: the descriptive names state what each extension
+adds. Jake's plain VAR(5) remains the matched comparator for his downside gain;
+comparing his LVAR(5) directly with Tim's calendar-controlled VAR(4) changes
+several model features at once. In tables, identify lags and calendar controls
+explicitly and label each candidate's matched equity-only benchmark.
+
+The additional daily-only VAR/LVAR variants have been removed from Jake's active
+analysis and report. Every remaining VAR/LVAR retains all five selected lags of
+each included market. The teammate's existing daily-only LHAR comparison remains
+unchanged. The general VAR source is Lütkepohl (2005), chapters 2-4:
+https://doi.org/10.1007/978-3-540-27752-1.
 
 Recommended main figure: the matched forecast-accuracy chart or the incremental
 gain chart, depending on whether a results table is retained. Do not duplicate a
 large table and a chart communicating exactly the same numbers in a short body.
-Put the lag-selection curves, restricted-versus-full detail, stationarity table
+Put the lag-selection curves, stationarity table
 and residual diagnostics in the appendix. Generalized IRFs are optional appendix
 figures; describe their contemporaneous component, conditional downside-control
 path and exploratory bands without causal language.

@@ -3,37 +3,34 @@ Group project
 
 ## Current final-dataset HAR and VAR results — 13 October 2026
 
-Both [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [VAR_QTFE.ipynb](VAR_QTFE.ipynb)
-have been fully executed using `datasets/vol_data_futures_yield_final_version.csv`.
-The input passes the main schema, calendar, finite-value and numerical identity
-checks. All required main-model and yield-model columns are present.
-See [the final-data readiness and results summary](reports/final_dataset/README.md)
-for the exact sample, updated scores, supported robustness checks and limitations.
+[VAR_QTFE.ipynb](VAR_QTFE.ipynb) is Jake's leverage-extension notebook, fully
+executed on `datasets/vol_data_futures_yield_final_version.csv`. The main-model
+columns and numerical identity checks pass. See [the current final-data summary](reports/final_dataset/README.md).
+The teammate's original [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [Tim_VAR](Tim_VAR/README.md)
+are preserved unchanged; HAR functions are read independently for matched references.
 
-VAR, LVAR, HAR and LHAR now score the same **783 evaluation targets**, with the
-existing 12 July 2023 training cutoff. BIC again selects **five VAR lags**.
-Oil + gold and oil + natural gas are present in all four families, alongside
-individual commodities, corn + gold, no-corn and all-four specifications.
-LVAR means leverage-augmented linear VAR-X with three ES downside-return controls.
+Jake's VAR, LVAR and common-date HAR/LHAR benchmarks score the same **783 targets**
+with the 12 July 2023 cutoff. BIC selects **five VAR lags**. Oil + gold, oil +
+natural gas, individual commodities, corn + gold, no-corn and all-four comparisons
+remain. All active VAR/LVAR systems retain every selected market lag.
+**LVAR** means leverage-augmented linear VAR-X with three ES downside controls.
 
-All **42 tests** pass. Verification recomputes 35,235 shared forecasts,
-20,358 HAR commodity/yield forecasts, 12,528 lag-sensitivity forecasts and 17,226
-independent HAR/LHAR matches. All scored models have zero forecast fallbacks.
+All **42 tests** pass. Verification checks 33,669 shared forecasts, 12,528 lag
+forecasts and 17,226 independent HAR/LHAR matches. There are zero forecast fallbacks.
 
 ```sh
 .venv/bin/python -m pip install -r requirements-var-notebook.txt
-.venv/bin/python scripts/execute_har_notebook.py
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-Run HAR before VAR. Use the project Python kernel; notebook outputs are saved.
-Generated CSVs and plots stay local in `reports/final_dataset/har/generated/` and
-`reports/final_dataset/var/generated/`. Earlier outputs are preserved separately.
-The following R analyses, HAR audits, data preparation guides and
-[older VAR report](reports/var_har_notebook/ASYMMETRIC_VAR_REPORT.tex) document
-previous data versions; their numbers are not the final-dataset results.
+Use the project Python kernel; outputs are saved. Current local CSVs/plots are
+in `reports/final_dataset/var/generated`. The [report reconciliation](reports/final_dataset/GROUP_REPORT_REVIEW.md)
+explains how to combine Tim's **VAR** with Jake's **LVAR** section and keep each
+extension's matched equity benchmark clear. [Jake's section](latex_report/jakes%20section.tex)
+includes current results, sources and charts. Earlier analyses below use separately
+documented data/samples and should not be mixed with this run.
 
 ## Earlier R VAR analysis — 4 October 2026
 

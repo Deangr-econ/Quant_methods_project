@@ -32,18 +32,16 @@ def save(fig, name):
 metrics = pd.read_csv(SOURCE / "shared_forecast_metrics.csv").set_index("Model")
 names = ["VAR (Baseline)", "LVAR (Baseline)", "LVAR (Oil + Gold)", "LVAR (NatGas)",
          "LVAR (No Corn: Oil + NG + Gold)",
-         "Restricted LVAR (No Corn: Oil + NG + Gold; Daily Only)",
          "LVAR (All 4: Oil + Corn + Gold + NG)",
-         "Restricted LVAR (All 4: Oil + Corn + Gold + NG; Daily Only)",
          "LHAR (Baseline)"]
-labels = ["Equity-only VAR(5)", "Equity-only LVAR(5)", "LVAR: oil + gold",
-          "LVAR: natural gas", "LVAR: no corn", "Restricted LVAR: no corn",
-          "LVAR: all four commodities", "Restricted LVAR: all four", "Matched equity-only LHAR"]
+labels = ["Equity-only AR(5)", "Equity-only AR(5) + downside", "LVAR: oil + gold",
+          "LVAR: natural gas", "LVAR: no corn",
+          "LVAR: all four commodities", "Matched equity-only LHAR"]
 fig, ax = plt.subplots(figsize=(8.4, 4.6))
 y = np.arange(len(names))
 values = metrics.loc[names, "MSE"].to_numpy()
 ax.barh(y, values, color=["#909da9", "#235789", "#235789", "#235789", "#235789",
-                         "#c78629", "#235789", "#c78629", "#429b96"], height=.62)
+                         "#235789", "#429b96"], height=.62)
 ax.set_yticks(y, labels)
 ax.invert_yaxis()
 ax.set_xlim(0, .414)

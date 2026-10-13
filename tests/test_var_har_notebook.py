@@ -138,12 +138,7 @@ class AlignedVARTests(unittest.TestCase):
         np.testing.assert_allclose(decimal[name].fittedvalues, percent[name].fittedvalues, atol=1e-10)
         np.testing.assert_allclose(decimal[name].params[cols], percent[name].params[cols]*100, atol=1e-8)
 
-    def test_daily_restrictions_and_common_sample(self):
-        daily = self.specs["Restricted LVAR (All 4: Oil + Corn + Gold + NG; Daily Only)"]
-        columns = columns_for(daily)
-        self.assertIn("ES.l5", columns) if self.p >= 5 else None
-        self.assertIn("C.l1", columns)
-        self.assertNotIn("C.l2", columns)
+    def test_models_use_the_common_fit_and_evaluation_sample(self):
         fits, summary = fit_models(self.design, self.specs)
         self.assertEqual(summary.N.nunique(), 1)
         self.assertEqual(int(summary.N.iloc[0]), len(self.raw) - 43)

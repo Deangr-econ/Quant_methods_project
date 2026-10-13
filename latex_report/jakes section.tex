@@ -18,17 +18,16 @@
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.12}
 \captionsetup{font=small,labelfont=bf,justification=raggedright,singlelinecheck=false}
-\hypersetup{pdftitle={Jake's section: leverage-augmented and restricted VAR},pdfauthor={Jake Lockitch}}
+\hypersetup{pdftitle={Jake's section: leverage-augmented VAR},pdfauthor={Jake Lockitch}}
 \newcommand{\reportnote}[1]{\par\smallskip{\footnotesize\raggedright #1\par}}
 \begin{document}
 
 % ==================== MAIN SECTION START ====================
-\section*{3.3 Leverage-augmented and restricted VAR}
+\section*{3.3 Leverage-augmented VAR (LVAR)}
 
 This extension asks whether commodity variance histories add forecast information
 after accounting for negative equity returns. We compare a plain VAR with a
-\emph{leverage-augmented VAR} (LVAR), and then restrict the commodity lag structure
-to assess whether a smaller model retains useful information. The relevant
+\emph{leverage-augmented VAR} (LVAR). The relevant
 benchmark for commodity additions is an equity-only model with the same variance
 lags and downside controls. This separates the contribution of equity-return
 information from that of additional markets.
@@ -59,24 +58,21 @@ and are available at the forecast origin. The specification is our application
 of a multihorizon downside-control idea, rather than a replication of the full
 LHAR-CJ model in \citet{corsi-reno}.
 
-The \emph{restricted LVAR} retains all five ES variance lags, the three downside
-controls and the intercept, but retains only the most recent variance observation
-for each commodity. Formally, every entry in a commodity column of $A_j$ is set to
-zero for $j=2,\ldots,5$, in every equation. These are predetermined lag-coefficient
-restrictions, a special case of constrained or subset VAR estimation
-\citep[Chapter 5]{lutkepohl}; manual zero restrictions with equation-by-equation
-OLS are also described in the official \texttt{vars} documentation \citep{vars}.
-The particular daily-only restriction is a project comparison, not a restriction
-prescribed by those sources. It does not impose contemporaneous restrictions to
-identify structural shocks. With all four commodities, it reduces the number of
-ES-equation coefficients from 29 to 13; without corn, from 24 to 12.
+The plain VAR follows the standard reduced-form framework
+\citep[Chapters 2--4]{lutkepohl}. For every included market, both VAR and LVAR
+retain all five variance lags. The plain VAR in this subsection is the matched
+benchmark for isolating the contribution of the downside controls. It is distinct
+from the specification in Section 3.2, which includes calendar controls and
+selects four lags in a system containing Treasury variation. A direct comparison
+with that model would therefore change several features at once and would not
+isolate the leverage contribution.
 
 The final panel contains 3,910 observations from 4 January 2011 to 31 August 2026.
 Shared HAR/LHAR warm-ups leave 3,867 regression targets, including 3,084 initial
 training targets through 12 July 2023. BIC on the initial five-market \emph{plain}
 VAR selects five lags from candidates 1--20, using identical training outcomes
 for every candidate; AIC selects ten. The five-lag order is held fixed across the
-main plain, leverage and restricted comparisons. The 1/5/22 return windows are
+main plain and leverage comparisons. The 1/5/22 return windows are
 fixed features, not separately selected VAR orders. Fits expand chronologically
 to produce 783 forecasts for the next retained observation, from 13 July 2023
 to 31 August 2026. No target-date commodity values or returns enter the forecast.
@@ -87,14 +83,12 @@ to 31 August 2026. No target-date commodity values or returns enter the forecast
 \label{tab:jake-results}
 \begin{tabular}{@{}p{8.1cm}rrr@{}}\toprule
 Model & ES coefficients & MSE & MAE\\\midrule
-Equity-only plain VAR(5) & 6 & 0.368531 & 0.464175\\
-Equity-only LVAR(5) & 9 & 0.334215 & 0.442837\\
+Equity-only AR(5) & 6 & 0.368531 & 0.464175\\
+Equity-only AR(5) + downside controls & 9 & 0.334215 & 0.442837\\
 LVAR: oil and gold & 19 & 0.336611 & 0.443919\\
 LVAR: natural gas & 14 & 0.332670 & 0.442343\\
 LVAR: oil, natural gas and gold & 24 & 0.334549 & 0.443412\\
-Restricted LVAR: oil, natural gas and gold & 12 & 0.334089 & 0.443097\\
-LVAR: all four commodities & 29 & 0.334687 & 0.443561\\
-Restricted LVAR: all four commodities & 13 & 0.333608 & 0.442659\\\bottomrule
+LVAR: all four commodities & 29 & 0.334687 & 0.443561\\\bottomrule
 \end{tabular}
 \reportnote{Notes: identical 783 ES log-RV5 outcomes and forecast origins. Lower
 loss is better. Coefficients include the intercept and refer to the ES equation,
@@ -102,7 +96,7 @@ not the whole system. ``All four'' means oil, corn, gold and natural gas. Source
 own calculations in \texttt{VAR\_QTFE.ipynb}, final-data run of 13 October 2026.}
 \end{table}
 
-Adding downside controls to the equity-only VAR reduces forecast MSE by
+Adding downside controls to the equity-only AR(5) reduces forecast MSE by
 9.31\%. Adding oil and gold to the resulting equity-only LVAR instead increases
 MSE by 0.72\%; adding all four commodities increases it by 0.14\%. Natural gas
 alone lowers MSE by 0.46\%. Descriptive paired circular-block intervals for these
@@ -111,14 +105,12 @@ remains positive across the examined block lengths. The largest clearly observed
 gain in this extension therefore comes from equity-return information rather
 than a broad commodity history.
 
-The daily-only restriction lowers the all-four LVAR's MSE by 0.32\%, while using
-16 fewer ES-equation coefficients. Its MSE is only 0.18\% below the equity-only
-LVAR. The restricted no-corn result is similarly close to that benchmark. These
-small descriptive differences support considering a parsimonious specification;
-they do not establish statistically significant forecast superiority or show that
-omitted commodity lags contain no information. In-sample joint HAC tests still
-find conditional commodity associations, illustrating why historical fit and
-incremental forecast performance must be distinguished.
+In-sample joint HAC tests still find conditional commodity associations,
+illustrating why historical fit and incremental forecast performance must be
+distinguished. The results support modelling equity-return asymmetry within this
+comparison, while providing little evidence of a useful incremental commodity
+forecast gain. The small commodity differences do not establish statistically
+significant forecast superiority or the absence of economic links between markets.
 
 ADF rejects a unit root for all five training log-RV5 series, while KPSS rejects
 level stationarity. We retain log-variance levels but treat this disagreement as
@@ -156,8 +148,9 @@ HAR notebook's default-split score.}
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{forecast_accuracy.pdf}
 \caption{Forecast accuracy with matched equity-only benchmarks. Bars report MSE
-of ES log RV5 over the same 783 targets; the axis begins at zero. Restricted
-models retain five ES lags, commodity lag one and all downside controls.
+of ES log RV5 over the same 783 targets; the axis begins at zero. Every VAR/LVAR
+retains all five lags of its included markets; LVAR additionally includes the
+three downside controls.
 The LHAR reference is recomputed on these common dates. Differences from Tim's
 VAR or the original HAR table also reflect specification and estimation-sample
 choices, so they cannot be attributed to leverage alone.}
@@ -208,7 +201,6 @@ to certify away conflicting series-level stationarity evidence.
 \begin{tabularx}{\linewidth}{@{}p{3.1cm}X@{}}\toprule
 Model or check & Current rule\\\midrule
 Jake VAR/LVAR & Training-only five-market BIC: 5 lags; AIC: 10. Fixed across main comparisons.\\
-Restricted LVAR & Same five ES lags; commodity lags 2--5 fixed to zero in every equation.\\
 Tim VAR & Training-only six-variable system plus month/weekday controls: BIC 4, AIC 9.\\
 HAR/LHAR & Fixed means over 1, 5 and 22 observations, each entering as one regressor.\\
 ADF/KPSS & Jake: AIC autolag/automatic bandwidth; Tim: fixed 20/28. These are test settings.\\
@@ -241,6 +233,14 @@ interpretation and comments, complete the empty results/conclusion sections, and
 attach the referenced appendices. Tim's current BIC results round to AR MSE
 0.356690 and an all-commodity MSE increase of 0.64\%.
 
+\textbf{Report naming.} Keep Section 3.2 as ``Vector autoregression (VAR)'' for
+Tim's calendar/Treasury specification and Section 3.3 as ``Leverage-augmented VAR
+(LVAR)'' for Jake's return-control extension. Give the basic VAR equation once,
+then state each extension's controls, lag order and training warm-up. Table labels
+such as ``AR(4), calendar controls,'' ``AR(5),'' and ``AR(5) + downside controls''
+identify the matched benchmarks. Interpret the 9.31\% gain against Jake's own
+plain benchmark, rather than Tim's differently controlled model.
+
 \textbf{Figure priorities.} Use the incremental-gain chart in the main text if
 the accuracy table is retained. The accuracy chart can replace the large table.
 Lag selection and generalized IRFs belong in the appendix; IRFs are optional if
@@ -260,8 +260,9 @@ with continuous-time volatility modeling.
 \bibitem[L\"utkepohl(2005)]{lutkepohl}
 L\"utkepohl, H. (2005).
 \emph{New Introduction to Multiple Time Series Analysis}.
-Springer. Chapter 5, ``VAR Processes with Parameter Constraints,'' pp.~193--231.
-\href{https://doi.org/10.1007/978-3-540-27752-1_5}{doi:10.1007/978-3-540-27752-1\_5}.
+Springer. Chapters 2--4 on stable VAR processes, estimation, order selection and
+model adequacy.
+\href{https://doi.org/10.1007/978-3-540-27752-1}{doi:10.1007/978-3-540-27752-1}.
 
 \bibitem[Newey and West(1987)]{newey-west}
 Newey, W.~K., and West, K.~D. (1987).
@@ -275,13 +276,6 @@ Generalized impulse response analysis in linear multivariate models.
 \emph{Economics Letters}, 58(1), 17--29.
 \href{https://doi.org/10.1016/S0165-1765(97)00214-0}{doi:10.1016/S0165-1765(97)00214-0}.
 
-\bibitem[Pfaff(2024)]{vars}
-Pfaff, B. (2024).
-\emph{vars: VAR Modelling}, version 1.6-1, reference manual,
-``restrict: Restricted VAR,'' pp.~29--30.
-\url{https://cran.r-project.org/web/packages/vars/vars.pdf}.
-Accessed 13 October 2026. The cited method supports manual zero restrictions;
-the present project's Python code performs its own equation-by-equation OLS.
 \end{thebibliography}
 
 \end{document}

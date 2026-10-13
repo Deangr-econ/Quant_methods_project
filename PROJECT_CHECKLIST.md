@@ -185,7 +185,7 @@ question; improving the project's quality does not require making VAR win.
 
 - [ ] Explain one VAR forecast from historical inputs, through fitting, to the
   next-observation prediction and its forecast error.
-- [ ] Explain AR versus VAR, the downside controls, restricted versus full VAR,
+- [ ] Explain AR versus VAR, the downside controls, matched plain VAR versus LVAR,
   variance versus volatility, AIC/BIC, expanding windows and IRFs in plain words.
 - [ ] Explain why good historical fit can coexist with little forecast gain,
   and what the data limitations prevent us from concluding.
