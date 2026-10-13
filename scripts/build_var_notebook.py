@@ -28,7 +28,7 @@ This notebook uses the latest `HAR_QTFE.ipynb` commodity specifications: RV5 fro
 fit-comparison tables, a corn/no-corn matrix,
 coefficient results and a four-panel residual plot. All fitted comparison tables
 use identical rows. A separate section evaluates sequential forecasts on shared
-dates and independently reruns the latest LHAR function on those same inputs.
+dates and independently reruns the latest HAR/LHAR function on those same inputs.
 The **commodity-core calendar is frozen**, with no bond-data join. The latest
 HAR's bond join is audited separately because it removes commodity observations
 even from models that do not use bonds. Its standalone scores are not the scores
@@ -199,14 +199,14 @@ with **our frozen commodity-core panel**. They are not a reproduction of its
 saved results on the newer yield-joined sample. They verify the latest commodity
 features and decimal-unit downside controls. Baseline
 HAR and LHAR have different warm-up samples; compare their R² descriptively,
-not their raw AIC/BIC across unequal samples. Below, the aligned VAR and LHAR
+not their raw AIC/BIC across unequal samples. Below, the aligned VAR, LVAR, HAR and LHAR
 tables instead use **the same regression rows** for every model.
 """)
 code("""
 har_reference = reference_har_function(ROOT / cfg['har_reference'])
 reference_rows = []
 for downside in [False, True]:
-    for label, assets in [('Baseline', []), ('Oil', ['CL']), ('NatGas', ['NG']), ('Energy', ['CL', 'NG']), ('No Corn', ['CL', 'NG', 'GC'])]:
+    for label, assets in [('Baseline', []), ('Oil', ['CL']), ('Oil + Gold', ['CL', 'GC']), ('NatGas', ['NG']), ('Energy', ['CL', 'NG']), ('No Corn', ['CL', 'NG', 'GC'])]:
         fit = har_reference(wide, exog_symbols=assets, include_exog_horizons=True,
                             include_leverage=downside, hac_lags=cfg['hac_lags'])
         reference_rows.append({'Model': ('LHAR' if downside else 'HAR') + f' ({label})',
@@ -243,6 +243,12 @@ first_names = [f'{prefix} ({label})' for prefix in ['VAR', 'LVAR'] for label in 
 summary_columns = ['N', 'Lag p', 'Params (k)', 'R²', 'Adj. R²', 'AIC', 'BIC', 'F-Stat', 'Prob(F-Stat)', 'Log-Likelihood']
 show_table(summary.loc[first_names, summary_columns])
 summary.to_csv(OUTPUT / 'common_sample_insample_results.csv')
+
+pair_fit_names = [f'{family} ({assets})' for family in ['HAR', 'LHAR']
+                  for assets in ['Baseline', 'Oil + Gold', 'Energy: Oil + NG']]
+display(Markdown('**Matched HAR/LHAR pair fits: the same 3,967 target rows as VAR/LVAR.**'))
+show_table(summary.loc[pair_fit_names, summary_columns])
+summary.loc[pair_fit_names].to_csv(OUTPUT / 'matched_pair_insample_results.csv')
 """)
 md("""
 ## 5. With corn / without corn: full memory and daily-only commodities
@@ -260,7 +266,7 @@ corn_names = ['LVAR (Baseline)', 'LVAR (Oil + Gold)',
     'LVAR (No Corn: Oil + NG + Gold)',
     'Restricted LVAR (No Corn: Oil + NG + Gold; Daily Only)']
 show_table(summary.loc[corn_names, summary_columns + ['System params', 'Max root']])
-lhar_names = ['LHAR (Baseline)', 'LHAR (Oil + Gold)', 'LHAR (All 4: Oil + Corn + Gold + NG)',
+lhar_names = ['LHAR (Baseline)', 'LHAR (Oil + Gold)', 'LHAR (Energy: Oil + NG)', 'LHAR (All 4: Oil + Corn + Gold + NG)',
     'LHAR (All 4: Oil + Corn + Gold + NG; Daily Only)', 'LHAR (No Corn: Oil + NG + Gold)',
     'LHAR (No Corn: Oil + NG + Gold; Daily Only)']
 display(Markdown('**Asymmetric HAR on exactly the same target rows, for reference:**'))
@@ -381,7 +387,7 @@ display(Markdown('**Reading this run:** oil and gold show larger immediate corre
     'commodity history adds useful information beyond ES history and downside controls.'))
 """)
 md("""
-## 9. Shared-date forecasts: VAR and asymmetric HAR
+## 9. Shared-date forecasts: VAR, LVAR, HAR and LHAR
 
 All models forecast **the next retained all-five-market row** and use the same
 initial training cutoff, 22-row warm-up and expanding refits. At origin t, only
@@ -406,11 +412,12 @@ conditional dispersion perfectly. Failed or unstable VAR fits use persistence,
 retain their dates and are counted. No Gaussian forecast intervals are claimed.
 
 **Independent latest-HAR check:** rerun its actual `fit_har_x` forecasting branch
-for all six LHAR specifications. Override its default per-model 80/20 split
+for every matched HAR and LHAR specification. Plain HAR starts at the common
+first origin, retaining the precomputed source-grid variance averages. Override its default per-model 80/20 split
 with the shared cutoff. Its returned index labels the **origin**, not the next
 target; map that index explicitly to our target dates. The audit below requires
-matching origins, targets, actual outcomes and every log forecast. The HAR
-source notebook and its standalone saved outputs are not modified.
+matching origins, targets, actual outcomes and every log forecast. Standalone HAR outputs use the separately audited yield-joined calendar and
+must not be mixed with these frozen commodity-core comparisons.
 """)
 code("""
 print(f'Fitting {len(specs)} models on {len(test_dates)} shared forecast targets...')
@@ -427,10 +434,22 @@ metrics = forecast_metrics(forecasts)
 show_table(metrics)
 forecasts.to_csv(OUTPUT / 'shared_forecasts.csv', index=False)
 metrics.to_csv(OUTPUT / 'shared_forecast_metrics.csv')
+
+pair_records = []
+for assets in ['Baseline', 'Oil + Gold', 'Energy: Oil + NG']:
+    for family in ['VAR', 'HAR', 'LVAR', 'LHAR']:
+        name = f'{family} ({assets})'
+        row = metrics.loc[name]
+        pair_records.append({'Assets': assets, 'Family': family, 'Model': name,
+                             **row.to_dict()})
+pair_metrics = pd.DataFrame(pair_records)
+display(Markdown('**Matched pair forecast MSE: identical dates; VAR/HAR are plain, LVAR/LHAR share downside controls.**'))
+show_table(pair_metrics.pivot(index='Assets', columns='Family', values='MSE')[['VAR', 'HAR', 'LVAR', 'LHAR']])
+pair_metrics.to_csv(OUTPUT / 'matched_pair_forecast_metrics.csv', index=False)
 print('Scored target dates:', test_dates.min().date(), 'to', test_dates.max().date())
 har_forecast_audit = audit_reference_har_forecasts(wide, design, specs, forecasts,
     cfg['training_end'], ROOT / cfg['har_reference'], cfg['hac_lags'])
-display(Markdown('**Latest HAR function independently reproduces the shared LHAR forecasts:**'))
+display(Markdown('**Latest HAR function independently reproduces the shared HAR/LHAR forecasts:**'))
 show_table(har_forecast_audit)
 har_forecast_audit.to_csv(OUTPUT / 'latest_har_forecast_audit.csv')
 """)

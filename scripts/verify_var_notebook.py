@@ -45,7 +45,15 @@ for name in ["VAR (Gold)", "LVAR (Gold)", "VAR (Corn)", "LVAR (Corn)"]:
     assert summary.loc[name, "Lag p"] == manifest["shared_lag"]
 har_audit = pd.read_csv(out / "latest_har_forecast_audit.csv", index_col=0)
 calendar_audit = pd.read_csv(out / "har_calendar_audit.csv", index_col=0)
-assert len(har_audit) == 6
+expected_har = summary.index[summary.index.str.startswith(("HAR (", "LHAR ("))]
+assert set(har_audit.index) == set(expected_har)
+for family in ["VAR", "LVAR", "HAR", "LHAR"]:
+    for assets in ["Baseline", "Oil + Gold", "Energy: Oil + NG"]:
+        assert f"{family} ({assets})" in metrics.index
+pair_metrics = pd.read_csv(out / "matched_pair_forecast_metrics.csv", index_col="Model")
+assert len(pair_metrics) == 12 and pair_metrics.index.is_unique
+assert pair_metrics.N.eq(manifest["evaluation_targets"]).all()
+np.testing.assert_allclose(pair_metrics.MSE, metrics.loc[pair_metrics.index, "MSE"], atol=1e-12)
 assert har_audit.N.eq(manifest['evaluation_targets']).all()
 assert har_audit.Initial_training.eq(manifest['initial_fit_targets']).all()
 assert (har_audit.Max_prediction_difference < 1e-9).all()

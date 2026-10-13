@@ -1,5 +1,16 @@
 # VAR: next steps and decisions
 
+**13 October pair alignment:** oil + gold and oil + natural gas now appear
+in HAR and LHAR, including the original HAR notebook and the shared VAR notebook.
+Sections 4 and 9 show matched pair fits and forecasts for VAR/HAR and LVAR/LHAR.
+All four families use the same 3,967 fit rows and 802 evaluation targets in that
+comparison. Plain HAR shares the common warm-up; leverage models share ES controls.
+There are 31 scored models, 24,862 main forecasts and 8,020 independently
+matched HAR/LHAR forecasts across ten specifications. All 38 tests pass.
+Original HAR saved pair results were refreshed locally using the saved commodity
+CSV and FRED snapshot, with their separate yield-joined calendar and default splits
+labelled explicitly. The focused sensitivity set remains unchanged.
+
 **12 October single-commodity extensions:** gold-only and corn-only VAR and LVAR
 now appear in the common-sample fit table, training diagnostics and shared-date
 forecast comparison, alongside oil-only, gas-only and combined specifications.

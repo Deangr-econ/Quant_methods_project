@@ -1,14 +1,14 @@
 # Quant_methods_project
 Group project
 
-## Current VAR results notebook — 12 October 2026
+## Current VAR results notebook — 13 October 2026
 
 Open [VAR_QTFE.ipynb](VAR_QTFE.ipynb) for the newly executed Python notebook
 using the latest asymmetric HAR commodity specification on the frozen RV5 calendar,
 ES downside-return controls, HAC(22), comparison tables and residual plots.
 The main model is ES/oil/gold, with corn/gas extensions. **LVAR** means
 **leverage-augmented VAR**: a linear VAR-X with daily, 5- and 22-observation
-ES downside-return controls in every equation. VAR, LVAR and LHAR forecasts
+ES downside-return controls in every equation. VAR, HAR, LVAR and LHAR forecasts
 score the same 802 targets; the latest HAR bond-data join is audited separately.
 See
 [the matching-methods guide](reports/var_har_notebook/README.md) for definitions,
@@ -19,8 +19,9 @@ the data/sample decision, expanding-window explanation and remaining learning/re
 **Section 10** adds the 5/10 lag comparison, five data scenarios and paired-loss
 uncertainty; read [the findings](reports/var_har_notebook/DATA_AND_ROBUSTNESS_RESULTS.md).
 Gold-only and corn-only VAR/LVAR comparisons are included on the same dates and lag order.
-All 38 Python tests pass. Saved-output verification covers 21,654 main forecasts,
-4,812 independent latest-HAR matches and 50,526 sensitivity forecasts.
+All 38 Python tests pass. Saved-output verification covers 24,862 main forecasts,
+8,020 independent latest-HAR matches and 50,526 sensitivity forecasts.
+Oil + gold and oil + natural gas are matched across all four families in sections 4 and 9.
 
 ```sh
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v

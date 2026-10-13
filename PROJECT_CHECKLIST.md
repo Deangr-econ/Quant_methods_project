@@ -1,5 +1,16 @@
 # Project analysis checklist
 
+**13 October pair alignment:** oil + gold and oil + natural gas now appear
+in HAR and LHAR, including the original HAR notebook and the shared VAR notebook.
+Sections 4 and 9 show matched pair fits and forecasts for VAR/HAR and LVAR/LHAR.
+All four families use the same 3,967 fit rows and 802 evaluation targets in that
+comparison. Plain HAR shares the common warm-up; leverage models share ES controls.
+There are 31 scored models, 24,862 main forecasts and 8,020 independently
+matched HAR/LHAR forecasts across ten specifications. All 38 tests pass.
+Original HAR saved pair results were refreshed locally using the saved commodity
+CSV and FRED snapshot, with their separate yield-joined calendar and default splits
+labelled explicitly. The focused sensitivity set remains unchanged.
+
 **12 October single-commodity extensions:** gold-only and corn-only VAR and LVAR
 now appear in the common-sample fit table, training diagnostics and shared-date
 forecast comparison, alongside oil-only, gas-only and combined specifications.
@@ -53,9 +64,9 @@ Source: `context/quant techniques syllabus.pdf`, final-assignment section.
 | Training-only lag comparison | Implemented for orders 1–20; BIC chooses 5 and AIC 10 for the initial five-market plain VAR |
 | Expanding-window forecasts | Implemented, with the existing matched comparison scoring 802 common targets |
 | Generalized VAR IRFs and bands | Implemented; five dedicated IRF tests pass |
-| Match with the latest HAR notebook | Latest commodity function independently matches all 4,812 shared LHAR forecasts; bond join audited separately |
+| Match with the latest HAR notebook | Latest commodity function independently matches all 8,020 shared HAR/LHAR forecasts; bond join audited separately |
 | Lag and data robustness | Implemented: 5/10 lag comparison, five data scenarios, 725-target retrospective subset and descriptive paired-loss intervals |
-| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 21,654 main and 50,526 sensitivity forecast records |
+| Fresh saved-notebook verification | Passes: 14 sequential code cells, five figures, 24,862 main and 50,526 sensitivity forecast records |
 | Full Python suite | **38 pass**, including reconciliation and sensitivity checks |
 | GARCH contribution, if retained | Needs an implementation and comparability review; oil regressor issue identified below |
 

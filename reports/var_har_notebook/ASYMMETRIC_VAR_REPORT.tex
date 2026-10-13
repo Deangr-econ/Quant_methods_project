@@ -534,7 +534,7 @@ Equity and all four commodities & 0.372801 & 0.365944 & 1.84 \\
 \small
 \begin{tabular}{p{2.6in}rrr}
 \toprule
-Markets & VAR(5) MSE & VAR(10) MSE & LHAR MSE \\
+Markets & LVAR(5) MSE & LVAR(10) MSE & LHAR MSE \\
 \midrule
 Equity only & 0.371498 & 0.365892 & 0.362110 \\
 Equity oil and gold & 0.374172 & 0.368497 & 0.363423 \\
@@ -542,8 +542,24 @@ Equity and all four commodities & 0.372801 & 0.365944 & 0.363237 \\
 \bottomrule
 \end{tabular}
 \end{table}
-{\footnotesize Shared commodity calendar, 802 outcomes, training cutoff and three ES downside controls. HAR uses daily, five- and 22-observation variance averages; VAR uses individual lags. Six current HAR specifications independently reproduce all 4,812 matched forecasts. No yield join enters this comparison.\par}
+{\footnotesize Shared commodity calendar, 802 outcomes, training cutoff and three ES downside controls. HAR uses daily, five- and 22-observation variance averages; VAR uses individual lags. Ten matched HAR/LHAR specifications independently reproduce all 8,020 forecasts. No yield join enters this comparison.\par}
 
+
+\begin{table}[H]
+\centering
+\caption{Matched oil--gold and oil--natural-gas pair forecasts}\label{tab:matchedpairs}
+\small
+\begin{tabular}{p{2.2in}rrrr}
+\toprule
+Markets & VAR(5) & HAR & LVAR(5) & LHAR \\
+\midrule
+Equity only & 0.409476 & 0.405567 & 0.371498 & 0.362110 \\
+Equity oil and gold & 0.413082 & 0.407377 & 0.374172 & 0.363423 \\
+Equity oil and natural gas & 0.410118 & 0.406167 & 0.370581 & 0.361663 \\
+\bottomrule
+\end{tabular}
+\end{table}
+{\footnotesize Log-variance MSE on identical 802 evaluation targets. Plain VAR/HAR omit downside controls; LVAR/LHAR share the same three ES controls. All fits use the common warm-up and initial cutoff. Plain HAR retains its precomputed daily/weekly/monthly features while starting at the common first origin. The original HAR notebook\textquotesingle s yield-joined results and default splits are separate.\par}
 
 Supporting QLIKE uses positive variance forecasts formed as the exponentiated
 log forecast times a historical residual-smearing factor estimated at each origin.
@@ -684,9 +700,9 @@ exchange closures or synchronised daily measurement intervals.
 The canonical analysis is \sourcefile{VAR\_QTFE.ipynb}. Model settings are in
 \sourcefile{config/var\_har\_notebook.json} and
 \sourcefile{config/var\_robustness.json}. The latest saved notebook execution is
-9 October 2026. On 12 October, all 38 tests pass and saved-output verification
-checks 14 executed code cells, five figures, 18,446 main forecast records across
-23 models, 50,526 sensitivity forecast records and 4,812 independently reproduced
+13 October 2026. All 38 tests pass and saved-output verification
+checks 14 executed code cells, five figures, 24,862 main forecast records across
+31 models, 50,526 sensitivity forecast records and 8,020 independently reproduced
 HAR forecasts. Source, code and result hashes are checked. These software checks
 do not independently validate the provider's original quotes or publication times.
 

@@ -82,17 +82,22 @@ class AlignedVARTests(unittest.TestCase):
                 got = fits[name].predict(sm.add_constant(row[columns_for(spec)], has_constant="add"))[0]
                 self.assertAlmostEqual(expected, got, places=10)
 
-    def test_lhar_reference_features_and_hac_are_identical(self):
-        name = "LHAR (No Corn: Oil + NG + Gold)"
-        fits, summary = fit_models(self.design, {name: self.specs[name]})
-        reference = reference_har_function(ROOT / "HAR_QTFE.ipynb")(
-            self.wide, exog_symbols=["CL", "NG", "GC"], include_exog_horizons=True,
-            include_leverage=True, hac_lags=22)
-        # Our feature order is different; align by named columns.
-        fit = fits[name]
-        np.testing.assert_allclose(fit.params, reference.params.reindex(fit.params.index), atol=1e-10)
-        np.testing.assert_allclose(fit.cov_params(), reference.cov_params().reindex(index=fit.params.index, columns=fit.params.index), atol=1e-10)
-        self.assertEqual(summary.iloc[0]["N"], int(reference.nobs))
+    def test_har_reference_features_and_hac_are_identical(self):
+        names = ["HAR (Baseline)", "HAR (Oil + Gold)", "HAR (Energy: Oil + NG)",
+                 "LHAR (Oil + Gold)", "LHAR (Energy: Oil + NG)", "LHAR (No Corn: Oil + NG + Gold)"]
+        for name in names:
+            with self.subTest(model=name):
+                spec = self.specs[name]
+                fits, summary = fit_models(self.design, {name: spec})
+                wide = self.wide if spec["downside"] else self.wide.loc[self.design["x"].index[0]:]
+                reference = reference_har_function(ROOT / "HAR_QTFE.ipynb")(
+                    wide, exog_symbols=spec["commodities"], include_exog_horizons=True,
+                    include_leverage=spec["downside"], hac_lags=22)
+                # Our feature order is different; align by named columns.
+                fit = fits[name]
+                np.testing.assert_allclose(fit.params, reference.params.reindex(fit.params.index), atol=1e-10)
+                np.testing.assert_allclose(fit.cov_params(), reference.cov_params().reindex(index=fit.params.index, columns=fit.params.index), atol=1e-10)
+                self.assertEqual(summary.iloc[0]["N"], int(reference.nobs))
 
     def test_downside_definition_timing_and_future_invariance(self):
         name = "LVAR (All 4: Oil + Corn + Gold + NG)"
@@ -121,12 +126,13 @@ class AlignedVARTests(unittest.TestCase):
         small = self.wide.iloc[:130]
         design = aligned_design(small)
         cutoff = small.index[-8]
-        names = ["LHAR (Baseline)", "LHAR (No Corn: Oil + NG + Gold)"]
+        names = ["HAR (Baseline)", "HAR (Oil + Gold)", "HAR (Energy: Oil + NG)",
+                 "LHAR (Oil + Gold)", "LHAR (Energy: Oil + NG)", "LHAR (No Corn: Oil + NG + Gold)"]
         specs = {name: self.specs[name] for name in names}
         forecasts = expanding_forecasts(design, specs, cutoff)
         audit = audit_reference_har_forecasts(small, design, specs, forecasts,
             cutoff, ROOT / "HAR_QTFE.ipynb")
-        self.assertEqual(audit.N.tolist(), [7, 7])
+        self.assertEqual(audit.N.tolist(), [7] * len(names))
         self.assertTrue((audit.Max_prediction_difference < 1e-9).all())
         self.assertTrue((audit.First_origin < audit.First_target).all())
         self.assertTrue((forecasts.training_end == forecasts.origin_date).all())

@@ -120,7 +120,7 @@ def aligned_design(wide, max_lag=20, warmup=22):
 
 
 def columns_for(spec):
-    if spec["family"] == "LHAR":
+    if spec["family"] in ("HAR", "LHAR"):
         columns = [f"ES_{h}" for h in ["d", "w", "m"]]
         columns += [f"{s}_{h}" for s in spec["commodities"] for h in (["d"] if spec["daily_only"] else ["d", "w", "m"])]
     else:
@@ -181,7 +181,10 @@ def model_specifications(p):
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
         specs[f"Restricted LVAR ({label}; Daily Only)"] = dict(
             family="VAR", p=p, commodities=sets[label], downside=True, daily_only=True)
-    for label in ["Baseline", "Oil + Gold", "No Corn: Oil + NG + Gold", "All 4: Oil + Corn + Gold + NG"]:
+    for label in ["Baseline", "Oil + Gold", "Energy: Oil + NG"]:
+        specs[f"HAR ({label})"] = dict(family="HAR", p=0, commodities=sets[label],
+                                       downside=False, daily_only=False)
+    for label in ["Baseline", "Oil + Gold", "Energy: Oil + NG", "No Corn: Oil + NG + Gold", "All 4: Oil + Corn + Gold + NG"]:
         specs[f"LHAR ({label})"] = dict(family="LHAR", p=0, commodities=sets[label],
                                         downside=True, daily_only=False)
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
@@ -277,7 +280,8 @@ def audit_reference_har_forecasts(wide, design, specs, forecasts, training_end, 
 
     Its default per-model 80/20 split is overridden by our explicit cutoff. Its
     returned index denotes origins, so target dates are mapped from the panel,
-    never relabelled as if origins were outcomes. No source notebook is edited.
+    never relabelled as if origins were outcomes. Plain HAR is trimmed to the
+    common first origin; source-grid variance averages remain precomputed.
     """
     reference = reference_har_function(path)
     n_initial = int((design["target_dates"] <= pd.Timestamp(training_end)).sum())
@@ -287,9 +291,10 @@ def audit_reference_har_forecasts(wide, design, specs, forecasts, training_end, 
     expected_origins = design["x"].index[design["target_dates"] > pd.Timestamp(training_end)]
     records = []
     for name, spec in specs.items():
-        if spec["family"] != "LHAR":
+        if spec["family"] not in ("HAR", "LHAR"):
             continue
-        result = reference(wide, exog_symbols=spec["commodities"],
+        reference_wide = wide.loc[design["x"].index[0]:] if not spec["downside"] else wide
+        result = reference(reference_wide, exog_symbols=spec["commodities"],
             include_exog_horizons=not spec["daily_only"], include_leverage=spec["downside"],
             hac_lags=hac_lags, do_forecast=True, train_split=ratio)
         native = result["predictions"]
