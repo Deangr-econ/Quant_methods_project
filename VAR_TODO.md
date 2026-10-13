@@ -1,5 +1,12 @@
 # VAR research checklist
 
+**Final dataset update — 13 October 2026:** HAR and VAR have both been fully
+rerun on `vol_data_futures_yield_final_version.csv`. The current comparison uses
+3,867 common fit targets and 783 evaluation targets, with BIC lag 5. All 42 tests
+and saved-forecast verification pass. Read the [final-data readiness and results
+summary](reports/final_dataset/README.md). The progress notes below describe
+previous runs and their previous datasets; their counts and scores are historical.
+
 Prepared: 26 September 2026. Reviewed project revision: `011333c`.
 
 Purpose: build a defensible, reproducible answer to whether information from other

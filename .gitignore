@@ -17,3 +17,5 @@ reports/har_followup/*.csv
 reports/har_followup/provenance.json
 reports/var_final/generated/
 reports/var_har_notebook/generated/
+reports/final_dataset/har/generated/
+reports/final_dataset/var/generated/

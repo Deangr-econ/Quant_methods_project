@@ -1,9 +1,13 @@
 {
-  "source": "datasets/realized_variance_futures.csv",
+  "source": "datasets/vol_data_futures_yield_final_version.csv",
   "har_reference": "HAR_QTFE.ipynb",
-  "yield_snapshot": "datasets/raw/fred_dgs10_2011_2026.csv",
-  "yield_manifest": "datasets/fred_dgs10_manifest.json",
-  "symbols": ["ES", "CL", "C", "GC", "NG"],
+  "symbols": [
+    "ES",
+    "CL",
+    "C",
+    "GC",
+    "NG"
+  ],
   "sample_start": "2011-01-01",
   "training_end": "2023-07-12",
   "measure": "rv5",
@@ -12,8 +16,8 @@
   "hac_lags": 22,
   "downside": "abs(min(mean(decimal ES close log returns over 1/5/22 retained rows), 0)); stored percentage returns divided by 100 as in latest HAR",
   "selection": "BIC on initial-history five-market plain VAR; same order for every VAR comparison",
-  "calendar": "Frozen commodity-core HAR preparation: source-grid volatility windows, then all-five complete cases; yields excluded from core matching. Latest HAR yield join audited separately; provider timing unverified",
-  "evaluation": "Shared next-row targets on frozen commodity calendar and 2023-07-12 cutoff; expanding fits; already examined and exploratory",
+  "calendar": "Authoritative final wide CSV calendar with embedded yields; no external yield join or old-file values",
+  "evaluation": "Shared next-row targets on the final CSV calendar; unchanged 2023-07-12 cutoff, expanding refits; exploratory inspected period",
   "fallback": "last ES log variance when fit fails, dynamics are unstable or inputs are unavailable",
   "irf": {
     "model": "LVAR (All 4: Oil + Corn + Gold + NG)",
@@ -21,5 +25,8 @@
     "draws": 2000,
     "seed": 20261005,
     "method": "Conditional generalized IRFs; initial training only; pointwise joint-HAC parameter-simulation bands"
-  }
+  },
+  "input_format": "prepared_wide",
+  "output_dir": "reports/final_dataset/var/generated",
+  "har_output_dir": "reports/final_dataset/har/generated"
 }

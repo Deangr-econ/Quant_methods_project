@@ -1,0 +1,17 @@
+{
+  "input_source_sha256": "ad3b481455b8e8ea4e632e065f7b38cfbb0293ecd8286611c81b5cda7ea5137f",
+  "result_run_time": "2026-10-13T18:27:00.061834+02:00",
+  "builder_sha256": "e0ed23fc5806e127a833288850a3d913332662f8348e80b61f39ad91bac1ce11",
+  "inputs": {
+    "shared_forecast_metrics.csv": "ca849b2a6f45520905e567a171a14a5fc079c859f51c6ce3d0cf06b9fe714986",
+    "robustness_intervals.csv": "b82c5c310508ba423fcbb8d05cff6eb5e5707c74c956776cf64389e246267fb8",
+    "initial_lag_selection.csv": "7a8afbdd2088cf6321200d1c55f7ff654d4136cb4ad37f876b3cd904c1a98179",
+    "training_generalized_irfs.csv": "cc03d3d5eca2343d90053c9eb3f457b7829fa50037d7a78b7914a192e85971fe"
+  },
+  "outputs": {
+    "conditional_irfs.pdf": "600e9fd56d09771349aec7d22256f4112df21542abd6ec54503f3a6ed6b014d1",
+    "forecast_accuracy.pdf": "1581b244b75893e2582a71f0490582702892b16ff9164f8b78beb6fded455cea",
+    "incremental_gains.pdf": "cb3e976ec26d54123ec238b1761cf3a700c48d86c11ef332c3bf426594bea043",
+    "lag_selection.pdf": "f1ca816b757d0dbc2acd43f17d5b499fdac244cac7b9a6cc6f7b0d2bed8fd200"
+  }
+}

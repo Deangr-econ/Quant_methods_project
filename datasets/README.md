@@ -1,6 +1,16 @@
 # Research data
 
-## VOLARE: current preparation pipeline
+## Current final input — 13 October 2026
+
+`vol_data_futures_yield_final_version.csv` is the authoritative input for
+`HAR_QTFE.ipynb` and `VAR_QTFE.ipynb`. It is already a wide matched panel with
+five-market RV5, close prices, percentage returns and embedded ten-year yields.
+No legacy preparation or external yield retrieval is needed for these notebooks.
+See [the final-data readiness summary](../reports/final_dataset/README.md).
+The pipelines below document earlier source versions and remain available for
+reproducing those earlier analyses.
+
+## VOLARE: earlier preparation pipeline
 
 The original `realized_variance_futures.csv` is the input. The older
 `volatility_model_QTFE_data.csv` currently contains RV5 columns without dates;

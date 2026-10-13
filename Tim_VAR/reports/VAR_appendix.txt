@@ -1,0 +1,41 @@
+Appendix A VAR specification and checks
+
+All systems include equity log RV5. Additional futures variables are their log RV5 series; Treasury variation is the supplied squared yield change in basis points squared. Every equation contains an intercept and 15 calendar indicators. The equity-only AR uses the same deterministic controls. Models are estimated by OLS, equation by equation.
+
+Table A1 Initial training specifications with four lags
+
+Model | Variables | Coefficients per equation | Largest root | Serial-correlation p-value
+AR | ES | 20 | 0.938 | <0.001
+Oil and gold | ES, CL, GC | 28 | 0.969 | <0.001
+Gas and Treasury | ES, NG, TY | 28 | 0.966 | <0.001
+All commodities | ES, CL, GC, NG, C | 36 | 0.975 | <0.001
+Full VAR | ES, CL, GC, NG, C, TY | 40 | 0.975 | <0.001
+
+ES: equity; CL: oil; GC: gold; NG: natural gas; C: corn; TY: Treasury proxy. Coefficient counts include the intercept and calendar indicators. Roots are companion-matrix eigenvalue moduli. Serial-correlation checks are Breusch–Godfrey LM tests with 20 residual lags, applied to the equity equation.
+
+All initial training estimates satisfy the stability condition, with roots inside the unit circle. However, the residual tests reject absence of serial correlation. Increasing to nine lags reduces but does not eliminate this problem: the full VAR’s residual-test p-value is 0.010. The models are therefore evaluated primarily on out-of-sample forecasting, with conventional in-sample test results interpreted cautiously.
+
+Figure A1 Lag selection in the initial training sample
+
+AIC and BIC are computed for the full six-variable system using the same 3,107 regression observations at every candidate order. BIC selects four lags and AIC nine. After selection, estimation uses the available sample for that order: 3,123 initial regression rows at four lags and 3,118 at nine. No test-period outcomes enter lag selection.
+
+Forecast sensitivity and in-sample predictability
+
+Table A2 Forecast accuracy and joint Granger tests
+
+Model | MSE 4 lags | MSE 9 lags | Granger p 4 lags | Granger p 9 lags
+AR | 0.35669 | 0.35713 | — | —
+Oil and gold | 0.35786 | 0.35662 | 0.040 | 0.382
+Gas and Treasury | 0.35838 | 0.35812 | 0.057 | 0.399
+All commodities | 0.35897 | 0.35738 | 0.028 | 0.539
+Full VAR | 0.35918 | 0.35769 | 0.086 | 0.726
+
+MSE uses the same 783 test targets. Granger tests use only the initial training sample and jointly set all additional-market lag coefficients in the equity equation to zero, conditional on equity lags and calendar controls. Reported p-values are conventional F-test values; residual serial correlation limits their reliability.
+
+At four lags, the oil-and-gold and all-commodity systems yield nominal p-values below 0.05. Neither finding persists at nine lags, and neither system improves four-lag forecast accuracy. These results illustrate why apparent in-sample predictability is insufficient to establish a forecasting gain. They do not identify structural causal effects.
+
+Figure A2 Cumulative forecast gain over AR with nine lags
+
+Cumulative gain equals the sum of AR squared errors minus VAR squared errors. Positive values favour the VAR. All models use nine lags and the same controls. The small final oil-and-gold advantage varies over the evaluation period.
+
+Two further checks retain all 783 targets. First differencing, with four lags selected by training-sample BIC, gives level-forecast MSEs of 0.37291 for the AR and 0.37312 for the full VAR. Adding one further retained-observation delay to the Treasury proxy gives 0.35669 for a sample-matched AR and 0.35915 for the full VAR. Both checks leave the main AR–VAR ranking unchanged.

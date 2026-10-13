@@ -10,6 +10,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def verify():
+    cfg = json.loads((ROOT / 'config/var_har_notebook.json').read_text())
+    if cfg.get('input_format') == 'prepared_wide':
+        from verify_final_run import verify_lag_run
+        out = ROOT / cfg['output_dir']
+        manifest = json.loads((out / 'provenance.json').read_text())
+        raw = pd.read_csv(ROOT / cfg['source'], float_precision='round_trip')
+        return verify_lag_run(out, manifest, raw)
     out = ROOT/'reports/var_har_notebook/generated'
     manifest = json.loads((out/'provenance.json').read_text())
     settings = manifest['robustness']['settings']

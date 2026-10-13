@@ -1,41 +1,39 @@
 # Quant_methods_project
 Group project
 
-## Current VAR results notebook — 13 October 2026
+## Current final-dataset HAR and VAR results — 13 October 2026
 
-Open [VAR_QTFE.ipynb](VAR_QTFE.ipynb) for the newly executed Python notebook
-using the latest asymmetric HAR commodity specification on the frozen RV5 calendar,
-ES downside-return controls, HAC(22), comparison tables and residual plots.
-The main model is ES/oil/gold, with corn/gas extensions. **LVAR** means
-**leverage-augmented VAR**: a linear VAR-X with daily, 5- and 22-observation
-ES downside-return controls in every equation. VAR, HAR, LVAR and LHAR forecasts
-score the same 802 targets; the latest HAR bond-data join is audited separately.
-See
-[the matching-methods guide](reports/var_har_notebook/README.md) for definitions,
-results and the differences from the earlier 809-target analysis.
-The notebook includes training-only commodity-to-ES generalized IRF curves with
-exploratory uncertainty bands. [VAR_NEXT_STEPS.md](VAR_NEXT_STEPS.md) records
-the data/sample decision, expanding-window explanation and remaining learning/report tasks.
-**Section 10** adds the 5/10 lag comparison, five data scenarios and paired-loss
-uncertainty; read [the findings](reports/var_har_notebook/DATA_AND_ROBUSTNESS_RESULTS.md).
-Gold-only and corn-only VAR/LVAR comparisons are included on the same dates and lag order.
-All 38 Python tests pass. Saved-output verification covers 24,862 main forecasts,
-8,020 independent latest-HAR matches and 50,526 sensitivity forecasts.
-Oil + gold and oil + natural gas are matched across all four families in sections 4 and 9.
+Both [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [VAR_QTFE.ipynb](VAR_QTFE.ipynb)
+have been fully executed using `datasets/vol_data_futures_yield_final_version.csv`.
+The input passes the main schema, calendar, finite-value and numerical identity
+checks. All required main-model and yield-model columns are present.
+See [the final-data readiness and results summary](reports/final_dataset/README.md)
+for the exact sample, updated scores, supported robustness checks and limitations.
+
+VAR, LVAR, HAR and LHAR now score the same **783 evaluation targets**, with the
+existing 12 July 2023 training cutoff. BIC again selects **five VAR lags**.
+Oil + gold and oil + natural gas are present in all four families, alongside
+individual commodities, corn + gold, no-corn and all-four specifications.
+LVAR means leverage-augmented linear VAR-X with three ES downside-return controls.
+
+All **42 tests** pass. Verification recomputes 35,235 shared forecasts,
+20,358 HAR commodity/yield forecasts, 12,528 lag-sensitivity forecasts and 17,226
+independent HAR/LHAR matches. All scored models have zero forecast fallbacks.
 
 ```sh
-.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
+.venv/bin/python -m pip install -r requirements-var-notebook.txt
+.venv/bin/python scripts/execute_har_notebook.py
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
+.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-Use `requirements-var-notebook.txt` and the project Python kernel. Notebook
-outputs are saved; generated CSVs stay local. The original HAR and legacy VAR
-notebooks are preserved. The prior R path below remains reproducible for its
-separately documented ES/CL/GC calendar; do not mix its scores with this notebook.
-For the separate bond-calendar audit, retrieve the public FRED snapshot once with
-`.venv/bin/python scripts/fetch_fred_dgs10.py`; subsequent execution uses the
-saved input offline. See [the project checklist](PROJECT_CHECKLIST.md).
+Run HAR before VAR. Use the project Python kernel; notebook outputs are saved.
+Generated CSVs and plots stay local in `reports/final_dataset/har/generated/` and
+`reports/final_dataset/var/generated/`. Earlier outputs are preserved separately.
+The following R analyses, HAR audits, data preparation guides and
+[older VAR report](reports/var_har_notebook/ASYMMETRIC_VAR_REPORT.tex) document
+previous data versions; their numbers are not the final-dataset results.
 
 ## Earlier R VAR analysis — 4 October 2026
 

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from statsmodels.tsa.api import VAR
+from final_model_data import prepare_final_data, validate_final_frame
 
 from var_har_notebook import (prepare_har_data, aligned_design, select_shared_lag,
     model_specifications, fit_models, expanding_forecasts, columns_for,
@@ -17,46 +18,35 @@ ROOT = Path(__file__).resolve().parents[1]
 class AlignedVARTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.raw = pd.read_csv(ROOT / "datasets/realized_variance_futures.csv")
-        cls.wide, _ = prepare_har_data(cls.raw)
+        cls.raw = pd.read_csv(ROOT / "datasets/vol_data_futures_yield_final_version.csv", float_precision="round_trip")
+        cls.wide, _ = prepare_final_data(cls.raw)
         cls.design = aligned_design(cls.wide)
         cls.p, _ = select_shared_lag(cls.design, "2023-07-12")
         cls.specs = model_specifications(cls.p)
 
     def test_preparation_exactly_matches_current_har_cell(self):
-        # A complete synthetic yield input isolates commodity preparation from
-        # the latest notebook's separately audited bond-calendar restriction.
-        dates = pd.DatetimeIndex(pd.to_datetime(self.raw.date).unique()).sort_values()
-        yields = pd.DataFrame({"dgs10": 2.5}, index=dates)
-        reference = reference_har_preparation(self.raw, yields, ROOT / "HAR_QTFE.ipynb")
-        pd.testing.assert_frame_equal(self.wide,
-            reference.drop(columns=["dgs10", "abs_dyield_10", "rv_yield_10"]))
+        reference = reference_har_preparation(self.raw, None, ROOT / "HAR_QTFE.ipynb")
+        pd.testing.assert_frame_equal(self.wide, reference)
 
-    def test_latest_yield_join_matches_reference_without_imputation(self):
-        # Include a genuinely absent date and a missing yield, so the test
-        # detects changes to inner matching and diff-before-dropna semantics.
-        dates = pd.DatetimeIndex(pd.to_datetime(self.raw.date).unique()).sort_values()
-        yields = pd.DataFrame({"dgs10": np.linspace(2, 4, len(dates))}, index=dates)
-        absent, missing = self.wide.index[50], self.wide.index[80]
-        yields = yields.drop(index=absent)
-        yields.loc[missing, "dgs10"] = np.nan
-        prepared, _ = prepare_har_data(self.raw, yields=yields)
-        reference = reference_har_preparation(self.raw, yields, ROOT / "HAR_QTFE.ipynb")
-        pd.testing.assert_frame_equal(prepared, reference)
-        self.assertNotIn(absent, prepared.index)
-        self.assertNotIn(missing, prepared.index)
-        pd.testing.assert_frame_equal(self.wide, prepare_har_data(self.raw)[0])
+    def test_final_yields_are_validated_without_imputation(self):
+        altered = self.raw.copy()
+        altered.loc[10, "dgs10"] = np.nan
+        with self.assertRaises(ValueError):
+            prepare_final_data(altered)
+        altered = self.raw.copy()
+        altered.loc[10, "rv_yield_10"] += 100
+        with self.assertRaises(ValueError):
+            prepare_final_data(altered)
 
-    def test_saved_yield_snapshot_matches_current_har_preparation(self):
-        yields = load_yield_snapshot(ROOT / "datasets/raw/fred_dgs10_2011_2026.csv")
-        prepared, _ = prepare_har_data(self.raw, yields=yields)
-        reference = reference_har_preparation(self.raw, yields, ROOT / "HAR_QTFE.ipynb")
-        pd.testing.assert_frame_equal(prepared, reference)
-        self.assertLess(len(prepared), len(self.wide))
+    def test_final_calendar_and_supplied_returns_are_preserved(self):
+        supplied = validate_final_frame(self.raw)
+        self.assertTrue(self.wide.index.equals(supplied.index[21:]))
+        pd.testing.assert_frame_equal(self.wide[["ret_ES", "dgs10", "rv_yield_10"]],
+                                     supplied.loc[self.wide.index, ["ret_ES", "dgs10", "rv_yield_10"]])
 
     def test_native_var_same_es_equation_and_forecast(self):
         for name in ["VAR (All 4: Oil + Corn + Gold + NG)", "VAR (Gold)", "LVAR (Gold)",
-                     "VAR (Corn)", "LVAR (Corn)"]:
+                     "VAR (Corn)", "LVAR (Corn)", "VAR (Corn + Gold)", "LVAR (Corn + Gold)"]:
             with self.subTest(model=name):
                 spec = self.specs[name]
                 symbols = ["ES", *spec["commodities"]]
@@ -156,8 +146,9 @@ class AlignedVARTests(unittest.TestCase):
         self.assertNotIn("C.l2", columns)
         fits, summary = fit_models(self.design, self.specs)
         self.assertEqual(summary.N.nunique(), 1)
-        self.assertEqual(int(summary.N.iloc[0]), 3967)
-        self.assertEqual(int((self.design["target_dates"] > "2023-07-12").sum()), 802)
+        self.assertEqual(int(summary.N.iloc[0]), len(self.raw) - 43)
+        self.assertEqual(int((self.design["target_dates"] > "2023-07-12").sum()),
+                         int(pd.to_datetime(self.raw.date).gt("2023-07-12").sum()))
 
 
 if __name__ == "__main__":

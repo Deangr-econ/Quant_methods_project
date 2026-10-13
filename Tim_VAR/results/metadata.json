@@ -1,0 +1,50 @@
+{
+  "n": 3910,
+  "initial_training": 3127,
+  "test": 783,
+  "start": "2011-01-04",
+  "end": "2026-08-31",
+  "train_end": "2023-07-12",
+  "test_start": "2023-07-13",
+  "p_BIC": 4,
+  "p_AIC": 9,
+  "models": {
+    "AR": [
+      "ES"
+    ],
+    "Oil and gold": [
+      "ES",
+      "CL",
+      "GC"
+    ],
+    "Gas and Treasury": [
+      "ES",
+      "NG",
+      "TY"
+    ],
+    "All commodities": [
+      "ES",
+      "CL",
+      "GC",
+      "NG",
+      "C"
+    ],
+    "Full VAR": [
+      "ES",
+      "CL",
+      "GC",
+      "NG",
+      "C",
+      "TY"
+    ]
+  },
+  "input_sha256": "ad3b481455b8e8ea4e632e065f7b38cfbb0293ecd8286611c81b5cda7ea5137f",
+  "maximum_QR_forecast_check_difference": 3.730349362740526e-14,
+  "treasury_zero_count": 308,
+  "ADF_critical_value_note": "Large-sample 5% intercept-only Dickey-Fuller value, rounded to -2.86",
+  "numerical_engine": "Python scipy/numpy OLS; R companion supplied separately",
+  "source_copy_unchanged": true,
+  "maximum_metric_recalculation_difference": 1.6653345369377348e-16,
+  "original_R_companion_executed": false,
+  "all_final_document_pages_visually_reviewed": true
+}

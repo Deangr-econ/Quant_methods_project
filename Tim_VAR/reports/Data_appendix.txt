@@ -1,0 +1,52 @@
+Appendix B Data and preliminary checks
+
+The supplied group dataset contains 3,910 dated observations and 24 columns. Dates are unique and ordered, and all numeric entries are finite and non-missing. The VAR analysis retains every row and selects five existing futures log-RV5 columns plus the Treasury variation proxy. Stored log columns equal the natural logarithm of their corresponding RV5 columns; no additional log transformation is applied.
+
+Table B1 Common observation sample
+
+Sample | Dates | Observations
+Full panel | 4 January 2011–31 August 2026 | 3,910
+Initial training | 4 January 2011–12 July 2023 | 3,127
+Test targets | 13 July 2023–31 August 2026 | 783
+
+The existing training cutoff is retained. Counts precede model-specific lag losses. The expanding procedure incorporates each observed test outcome only into subsequent forecasts.
+
+Table B2 Variables and initial training descriptives
+
+Series | CSV column | Mean | Std. deviation
+Equity | log_rv5_ES | -9.761 | 1.053
+WTI oil | log_rv5_CL | -8.015 | 0.945
+Gold | log_rv5_GC | -9.604 | 0.730
+Natural gas | log_rv5_NG | -7.409 | 0.860
+Corn | log_rv5_C | -8.693 | 0.821
+Treasury proxy | rv_yield_10 | 26.749 | 53.987
+
+Futures variables are natural log RV5. Treasury variation is in basis points squared, unlogged; 308 full-sample observations are zero. Units differ across these two representations.
+
+The Treasury proxy equals the squared basis-point change in the yield between successive retained dates, wherever the change can be verified within the file. It can therefore span a gap in the common calendar and is not intraday bond realised variance. The baseline uses its ordinary model lags and assumes previous-date information is available; an extra-delay check appears in Appendix A. No values are interpolated or seasonally pre-filtered.
+
+Figure B1 Equity log realised variance and the evaluation period
+
+The dashed line marks the fixed training cutoff. The plot displays the full supplied panel for description; preliminary tests use only the initial training sample.
+
+Stationarity and seasonality
+
+Table B3 Stationarity tests and persistence in the initial training sample
+
+Series | ADF statistic | KPSS statistic | Lag-one ACF
+Equity | -5.661 | 0.896 | 0.855
+WTI oil | -4.152 | 2.133 | 0.874
+Gold | -5.136 | 1.041 | 0.667
+Natural gas | -3.757 | 2.857 | 0.792
+Corn | -4.825 | 0.883 | 0.619
+Treasury proxy | -8.132 | 1.034 | 0.213
+
+ADF: intercept, no trend, 20 lagged differences; 5% critical value approximately −2.86. KPSS: level-stationarity null and 28 Bartlett lags; 5% critical value 0.463. Tests use the series as entered, before calendar controls. ACF denotes sample autocorrelation.
+
+ADF rejects a unit root for every series, while KPSS rejects constant-mean level stationarity for every series. This mixed evidence prevents an unqualified claim that the data are stationary. Strong persistence, changing volatility regimes and deterministic patterns may contribute to the disagreement. Log levels are retained as the baseline forecasting specification, while the first-difference check in Appendix A assesses whether the AR–VAR comparison depends on this choice.
+
+Figure B2 Monthly volatility patterns in natural gas and corn
+
+Each point is the arithmetic mean of unlogged RV5 for that month, divided by the series’ overall initial-training mean. These are descriptive monthly averages, not causal estimates or formal tests of seasonality.
+
+Natural gas has its highest monthly mean in January and its lowest in August. Corn peaks in June; July’s mean RV5 is 3.21 times December’s. Rejecting a unit root does not remove these calendar patterns. The AR and VAR equations therefore include 11 month and four weekday indicators, estimated within each expanding training sample. The underlying observations remain unchanged, and seasonal coefficients are never estimated using future test outcomes.

@@ -68,6 +68,16 @@ def prepare_har_data(raw, start="2011-01-01", yields=None):
 def reference_har_preparation(raw, yields, path):
     """Execute only the inspected preparation cell, with explicit local inputs."""
     notebook = json.loads(Path(path).read_text())
+    if "rv5_ES" in raw.columns:
+        from final_model_data import validate_final_frame
+        candidates = ["".join(c["source"]) for c in notebook["cells"]
+                      if c["cell_type"] == "code" and "df = df_wide.copy()" in "".join(c["source"])
+                      and "log_rv5_m_" in "".join(c["source"])]
+        if len(candidates) != 1:
+            raise ValueError("Expected one final-wide HAR variance preparation cell")
+        namespace = dict(np=np, pd=pd, df_wide=validate_final_frame(raw))
+        exec(compile(ast.parse(candidates[0]), str(path), "exec"), namespace)
+        return namespace["df"]
     candidates = ["".join(c["source"]) for c in notebook["cells"]
                   if c["cell_type"] == "code" and "data.groupby" in "".join(c["source"])
                   and "rv5_scaled_m" in "".join(c["source"])]
@@ -169,7 +179,7 @@ def select_shared_lag(design, training_end, max_lag=20):
 def model_specifications(p):
     sets = {"Baseline": [], "Oil": ["CL"], "Gold": ["GC"], "Corn": ["C"], "NatGas": ["NG"],
             "Oil + Gold": ["CL", "GC"],
-            "Energy: Oil + NG": ["CL", "NG"], "No Corn: Oil + NG + Gold": ["CL", "NG", "GC"],
+            "Energy: Oil + NG": ["CL", "NG"], "Corn + Gold": ["C", "GC"], "No Corn: Oil + NG + Gold": ["CL", "NG", "GC"],
             "All 4: Oil + Corn + Gold + NG": ["CL", "C", "GC", "NG"]}
     specs = {}
     for downside in [False, True]:
@@ -181,10 +191,10 @@ def model_specifications(p):
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:
         specs[f"Restricted LVAR ({label}; Daily Only)"] = dict(
             family="VAR", p=p, commodities=sets[label], downside=True, daily_only=True)
-    for label in ["Baseline", "Oil + Gold", "Energy: Oil + NG"]:
+    for label in sets:
         specs[f"HAR ({label})"] = dict(family="HAR", p=0, commodities=sets[label],
                                        downside=False, daily_only=False)
-    for label in ["Baseline", "Oil + Gold", "Energy: Oil + NG", "No Corn: Oil + NG + Gold", "All 4: Oil + Corn + Gold + NG"]:
+    for label in sets:
         specs[f"LHAR ({label})"] = dict(family="LHAR", p=0, commodities=sets[label],
                                         downside=True, daily_only=False)
     for label in ["All 4: Oil + Corn + Gold + NG", "No Corn: Oil + NG + Gold"]:

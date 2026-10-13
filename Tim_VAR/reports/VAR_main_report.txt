@@ -1,0 +1,23 @@
+Vector autoregression
+
+To identify the contribution of other markets, we compare VAR forecasts with an equity-only AR containing the same number of lags and calendar controls. This comparison separates cross-market information from the predictive value of equity volatility’s own history. A persistence forecast, equal to the previous retained observation, provides an additional benchmark.
+
+The dependent variable is log RV5 of E-mini S&P 500 futures. We estimate four VAR specifications: equity with oil and gold; equity with natural gas and the Treasury proxy; equity with all four commodities, including corn; and a full system containing all six series. Each equation is estimated by OLS with an intercept, 11 month indicators and four weekday indicators. The calendar controls accommodate recurring seasonal differences without pre-filtering the data. Treasury variation enters as the supplied squared yield-change proxy. Appendix B describes the variables and common sample.
+
+The initial training sample contains 3,127 observations through 12 July 2023. Lag selection uses only this sample: BIC selects four lags and AIC selects nine from a maximum of 20 in the full system. Four lags form the main specification; nine provide a sensitivity check. We hold the lag order fixed across models within each comparison and re-estimate on an expanding sample, producing 783 one-step forecasts from 13 July 2023 to 31 August 2026. Forecasts use earlier retained observations and assume that all inputs dated before the target are available. Appendix A reports the specification checks.
+
+Table 1 Out-of-sample accuracy with four lags
+
+Model | MSE | MAE | MSE difference vs AR (%)
+Persistence | 0.43574 | 0.50428 | +22.16
+AR | 0.35669 | 0.45396 | 0.00
+VAR: oil and gold | 0.35786 | 0.45575 | +0.33
+VAR: gas and treasury | 0.35838 | 0.45651 | +0.48
+VAR: all commodities | 0.35897 | 0.45759 | +0.64
+Full VAR | 0.35918 | 0.45785 | +0.70
+
+Notes: 783 common forecast targets; errors are measured in equity log RV5. All AR/VAR models include identical calendar controls. Source: own calculations using the group dataset.
+
+The equity AR reduces MSE by 18.14% relative to persistence. None of the four-lag VARs improves on the matched AR in either MSE or MAE. The full VAR’s MSE is 0.70% higher, while adding oil and gold raises it by 0.33%. The improvement over persistence therefore comes from modelling equity’s own dynamics and calendar effects; it cannot be attributed to the additional markets.
+
+The nine-lag oil-and-gold VAR achieves a small 0.14% MSE reduction relative to AR(9), but its MAE is higher. Broader systems again fail to improve MSE. First differencing and an additional Treasury delay also leave the AR–VAR comparison unchanged (Appendix A). Mixed stationarity evidence and remaining residual autocorrelation warrant caution with conventional Granger-test inference. Overall, additional markets provide little incremental forecast value for this equity benchmark over the selected evaluation period. This finding does not establish that spillovers are absent or that the same result holds for other equity markets or forecast horizons.
