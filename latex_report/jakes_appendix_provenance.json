@@ -1,0 +1,210 @@
+{
+  "source_sha256": "ad3b481455b8e8ea4e632e065f7b38cfbb0293ecd8286611c81b5cda7ea5137f",
+  "model_run": "2026-10-13T19:31:46.382262+02:00",
+  "builder_sha256": "7e5688041ec2613e85761726771ac937fe9c1ebbe96765dbf99b1c15e16c629f",
+  "inputs": {
+    "initial_lag_selection.csv": "7a8afbdd2088cf6321200d1c55f7ff654d4136cb4ad37f876b3cd904c1a98179",
+    "robustness_lag_metrics.csv": "9e960496779fe3f62aaf9892e90d42e93eb9a9b9c795b7bbc8f1f6f4d3a83f56",
+    "training_stationarity.csv": "f0e809f42235add0b4196b82c85c36b68d62e80fc9531993ed9292788135fe4f",
+    "training_es_diagnostics.csv": "de94de633246ba3ab8897a9986a959806bab8b6b0a37c44b90a6949a86586d0e",
+    "training_joint_hac_tests.csv": "3a6617b72b960789f0d8353eaba33ef419f3057a3a6157e7b0dc779a992dfe96",
+    "robustness_intervals.csv": "b82c5c310508ba423fcbb8d05cff6eb5e5707c74c956776cf64389e246267fb8",
+    "shared_forecast_metrics.csv": "0bd4e42e1df62992f5370087cd245e9a141be1155bbbb98454b65d6d17a77278",
+    "training_generalized_irfs.csv": "cc03d3d5eca2343d90053c9eb3f457b7829fa50037d7a78b7914a192e85971fe",
+    "training_irf_selected_horizons.csv": "eb3265e10241afc1591d24e75b3eb88ffbbfd366bf3ad7cc134307cc62338422"
+  },
+  "figures": {
+    "lag_selection.pdf": "486f06b2b6f0e02d65479b65ac46dd5e4d9aa7254fb307b55daafc8949547f12",
+    "incremental_gains.pdf": "e636ee43f7f515861add44fecac1fa7f1d8fc1f995f820010099088e8cc4b8b2",
+    "conditional_irfs.pdf": "63dbb8286e77bf7261458be111c1fd5e2cd21cf51c2ac432ca9fc681ccc06512"
+  },
+  "report_sha256": "9293dad11f6e3ad07e76e7b80dc6c08cdb620f4727f602f8c037934dcfa1a5b6",
+  "table_rows": {
+    "D1": [
+      [
+        "Equity-only VAR",
+        "0.368531",
+        "0.365940",
+        "0.464175",
+        "0.463306"
+      ],
+      [
+        "Equity-only LVAR",
+        "0.334215",
+        "0.328510",
+        "0.442837",
+        "0.440629"
+      ],
+      [
+        "LVAR: oil and gold",
+        "0.336611",
+        "0.330827",
+        "0.443919",
+        "0.442912"
+      ],
+      [
+        "LVAR: natural gas",
+        "0.332670",
+        "0.328684",
+        "0.442343",
+        "0.441537"
+      ],
+      [
+        "LVAR: oil, natural gas and gold",
+        "0.334549",
+        "0.330157",
+        "0.443412",
+        "0.442896"
+      ],
+      [
+        "LVAR: all four commodities",
+        "0.334687",
+        "0.330471",
+        "0.443561",
+        "0.442872"
+      ]
+    ],
+    "D2": [
+      [
+        "Equity",
+        "-5.5373",
+        "$<0.001$",
+        "0.8349",
+        "$\\leq 0.010$"
+      ],
+      [
+        "WTI oil",
+        "-3.9928",
+        "0.0014",
+        "1.9409",
+        "$\\leq 0.010$"
+      ],
+      [
+        "Gold",
+        "-5.1617",
+        "$<0.001$",
+        "0.9606",
+        "$\\leq 0.010$"
+      ],
+      [
+        "Natural gas",
+        "-3.9078",
+        "0.0020",
+        "2.6295",
+        "$\\leq 0.010$"
+      ],
+      [
+        "Corn",
+        "-5.5897",
+        "$<0.001$",
+        "0.8136",
+        "$\\leq 0.010$"
+      ]
+    ],
+    "D3": [
+      [
+        "Equity-only LVAR",
+        "0.9159",
+        "$<0.001$",
+        "0.4184"
+      ],
+      [
+        "LVAR: oil and gold",
+        "0.9669",
+        "$<0.001$",
+        "0.3726"
+      ],
+      [
+        "LVAR: oil, natural gas and gold",
+        "0.9777",
+        "0.0018",
+        "0.3227"
+      ],
+      [
+        "LVAR: all four commodities",
+        "0.9786",
+        "0.0019",
+        "0.3126"
+      ]
+    ],
+    "D4": [
+      [
+        "LVAR: oil and gold",
+        "10",
+        "37.7788",
+        "$<0.001$"
+      ],
+      [
+        "LVAR: oil, natural gas and gold",
+        "15",
+        "63.7299",
+        "$<0.001$"
+      ],
+      [
+        "LVAR: all four commodities",
+        "20",
+        "69.6887",
+        "$<0.001$"
+      ]
+    ],
+    "D5": [
+      [
+        "Equity-only LVAR vs equity-only VAR",
+        "9.31",
+        "5.95",
+        "13.44"
+      ],
+      [
+        "Oil and gold vs equity-only LVAR",
+        "-0.72",
+        "-2.21",
+        "0.77"
+      ],
+      [
+        "All four commodities vs equity-only LVAR",
+        "-0.14",
+        "-2.00",
+        "1.55"
+      ],
+      [
+        "Natural gas vs equity-only LVAR",
+        "0.46",
+        "-0.79",
+        "1.69"
+      ],
+      [
+        "Matched equity-only LHAR vs equity-only LVAR",
+        "3.30",
+        "1.59",
+        "5.09"
+      ]
+    ],
+    "4": [
+      [
+        "Equity only",
+        "0.368531",
+        "0.334215"
+      ],
+      [
+        "Oil and gold",
+        "0.371324",
+        "0.336611"
+      ],
+      [
+        "Natural gas",
+        "0.367983",
+        "0.332670"
+      ],
+      [
+        "Oil, natural gas and gold",
+        "0.369927",
+        "0.334549"
+      ],
+      [
+        "All four commodities",
+        "0.370488",
+        "0.334687"
+      ]
+    ]
+  }
+}
