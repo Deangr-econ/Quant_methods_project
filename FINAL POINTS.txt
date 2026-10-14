@@ -1,0 +1,128 @@
+PART B - POINTS TO PASS TO THE OTHER SECTION OWNERS
+==================================================
+
+These remain in the current PDF. You do not have to rewrite someone else's section yourself. Send the relevant owner the exact proposed correction below. No notebook changes or new model runs are needed for these wording corrections.
+
+B1. DEAN: LHAR FORMULA STILL DOES NOT MATCH THE IMPLEMENTED CODE
+
+WHERE: Section 3.1, PDF page 7 / printed page 6, under "Incorporating Asymmetries: The Leverage LHAR Model".
+
+The current formula takes the negative part of each daily return BEFORE averaging. The code averages SIGNED returns first, THEN takes the magnitude of a negative average. It also uses positive magnitudes, rather than signed negative inputs. This is a model-description correction, not just a style preference.
+
+PROPOSED ACTION: replace the whole block from "Because negative equity returns induce" through "to isolate market-wide panic spillovers", including its current formulas. Stop before Section 3.2.
+
+PLAIN-TEXT REPLACEMENT:
+
+PASTE START
+Negative equity returns may contain information about future variance beyond the size of past price movements. Motivated by the persistent-leverage approach of Corsi and Renò (2012), the LHAR adds three measures of negative ES returns over 1, 5 and 22 observations. Let r_t be the decimal ES close-to-close log return, obtained by dividing the dataset's percentage return by 100. For each window, the leverage input is the magnitude of the negative part of its average signed return:
+
+d_t^(h) = |min(mean(r_t, ..., r_(t-h+1)), 0)|, for h = 1, 5 and 22.
+
+If the average return is negative, the measure equals its magnitude; otherwise, it is zero. Gains and losses can therefore offset each other before the negative part is taken. These three variables are added to the HAR's variance regressors, using only returns observed before the forecast target. The resulting model is called LHAR. The coefficients are estimated from the data, so a negative return does not automatically increase the forecast. This is the same construction used for the LVAR leverage inputs in Section 3.3.
+PASTE END
+
+The plain-text formula can be formatted as a Word equation. If Dean wants the typeset equation instead, it is on page 9 of "output/pdf/jakes section.pdf". Do not paste raw LaTeX into an ordinary Word paragraph.
+
+
+B2. FEMKE: THE VALUE-AT-RISK CLAIM IS STILL PRESENT
+
+WHERE: Section 5, PDF page 14 / printed page 13, in the paragraph beginning "Banks and other financial institutions".
+
+FIND this sentence:
+A forecast that changes MSE by less than 1% would therefore hardly change the resulting Value-at-Risk, whereas modelling the equity market's own history improves accuracy by 18% relative to the persistence benchmark.
+
+REPLACE ONLY THAT SENTENCE WITH:
+
+PASTE START
+The differences in forecast MSE describe statistical accuracy. They do not establish how much Value-at-Risk would change or whether the models improve risk-management decisions.
+PASTE END
+
+Keep the other sentences in that paragraph. A percentage change in forecast MSE is not a percentage change in forecast variance or Value-at-Risk.
+
+
+B3. FEMKE: THE RECESSION/CRISIS SENTENCE YOU ALREADY FLAGGED
+
+WHERE: Section 5, PDF page 14 / printed page 13, just before the paragraph beginning "Banks and other financial institutions".
+
+FIND this sentence:
+Our evaluation period (July 2023 to August 2026) contains no recession or crisis comparable to 2008 or 2020, so such episodes have little opportunity to appear.
+
+ASK THE OWNER TO provide evidence supporting it, or REPLACE ONLY THAT SENTENCE WITH:
+
+PASTE START
+Forecast comparisons over one evaluation period may not capture episodic predictive benefits documented in other samples.
+PASTE END
+
+This is the same point you have already noted. It is separate from finishing your LVAR section.
+
+
+B4. GROUP: TIDY THE CITATIONS AND COMPLETE THE REFERENCES
+
+WHERE: Section 1, PDF page 4 / printed page 3.
+
+FIND: (Yongdeng Xu, et. Al., 2024)
+REPLACE WITH: (Xu et al., 2024)
+
+FIND: (Francis X, et. Al., 2012)
+REPLACE WITH: (Diebold and Yilmaz, 2012)
+
+WHERE: References, currently PDF pages 27-28 / printed pages 26-27.
+
+Use one heading "References", rather than the three author/section headings "Chapter 1", "Chapter 5 (Femkes Part):" and "Jakes part:". Combine the entries into one list. Keep one copy of Diebold and Yilmaz (2012), which is currently duplicated.
+
+The Data section cites Liu et al. (2015), Baur and McDermott (2010), and Cipollini et al. (2026), but their entries are missing from the final References. Andersen et al. (2003) is written under Section 2 rather than included in the final list. Add the following four entries to the combined References, without duplicating an entry if a teammate has already added it:
+
+PASTE START
+Andersen, T. G., Bollerslev, T., Diebold, F. X., and Labys, P. (2003). Modeling and forecasting realized volatility. Econometrica, 71(2), 579-625. https://doi.org/10.1111/1468-0262.00418
+
+Baur, D. G., and McDermott, T. K. (2010). Is gold a safe haven? International evidence. Journal of Banking & Finance, 34(8), 1886-1898. https://doi.org/10.1016/j.jbankfin.2009.12.008
+
+Cipollini, F., Cruciani, G., Gallo, G. M., Insana, A., Otranto, E., and Spagnolo, F. (2026). VOLatility Archive for Realized Estimates (VOLARE). arXiv preprint arXiv:2602.19732. https://doi.org/10.48550/arXiv.2602.19732
+
+Liu, L. Y., Patton, A. J., and Sheppard, K. (2015). Does anything beat 5-minute RV? A comparison of realized measures across multiple asset classes. Journal of Econometrics, 187(1), 293-311. https://doi.org/10.1016/j.jeconom.2015.02.008
+PASTE END
+
+For the Paye entry, the report cites 2012 but the reference currently lists a 2011 working paper and repeats its SSRN link. If citing the published 2012 article, replace that entry and the repeated standalone SSRN link with:
+
+PASTE START
+Paye, B. S. (2012). 'Déjà vol': Predictive regressions for aggregate stock market volatility using macroeconomic variables. Journal of Financial Economics, 106(3), 527-546. https://doi.org/10.1016/j.jfineco.2012.06.005
+PASTE END
+
+The reference details above were checked against the publisher, author or preprint records. These links are evidence for the bibliography edits, not extra text to paste into the report:
+- Andersen: https://onlinelibrary.wiley.com/doi/10.1111/1468-0262.00418
+- Baur and McDermott: https://research-repository.uwa.edu.au/en/publications/is-gold-a-safe-haven-international-evidence/
+- VOLARE: https://arxiv.org/abs/2602.19732
+- Liu, Patton and Sheppard: https://public.econ.duke.edu/~ap172/Liu_Patton_Sheppard_JoE_2015.pdf
+- Paye: https://www.sciencedirect.com/science/article/pii/S0304405X12001316
+
+
+PART C - FINAL WORD DOCUMENT CLEANUP
+====================================
+
+C1. TABLE OF CONTENTS
+WHERE: PDF page 3 / printed page 2.
+The current contents list is incomplete and contains "Error! Bookmark not defined." entries. Apply Word heading styles to the section and appendix headings, rebuild/update the automatic contents list, and update the whole table after all edits. Do not keep the broken bookmark text.
+
+C2. COMMENTS / MARKUP
+WHERE: particularly PDF page 14 / printed page 13.
+The PDF still displays a comment balloon and markup. Resolve/remove comments and export the final document without markup. This also removes the wide blank comment area visible on several pages. If using Print to PDF, make sure markup is excluded from the print output.
+
+C3. APPENDIX PAGE BREAKS
+WHERE: D.2 on printed page 22 and the final D.3 paragraph split across printed pages 24-25.
+Move the D.2 heading onto the page containing Table D2, using "Keep with next" or a page break before that heading. Keep the final D.3 paragraph together using Word's paragraph setting "Keep lines together". Keep each caption attached to its table or figure. Recheck these after adding the missing paragraphs.
+
+C4. PREFACE
+WHERE: PDF page 2 / printed page 1.
+The Preface is currently empty. Ask the group whether it is required. If required, the group should complete it; otherwise remove the empty heading/page and update the contents. You do not need to invent a preface for your LVAR contribution.
+
+C5. TWO SMALL LABEL FIXES
+WHERE: Section 3.3, printed pages 8-9.
+Change "Table2:" to "Table 2:" and "(Lütkepohl,2005)" to "(Lütkepohl, 2005)".
+
+WHERE: Appendix C, PDF page 22 / printed page 21.
+The rows labelled "HAR-X (Energy: Corn + Gold)" and "LHAR-X (Energy: Corn + Gold)" contain corn and gold, not energy commodities. Ask Dean to relabel them "HAR-X (Corn + Gold)" and "LHAR-X (Corn + Gold)". Keep the numbers.
+
+
+WHEN YOUR PART IS FINISHED
+==========================
+After A1-A8, your LVAR results, matched model comparison, lag sensitivity, diagnostics, uncertainty table, IRF explanation and references are represented. The remaining listed content issues belong to the shared report or other section owners. These edits do not require changing the data, notebooks or saved model results.
