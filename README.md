@@ -45,15 +45,24 @@ independent HAR/LHAR forecast matches. All 42 tests pass.
 
 ### Running the HAR notebook
 
-`HAR_QTFE.ipynb` was written for Google Colab. To run it, set the Colab secrets `data_path` (the long-format
-export `datasets/realized_variance_futures.csv`) and `fredapi_key` (a free FRED API key) and install
-`scikit-learn` and `fredapi`. It then reproduces the reported HAR/LHAR results, except that it rebuilds the
-panel one row shorter at the start (3,909 versus 3,910 rows), which moves the baseline LHAR MSE from 0.3254
-to 0.3253.
+`HAR_QTFE.ipynb` was written for Google Colab and still runs there unchanged (set the Colab secrets `data_path`,
+the long-format export `datasets/realized_variance_futures.csv`, and `fredapi_key`, a free FRED API key).
 
-The only changes to this notebook are a one-line fix to a display cell (cell 17 called `.summary()` on a
-dictionary) and the removal of repository-owner details from its Colab badge and a commented-out URL. Its code
-and functions are otherwise untouched and are read independently by `VAR_QTFE.ipynb` for matched references.
+It also runs locally: open it from inside this project folder and use *Run all*. One added cell (the third
+cell, "Local-run compatibility") detects that it is not running in Colab and supplies local stand-ins:
+`data_path` becomes `datasets/realized_variance_futures.csv`, the FRED DGS10 series is read from
+`datasets/vol_data_futures_yield_final_version.csv`, and scikit-learn's two error metrics are replaced by numpy
+equivalents if scikit-learn is not installed. No secrets, API key or internet access are needed (the first cell,
+`!pip install fredapi`, is harmless and can be skipped locally). A full run takes under a minute.
+
+The saved outputs in the notebook come from the original Colab run. A local run reproduces the reported HAR/LHAR
+results, except that it rebuilds the panel one row shorter at the start (3,909 versus 3,910 rows), which moves the
+baseline LHAR MSE from 0.3254 to 0.3253 and changes AIC and BIC slightly.
+
+The changes to this notebook are a one-line fix to a display cell (cell 17 called `.summary()` on a dictionary), the
+added local-run cell, and the removal of repository-owner details from its Colab badge and a commented-out URL.
+Its model code and functions are otherwise untouched and are read independently by `VAR_QTFE.ipynb` for matched
+references.
 
 ### Running the calendar-controlled VAR
 
