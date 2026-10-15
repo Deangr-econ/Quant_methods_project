@@ -1,30 +1,36 @@
-# Quant_methods_project
-Group project
+# Cross-market information and equity volatility
 
-## Current final-dataset HAR and VAR results — 13 October 2026
+Group project for Quantitative Techniques for Financial Economics (EBC4097).
 
-[VAR_QTFE.ipynb](VAR_QTFE.ipynb) is the leverage-extension notebook, fully
-executed on `datasets/vol_data_futures_yield_final_version.csv`. The main-model
-columns and numerical identity checks pass. See [the current final-data summary](reports/final_dataset/README.md).
-The original [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [Tim_VAR](Tim_VAR/README.md)
-are preserved. The only changes to the HAR notebook are a one-line fix to a display cell (cell 17 called
-`.summary()` on a dictionary) and the removal of repository-owner details from its Colab badge and a commented-out URL;
-its code and functions are otherwise untouched and are read independently for matched references.
+**Research question.** Does commodity and Treasury-market information improve forecasts of
+S&P 500 futures realised variance beyond the equity market's own history?
 
-`HAR_QTFE.ipynb` was written for Google Colab. To run it, set the Colab secrets `data_path` (the long-format
-export `datasets/realized_variance_futures.csv`) and `fredapi_key` (a free FRED API key) and install
-`scikit-learn` and `fredapi`. Re-running it on the repository data reproduces the reported HAR/LHAR results,
-except that it rebuilds the panel one row shorter at the start (3,909 vs 3,910 rows), which moves the
-baseline LHAR MSE from 0.3254 to 0.3253.
+## What is in this folder
 
-The VAR, LVAR and common-date HAR/LHAR benchmarks score the same **783 targets**
-with the 12 July 2023 cutoff. BIC selects **five VAR lags**. Oil + gold, oil +
-natural gas, individual commodities, corn + gold, no-corn and all-four comparisons
-remain. All active VAR/LVAR systems retain every selected market lag.
-**LVAR** means leverage-augmented linear VAR-X with three ES downside controls.
+| Component | Where | What it does |
+|---|---|---|
+| VAR, leverage-augmented VAR (LVAR) and common-date HAR/LHAR benchmarks | `VAR_QTFE.ipynb` (fully executed) | Plain VAR(5) versus LVAR(5) with three negative-return inputs, commodity extensions, diagnostics, joint tests, impulse responses and robustness checks |
+| HAR and leverage HAR (LHAR) with commodity and Treasury extensions | `HAR_QTFE.ipynb` | Colab notebook; see "Running the HAR notebook" below |
+| VAR with calendar controls and a Treasury proxy | `Tim_VAR/` | Equity-only AR(4) versus four VAR extensions; Python script plus an independent R implementation |
+| Supporting code | `final_model_data.py`, `var_har_notebook.py`, `var_irf.py`, `final_robustness.py`, `har_return_audit.py`, `config/`, `scripts/`, `tests/` | Data validation, model code, impulse responses, interval estimates, notebook runner and verification |
+| Data | `datasets/vol_data_futures_yield_final_version.csv` | Final panel: 3,910 dates, 4 January 2011 to 31 August 2026 |
+| Saved results | `reports/final_dataset/var/generated/` | Forecasts, metrics, diagnostics and provenance written by `VAR_QTFE.ipynb` |
+| Report figures | `var_figures/` | Figures built from the saved results by `scripts/build_var_figures.py` |
 
-All **42 tests** pass. Verification checks 33,669 shared forecasts, 12,528 lag
-forecasts and 17,226 independent HAR/LHAR matches. There are zero forecast fallbacks.
+## Design shared by all models
+
+- Target: log realised variance (five-minute) of E-mini S&P 500 futures, one day ahead.
+- Initial training sample to 12 July 2023 (3,127 observations); expanding re-estimation on the remaining
+  **783 forecast targets** (13 July 2023 to 31 August 2026). Loss: mean squared error.
+- BIC on the initial training sample selects **five lags** for the VAR/LVAR system (AIC selects ten and is
+  reported as a sensitivity check). The calendar-controlled VAR selects four lags by BIC.
+- **LVAR** is a leverage-augmented linear VAR-X: the plain VAR plus three equity downside inputs, the magnitude
+  of the negative part of the average return over 1, 5 and 22 days. Each LVAR is compared with a plain VAR
+  that has the same lags, sample and forecast dates.
+- The original HAR/LHAR notebook uses its own 80/20 splits (778 and 774 targets); common-date HAR/LHAR
+  benchmarks on the 783 targets are calculated inside `VAR_QTFE.ipynb`.
+
+## Running and verifying
 
 ```sh
 .venv/bin/python -m pip install -r requirements-var-notebook.txt
@@ -33,85 +39,42 @@ forecasts and 17,226 independent HAR/LHAR matches. There are zero forecast fallb
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-Use the project Python kernel; outputs are saved. Current local CSVs/plots are
-in `reports/final_dataset/var/generated`. The [report reconciliation](reports/final_dataset/GROUP_REPORT_REVIEW.md)
-explains how to combine the calendar-controlled **VAR** with the **LVAR** section and keep each
-extension's matched equity benchmark clear. Report figures are in `var_figures/`.
-Earlier analyses below use separately
-documented data/samples and should not be mixed with this run.
+Use the project Python kernel; outputs are saved in the notebook. Verification checks the final data, code
+and output hashes, 33,669 shared forecasts across 43 models, 12,528 lag-sensitivity forecasts and 17,226
+independent HAR/LHAR forecast matches. All 42 tests pass.
 
-## Earlier R VAR analysis — 4 October 2026
+### Running the HAR notebook
 
-The agreed VAR scope is **ES, WTI oil (CL) and gold (GC)**, with **corn and natural
-gas as an extension**. This earlier analysis uses one shared R module and
-local repository data. See the [VAR guide](reports/var_final/README.md),
-[research design](reports/var_final/research_design.md) and
-[report draft](reports/var_final/VAR_REPORT_SECTION.md).
+`HAR_QTFE.ipynb` was written for Google Colab. To run it, set the Colab secrets `data_path` (the long-format
+export `datasets/realized_variance_futures.csv`) and `fredapi_key` (a free FRED API key) and install
+`scikit-learn` and `fredapi`. It then reproduces the reported HAR/LHAR results, except that it rebuilds the
+panel one row shorter at the start (3,909 versus 3,910 rows), which moves the baseline LHAR MSE from 0.3254
+to 0.3253.
 
-```sh
-Rscript --vanilla tests/test_var_pipeline.R
-Rscript --vanilla scripts/run_var.R
-Rscript --vanilla scripts/verify_var.R
-```
+The only changes to this notebook are a one-line fix to a display cell (cell 17 called `.summary()` on a
+dictionary) and the removal of repository-owner details from its Colab badge and a commented-out URL. Its code
+and functions are otherwise untouched and are read independently by `VAR_QTFE.ipynb` for matched references.
 
-Direct R dependency versions are recorded in `requirements-var.R`. The runner
-reports missing packages; install them with
-`install.packages(c("vars", "urca", "sandwich", "jsonlite", "digest"))` in R.
-Generated forecasts, diagnostics, figures and provenance stay local in
-`reports/var_final/generated/`. No API key is required. The VOLARE source export
-must already be present; see the [data-access guide](datasets/README.md).
+### Running the calendar-controlled VAR
 
-This implementation replaced the legacy VAR notebooks for the earlier analysis;
-the current Python notebook above is the entry point for HAR-aligned comparisons.
-The R path reproduces the original main forecast results and adds robust
-joint tests, variance-scale losses, RK/anomaly checks and a matched corn/gas
-extension. The forecasts are exploratory because the evaluation period has
-already been inspected. Provider session timing and contract/quote validation
-remain open.
-
-## HAR performance audit
-
-See [the HAR verification](reports/har_verification/HAR_REVIEW.md) for reproduced
-notebook fits and a comparison with AR/VAR on the same 809 forecast targets.
-Run `.venv/bin/python scripts/verify_har.py` to regenerate the local results.
-The audit distinguishes ordinary HAR from LHAR with equity-return terms and
-preserves the original notebook. Install `requirements-har.txt` for the validated
-Python dependencies; it extends `requirements-data.txt`.
-
-The [return-control follow-up](reports/har_followup/RETURN_CONTROL_REVIEW.md)
-adds the same equity-return signals to AR, audits possible roll effects and runs
-five sensitivity scenarios with descriptive uncertainty intervals. Reproduce it
-with `.venv/bin/python scripts/audit_har_returns.py`.
-
-## Research data
-
-Prepare **dated RK and RV5 variance panels** from the saved VOLARE futures export:
+From inside `Tim_VAR/`:
 
 ```sh
-python scripts/prepare_volare.py
+OPENBLAS_NUM_THREADS=1 python run_analysis.py
 ```
 
-On the current machine, use `.venv/bin/python` in place of `python`. For a fresh
-Python environment, install `requirements-data.txt` first. No network access or
-API key is needed for preparation; the original VOLARE export must be available.
+This rewrites `Tim_VAR/results/` and reproduces the shipped results to floating-point precision. The R implementation
+(`source("run_VAR.R")` in R, with the working directory set to `Tim_VAR/`) refits the VAR for every forecast, so
+it is slow; its results match the Python results to about 1e-13. See `Tim_VAR/README.md` for details.
 
-Read [the data-quality report](reports/volare/DATA_QUALITY_REPORT.md) before fitting
-models. Preparation preserves missing entries and flags anomalies; it does not
-approve the data for estimation. The [VOLARE data guide](datasets/README.md)
-explains outputs and how to load explicit RK or RV5 columns.
+## Supporting analyses from earlier stages
 
-The [ES/CL evidence review](reports/volare/ES_CL_REVIEW.md) records the preliminary
-assessment of quote anomalies, possible contract switching and calendar gaps.
-Reproduce its diagnostic tables with `python scripts/audit_volare_es_cl.py`.
-Review annotations never automatically change the modelling panels.
+These use earlier data and samples and are not used in the final report:
 
-The original FRED setup is also retained: daily S&P 500, Treasury yield, Brent and
-VIX data for 2017–2025 can be downloaded with:
-
-```sh
-Rscript scripts/download_data.R
-```
-
-No API key or extra R packages are needed. See [the data guide](datasets/README.md)
-for sources, loading examples and modelling considerations. Downloads stay local;
-the retrieval script and source metadata can be shared through Git.
+- `R/`, `scripts/run_var.R`, `scripts/verify_var.R`, `tests/test_var_pipeline.R`: an earlier R VAR analysis
+  (`Rscript --vanilla tests/test_var_pipeline.R` runs its tests).
+- `scripts/verify_har.py`, `scripts/audit_har_returns.py`, `har_forecasts.py`: an earlier audit of the HAR notebook
+  and a return-control follow-up on the 809-target sample.
+- `volare_data.py`, `volare_review.py`, `scripts/prepare_volare.py`, `scripts/audit_volare_es_cl.py`: preparation and
+  quality flags for the VOLARE realised-variance export (`datasets/realized_variance_futures.csv`).
+- `GARCH_QTFE.ipynb`, `VAR_GPRD_OIL_GAS.ipynb`, `Group_Project_QTFE_Functions.ipynb`: early exploratory and helper notebooks.
