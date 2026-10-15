@@ -13,8 +13,8 @@ TEMPLATE = json.loads(r'''{
     "\n",
     "**Research question:** do commodity variance histories improve forecasts of ES\n",
     "log realised variance beyond ES history and the same downside-return information?\n",
-    "This is Jake's leverage extension: the plain VAR is its matched benchmark.\n",
-    "Tim's seasonally controlled VAR is reported separately; oil/gold remains the main commodity comparison.\n",
+    "This is the leverage extension: the plain VAR is its matched benchmark.\n",
+    "The seasonally controlled VAR is reported separately; oil/gold remains the main commodity comparison.\n",
     "\n",
     "The authoritative source is `datasets/vol_data_futures_yield_final_version.csv`.\n",
     "Its wide calendar, percentage log returns and embedded yield measures are preserved.\n",
@@ -286,7 +286,7 @@ TEMPLATE = json.loads(r'''{
     "Compare the all-four and no-corn LVAR systems with their equity-only and oil/gold\n",
     "benchmarks. Every VAR/LVAR includes all five selected lags of its included markets.\n",
     "HAR/LHAR rows are separate common-date references using variance averages;\n",
-    "the daily-only LHAR rows remain the teammate's existing HAR specification comparison.\n"
+    "the daily-only LHAR rows remain the existing HAR specification comparison.\n"
    ]
   },
   {
@@ -607,13 +607,13 @@ TEMPLATE = json.loads(r'''{
     "The final loader checks schema, unique ordered dates, finite/positive inputs,\n",
     "supplied returns, log variances and embedded yield identities. Tests verify causal\n",
     "features, unchanged forecasts under future-input mutations, native VAR predictions,\n",
-    "the teammate's HAR/LHAR function and matching cutoff/origin/target dates.\n",
+    "the HAR/LHAR function and matching cutoff/origin/target dates.\n",
     "Saved forecasts, model scores, source hashes and supported lag sensitivities are checked.\n",
     "\n",
     "Run `.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v`, then\n",
     "`scripts/execute_var_notebook.py` and `scripts/verify_var_notebook.py` using the\n",
     "project Python environment. HAR_QTFE is a read-only function reference; it does\n",
-    "not need to be edited or executed locally to run Jake's notebook.\n",
+    "not need to be edited or executed locally to run this notebook.\n",
     "Current output directories are in `config/var_har_notebook.json`. Earlier results\n",
     "remain in `reports/var_har_notebook/generated`; they are not current results.\n"
    ]

@@ -1,6 +1,6 @@
 # ES and CL evidence review
 
-Reviewed 29 September 2026 by Codex. This is a preliminary evidence assessment,
+Reviewed 29 September 2026. This is a preliminary evidence assessment,
 not group approval or certification of the provider data. Original source SHA-256:
 `face904a9aeb062796d8fb2c2d17c7e2a2df6f7ecfdca9e473232ddebecacb8f`.
 
@@ -166,7 +166,7 @@ joining annotations. New flags without a decision remain `unreviewed`. It writes
 local evidence/calendar CSVs and `es_cl_audit_summary.json` with hashes and counts.
 It does not edit the ledger, original data, prepared panels or notebooks.
 
-The ledger records **Codex preliminary review**, not a human sign-off. Resolve
+The ledger records a **preliminary review**, not a human sign-off. Resolve
 entries with new evidence and preserve the reason for any changed decision. A new
 source snapshot requires reassessment; the audit refuses stale source hashes.
 GC, NG and corn flags remain outside this ES/CL review.

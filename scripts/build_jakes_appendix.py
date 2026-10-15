@@ -9,7 +9,7 @@ import json
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "reports/final_dataset/var/generated"
 REPORT = ROOT / "latex_report/jakes section.tex"
-FIGURES = ROOT / "latex_report/jakes_figures"
+FIGURES = ROOT / "var_figures"
 INPUTS = [
     "initial_lag_selection.csv",
     "robustness_lag_metrics.csv",

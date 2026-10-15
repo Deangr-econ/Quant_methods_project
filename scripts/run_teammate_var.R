@@ -1,5 +1,5 @@
 # Usage: Rscript --vanilla scripts/run_teammate_var.R [output-directory]
-# This reproduces the teammate's draft assumptions, not an approved final design.
+# This reproduces the draft assumptions of the earlier VAR analysis, not an approved final design.
 args <- commandArgs(trailingOnly = FALSE)
 script <- sub("^--file=", "", args[grepl("^--file=", args)])
 stopifnot(length(script) == 1L)

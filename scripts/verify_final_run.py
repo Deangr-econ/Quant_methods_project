@@ -1,6 +1,6 @@
-"""Verify Jake's executed VAR notebook and independent HAR function comparisons.
+"""Verify the executed VAR notebook and independent HAR function comparisons.
 
-The teammate's Colab HAR notebook is a read-only function reference. Its native
+The Colab HAR notebook is a read-only function reference. Its native
 80/20 outputs are not assumed to be an executed local common-date HAR run.
 """
 import hashlib
@@ -126,7 +126,7 @@ def main():
     np.testing.assert_allclose(irfs.variance_pct, 100 * np.expm1(irfs.log_response), atol=1e-12)
     verify_lag_run(out, manifest, raw)
 
-    print(f'Verified Jake\'s fully executed VAR notebook, final input/code/output hashes, {len(forecasts):,} shared forecasts across {len(metrics)} models, and {int(native.N.sum()):,} independent HAR/LHAR forecast matches. The teammate\'s HAR notebook was used as a read-only function reference.')
+    print(f'Verified the fully executed VAR notebook, final input/code/output hashes, {len(forecasts):,} shared forecasts across {len(metrics)} models, and {int(native.N.sum()):,} independent HAR/LHAR forecast matches. The HAR notebook was used as a read-only function reference.')
 
 
 if __name__ == '__main__':

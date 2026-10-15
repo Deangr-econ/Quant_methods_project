@@ -1,4 +1,4 @@
-"""Build report figures from Jake's verified final-data outputs; fit no models."""
+"""Build report figures from the verified final-data outputs; fit no models."""
 from pathlib import Path
 import hashlib
 import json
@@ -11,7 +11,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "reports/final_dataset/var/generated"
-OUT = ROOT / "latex_report/jakes_figures"
+OUT = ROOT / "var_figures"
 OUT.mkdir(parents=True, exist_ok=True)
 manifest = json.loads((SOURCE / "provenance.json").read_text())
 sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()

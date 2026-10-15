@@ -1,7 +1,7 @@
 {
   "input_source_sha256": "ad3b481455b8e8ea4e632e065f7b38cfbb0293ecd8286611c81b5cda7ea5137f",
   "result_run_time": "2026-10-13T19:31:46.382262+02:00",
-  "builder_sha256": "f45a359af8a45e5cc46aaf0b413f6607af881a6e59da4a41a68948f260fbf956",
+  "builder_sha256": "d1808a8e7f8e7375ec8c634046d94505b12e0ff17f3d8f3be6fde3131c92e2af",
   "inputs": {
     "shared_forecast_metrics.csv": "0bd4e42e1df62992f5370087cd245e9a141be1155bbbb98454b65d6d17a77278",
     "robustness_intervals.csv": "b82c5c310508ba423fcbb8d05cff6eb5e5707c74c956776cf64389e246267fb8",
@@ -9,9 +9,9 @@
     "training_generalized_irfs.csv": "cc03d3d5eca2343d90053c9eb3f457b7829fa50037d7a78b7914a192e85971fe"
   },
   "outputs": {
-    "conditional_irfs.pdf": "63dbb8286e77bf7261458be111c1fd5e2cd21cf51c2ac432ca9fc681ccc06512",
-    "forecast_accuracy.pdf": "ba34fb9b71f31d0175c76b340b478e4cce961658e910debc87904284463afc97",
-    "incremental_gains.pdf": "e636ee43f7f515861add44fecac1fa7f1d8fc1f995f820010099088e8cc4b8b2",
-    "lag_selection.pdf": "486f06b2b6f0e02d65479b65ac46dd5e4d9aa7254fb307b55daafc8949547f12"
+    "conditional_irfs.pdf": "43ce354ec4c212c735854861ea7d8ac22117f9effa8d64d62aa42a73c82d6ac0",
+    "forecast_accuracy.pdf": "473c42d1ec5a531c2d088a63a5985044b019181fb3d61fc37f43a128d701cf70",
+    "incremental_gains.pdf": "e362cfb81aee85f588af664aca42bbf31e4587048f67994d656b3ce9917d8918",
+    "lag_selection.pdf": "2fe9c6aa244b1f315bb07688bcc1e08d9623e3dab80faae927615d9dd40a416e"
   }
 }

@@ -65,7 +65,7 @@ weekday calendar audit and gap list under `reports/volare/`. This additional
 diagnostic catches weekdays absent from both series. Holiday labels are only
 candidates, not official closure or session validation.
 
-The decision ledger now contains 14 preliminary Codex assessments: four suspected
+The decision ledger now contains 14 preliminary assessments: four suspected
 quote problems, one possible roll problem and nine provisionally retained crisis
 observations. It includes a source SHA-256 for each assessment; the audit rejects
 stale source hashes, duplicate decisions and changed screening flags. These

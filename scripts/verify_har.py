@@ -90,7 +90,7 @@ def main():
     variance = data.pivot(index="date", columns="symbol", values="rv5")[["ES", "CL", "GC"]]
     variance = variance.loc["2011-01-01":]
     excluded = variance.loc[variance.isna().any(axis=1)]
-    variance = variance.dropna()  # Reproduce teammate's explicit common-row definition.
+    variance = variance.dropna()  # Reproduce the explicit common-row definition.
     es = data.loc[data.symbol.eq("ES")].set_index("date")
     returns = 100 * np.log(es.close_price / es.close_price.shift(1))
     design, groups = build_design(variance, returns)
@@ -110,7 +110,7 @@ def main():
         reference = pd.read_csv(reference_path, parse_dates=["date", "origin_date"])
         if not (reference.date.equals(forecasts.date) and reference.origin_date.equals(forecasts.origin_date)
                 and np.allclose(reference.actual, forecasts.actual, rtol=0, atol=1e-12)):
-            raise ValueError("Comparison does not match the teammate's saved targets/origins")
+            raise ValueError("Comparison does not match the saved targets/origins")
     summary = dict(source_code_sha256=inputs, python=platform.python_version(),
                    numpy=np.__version__, pandas=pd.__version__, scipy=scipy.__version__,
                    statsmodels=statsmodels.__version__, matched_observations=len(variance),
