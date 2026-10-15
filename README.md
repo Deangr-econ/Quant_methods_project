@@ -7,7 +7,15 @@ Group project
 executed on `datasets/vol_data_futures_yield_final_version.csv`. The main-model
 columns and numerical identity checks pass. See [the current final-data summary](reports/final_dataset/README.md).
 The original [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [Tim_VAR](Tim_VAR/README.md)
-are preserved unchanged; HAR functions are read independently for matched references.
+are preserved. The only changes to the HAR notebook are a one-line fix to a display cell (cell 17 called
+`.summary()` on a dictionary) and the removal of repository-owner details from its Colab badge and a commented-out URL;
+its code and functions are otherwise untouched and are read independently for matched references.
+
+`HAR_QTFE.ipynb` was written for Google Colab. To run it, set the Colab secrets `data_path` (the long-format
+export `datasets/realized_variance_futures.csv`) and `fredapi_key` (a free FRED API key) and install
+`scikit-learn` and `fredapi`. Re-running it on the repository data reproduces the reported HAR/LHAR results,
+except that it rebuilds the panel one row shorter at the start (3,909 vs 3,910 rows), which moves the
+baseline LHAR MSE from 0.3254 to 0.3253.
 
 The VAR, LVAR and common-date HAR/LHAR benchmarks score the same **783 targets**
 with the 12 July 2023 cutoff. BIC selects **five VAR lags**. Oil + gold, oil +

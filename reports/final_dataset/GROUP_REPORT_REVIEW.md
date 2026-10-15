@@ -1,7 +1,7 @@
 # Group report reconciliation — 13 October 2026
 
 Reviewed `Group Assignment Report EBC4097.pdf` against the final CSV, the newly
-pulled unmodified `HAR_QTFE.ipynb`, `Tim_VAR`, and the saved final-data outputs.
+pulled `HAR_QTFE.ipynb` (before later cosmetic edits: a display-cell fix and removal of owner details from a Colab link), `Tim_VAR`, and the saved final-data outputs.
 The PDF is a draft, not yet consistent enough for submission. The source PDF and
 teammates' code have not been edited. Page references below use the printed page
 numbers (one less than the PDF viewer page number).

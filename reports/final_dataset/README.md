@@ -4,7 +4,7 @@
 It has been freshly executed on `datasets/vol_data_futures_yield_final_version.csv`
 after removing the daily-only VAR/LVAR variants. All remaining VAR/LVAR systems
 retain the full selected lag history. The calendar/Treasury VAR and the
-original Colab [HAR notebook](../../HAR_QTFE.ipynb) remain unchanged.
+original Colab [HAR notebook](../../HAR_QTFE.ipynb) remain unchanged, apart from a one-line fix to a display cell (cell 17) and the removal of repository-owner details from a Colab link in the HAR notebook.
 The latter is used as a read-only function reference for common-date HAR/LHAR
 comparisons inside the notebook; it need not be executed locally.
 
