@@ -15,7 +15,7 @@ significance or a final model selection.
 
 ## What the previous commit did
 
-Commit `dc26120` (`added tim changes`) imported the teammate's R analysis and
+A previous commit imported the earlier R analysis and
 expanded HTML draft, preserved the originals, provided a portable runner and
 verification script, and updated the README/checklist. Its reproduction covered
 nine AR/VAR/persistence specifications and four Clark–West comparisons. It did
@@ -51,7 +51,7 @@ forecasts with origin dates, **2024-09-13 to 2026-08-28**. The audit exports bot
 origin and corrected target dates without changing the fitted numbers. This is
 a date-label bug, not evidence by itself that future outcomes entered estimation.
 Beating a historical-mean benchmark by 52% is not the same as beating AR or VAR.
-These 500-target scores should not be compared directly with Tim's 809-target scores.
+These 500-target scores should not be compared directly with the 809-target scores.
 
 The notebook's QLIKE calculation is mathematically the loss for the positive
 forecast `exp(predicted_log_variance)`. That exponential is not generally the
@@ -66,7 +66,7 @@ The new comparison uses the same source snapshot, ES/CL/GC matching, 2011 start,
 80/20 split, forecast origins and realised log-RV5 targets as the R analysis.
 Every model refits before each target using an expanding history. All models use
 the same fitted training target rows after a **22-observation warm-up**. This is
-why AR/VAR values differ slightly from Tim's original values, which use each
+why AR/VAR values differ slightly from the original values, which use each
 model's own lag-dependent starting row. The initial raw history is 3,236 rows;
 the shared initial regression target sample is 3,214 rows.
 

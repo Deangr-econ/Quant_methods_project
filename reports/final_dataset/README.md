@@ -1,18 +1,17 @@
 # Final-dataset HAR and VAR results — 13 October 2026
 
-[VAR_QTFE.ipynb](../../VAR_QTFE.ipynb) is Jake's leverage-extension notebook.
+[VAR_QTFE.ipynb](../../VAR_QTFE.ipynb) is the leverage-extension notebook.
 It has been freshly executed on `datasets/vol_data_futures_yield_final_version.csv`
 after removing the daily-only VAR/LVAR variants. All remaining VAR/LVAR systems
-retain the full selected lag history. Tim's calendar/Treasury VAR and the
-teammate's original Colab [HAR notebook](../../HAR_QTFE.ipynb) remain unchanged.
+retain the full selected lag history. The calendar/Treasury VAR and the
+original Colab [HAR notebook](../../HAR_QTFE.ipynb) remain unchanged.
 The latter is used as a read-only function reference for common-date HAR/LHAR
-comparisons inside Jake's notebook; it need not be executed locally.
+comparisons inside the notebook; it need not be executed locally.
 
-Use [Jake's LaTeX section](../../latex_report/jakes%20section.tex) and
-[the group-report reconciliation](GROUP_REPORT_REVIEW.md) for the current draft.
-The recommended headings are **3.2 Vector autoregression (VAR)** for Tim and
-**3.3 Leverage-augmented VAR (LVAR)** for Jake. Describe controls and lag orders
-explicitly; Jake's plain VAR is his matched benchmark, rather than a duplicate
+Use [the group-report reconciliation](GROUP_REPORT_REVIEW.md) for the current draft.
+The recommended headings are **3.2 Vector autoregression (VAR)** for the calendar-controlled VAR and
+**3.3 Leverage-augmented VAR (LVAR)** for the return-control extension. Describe controls and lag orders
+explicitly; the plain VAR is the LVAR's matched benchmark, rather than a duplicate
 section labelled VAR B. Earlier results and source copies are retained separately.
 
 ## Data readiness and required columns
@@ -68,7 +67,7 @@ The previous cutoff, 12 July 2023, is retained. Expanding fits use only outcomes
 available through each forecast origin. Every scored commodity model uses the
 same origins and next-retained-row targets. The original Colab HAR/LHAR
 results use their own 80/20 splits, scoring 778/774 targets; their saved yield
-comparisons are separate from Jake's common-date model grid.
+comparisons are separate from the common-date model grid.
 
 BIC on the initial-training five-market plain VAR selects lag 5 from candidates
 1–20; AIC selects lag 10. The selected order is fixed across main VAR/LVAR
@@ -128,11 +127,11 @@ initial training period and have exploratory pointwise simulation bands.
 .venv/bin/python scripts/execute_var_notebook.py
 .venv/bin/python scripts/verify_var_notebook.py
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
-.venv/bin/python scripts/build_jakes_figures.py
+.venv/bin/python scripts/build_var_figures.py
 ```
 
 Use the project `.venv` Python kernel. HAR_QTFE is read as a function reference;
-do not run its local execution wrapper to reproduce Jake's analysis. The notebook
+do not run its local execution wrapper to reproduce this analysis. The notebook
 builder is optional: it regenerates VAR source cells and clears saved outputs,
 so execution is required afterwards.
 

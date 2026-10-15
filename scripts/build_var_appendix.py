@@ -8,7 +8,7 @@ import json
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "reports/final_dataset/var/generated"
-REPORT = ROOT / "latex_report/jakes section.tex"
+REPORT = ROOT / "latex_report/var_section.tex"
 FIGURES = ROOT / "var_figures"
 INPUTS = [
     "initial_lag_selection.csv",
@@ -133,7 +133,7 @@ appendix = r"""
 \renewcommand{\thetable}{D\arabic{table}}
 \renewcommand{\thefigure}{D\arabic{figure}}
 
-This appendix supports the LVAR in Section 3.3. The main specification uses five variance lags, an intercept and the downside measures in Equation~\eqref{eq:jake-downside}, without Treasury or calendar controls. Forecasts use the same 783 evaluation targets as Section 3.2, from 13 July 2023 to 31 August 2026. Appendix B covers Section 3.2's different VAR specification.
+This appendix supports the LVAR in Section 3.3. The main specification uses five variance lags, an intercept and the downside measures in Equation~\eqref{eq:var-downside}, without Treasury or calendar controls. Forecasts use the same 783 evaluation targets as Section 3.2, from 13 July 2023 to 31 August 2026. Appendix B covers Section 3.2's different VAR specification.
 
 \subsection*{D.1 Lag selection and forecast sensitivity}
 
@@ -142,14 +142,14 @@ AIC and BIC use the plain five-market system (equity, oil, corn, gold and natura
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{lag_selection.pdf}
 \caption{Lag selection for the initial-training five-market VAR}
-\label{fig:jake-lags}
+\label{fig:var-lags}
 \reportnote{Notes: the system includes an intercept and variance lags, without downside, Treasury or calendar controls. Each candidate uses the same training outcomes. Source: own calculations.}
 \end{figure}
 
 \begin{table}[H]
 \centering\small
 \caption{Forecast accuracy with five and ten variance lags}
-\label{tab:jake-lag-sensitivity}
+\label{tab:var-lag-sensitivity}
 \begin{tabularx}{\linewidth}{@{}Xrrrr@{}}\toprule
 & \multicolumn{2}{c}{MSE} & \multicolumn{2}{c}{MAE}\\
 Model & 5 lags & 10 lags & 5 lags & 10 lags\\\midrule
@@ -166,7 +166,7 @@ Downside controls reduce equity-only MSE by 9.31\% at five lags and @@TEN_GAIN@@
 \begin{table}[H]
 \centering\small
 \caption{Stationarity tests for the initial-training log-RV5 series}
-\label{tab:jake-stationarity}
+\label{tab:var-stationarity}
 \begin{tabularx}{\linewidth}{@{}Xrrrr@{}}\toprule
 Series & ADF statistic & ADF $p$ & KPSS statistic & KPSS $p$\\\midrule
 @@STATIONARITY_ROWS@@
@@ -179,7 +179,7 @@ ADF rejects a unit root for every series, while KPSS rejects level stationarity.
 \begin{table}[H]
 \centering\small
 \caption{Initial-training stability and equity-residual checks for LVAR(5)}
-\label{tab:jake-diagnostics}
+\label{tab:var-diagnostics}
 \begin{tabularx}{\linewidth}{@{}Xrrr@{}}\toprule
 Model & Largest root & Ljung--Box $p$ & ARCH $p$\\\midrule
 @@DIAGNOSTIC_ROWS@@
@@ -192,7 +192,7 @@ The reported roots are below one, but the Ljung--Box results indicate remaining 
 \begin{table}[H]
 \centering\small
 \caption{Joint tests of commodity-lag coefficients in the equity equation}
-\label{tab:jake-joint-tests}
+\label{tab:var-joint-tests}
 \begin{tabularx}{\linewidth}{@{}Xrrr@{}}\toprule
 Model & Coefficients tested & Wald statistic & HAC $p$\\\midrule
 @@JOINT_ROWS@@
@@ -205,19 +205,19 @@ The joint tests indicate in-sample predictive information from the commodity his
 \clearpage
 \subsection*{D.3 Uncertainty around forecast improvements}
 
-Figure~\ref{fig:jake-gains} and Table~\ref{tab:jake-intervals} compare each candidate with its named benchmark on the same forecast dates. Positive gains indicate lower MSE for the candidate. To describe uncertainty, we resample the paired forecast losses in circular blocks of 20 observations, using 2,000 draws. Resampling blocks keeps some dependence between nearby observations. The intervals are descriptive and are not formal nested-model or selection-adjusted significance tests.
+Figure~\ref{fig:var-gains} and Table~\ref{tab:var-intervals} compare each candidate with its named benchmark on the same forecast dates. Positive gains indicate lower MSE for the candidate. To describe uncertainty, we resample the paired forecast losses in circular blocks of 20 observations, using 2,000 draws. Resampling blocks keeps some dependence between nearby observations. The intervals are descriptive and are not formal nested-model or selection-adjusted significance tests.
 
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{incremental_gains.pdf}
 \caption{Incremental forecasting value of downside controls and commodities}
-\label{fig:jake-gains}
+\label{fig:var-gains}
 \reportnote{Notes: points show percentage reductions in MSE relative to the named benchmark. Bars are descriptive 95\% paired-loss intervals; the dashed line marks zero gain. The LHAR comparison is recomputed on the same 783 targets and differs from the original HAR notebook's separate 80/20 split. Source: own calculations.}
 \end{figure}
 
 \begin{table}[H]
 \centering\small
 \caption{MSE reductions and descriptive uncertainty intervals}
-\label{tab:jake-intervals}
+\label{tab:var-intervals}
 \begin{tabularx}{\linewidth}{@{}X*{3}{>{\raggedleft\arraybackslash}p{1.75cm}}@{}}\toprule
 Comparison & Gain (\%) & Lower (\%) & Upper (\%)\\\midrule
 @@INTERVAL_ROWS@@
@@ -235,7 +235,7 @@ We examine how the fitted all-four-commodity LVAR(5) responds to an innovation i
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{conditional_irfs.pdf}
 \caption{Conditional commodity-to-equity impulse responses in the initial-training LVAR(5)}
-\label{fig:jake-irfs}
+\label{fig:var-irfs}
 \reportnote{Notes: each shock is one residual standard deviation of commodity log RV5, allowing contemporaneously correlated innovations. Responses show percentage changes in ES variance over 0--20 retained observations. The shocked and baseline systems have identical downside-control paths. Shading gives exploratory 95\% pointwise bands from 2,000 joint-HAC normal parameter simulations with bandwidth 22. These are not simultaneous bands or forecast prediction intervals. Source: own calculations, notebook Section 8.}
 \end{figure}
 
@@ -270,7 +270,7 @@ Commodity information adds little once the leverage inputs are included. Relativ
 \begin{table}[H]
 \centering\small
 \caption{Matched VAR and LVAR forecast accuracy by commodity set}
-\label{tab:jake-matched-forecasts}
+\label{tab:var-matched-forecasts}
 \begin{tabularx}{\linewidth}{@{}Xrr@{}}\toprule
 Commodity set & VAR(5) MSE & LVAR(5) MSE\\\midrule
 @@PAIRED_ROWS@@
@@ -303,7 +303,7 @@ d_t^{(h)}=\left|\min\left(\frac{1}{h}\sum_{i=0}^{h-1}r_{t-i},0\right)\right|,
 For each window, we first average the signed returns. If this average is negative, the measure equals its magnitude; otherwise, it is zero. Gains and losses can therefore offset each other before the negative part is taken. These three variables are added to the HAR's variance regressors, using only returns observed before the forecast target. The resulting model is called LHAR. The coefficients are estimated from the data, so a negative return does not automatically increase the forecast. This is the same construction used for the LVAR leverage inputs in Section 3.3.
 
 \medskip
-\textbf{Why this replacement is needed (do not paste):} the current report averages already-negative daily returns. The implemented code averages signed returns first, then takes the magnitude of a negative average. The replacement describes the implemented model. It does not change Dean's code or results.
+\textbf{Why this replacement is needed (do not paste):} the current report averages already-negative daily returns. The implemented code averages signed returns first, then takes the magnitude of a negative average. The replacement describes the implemented model. It does not change the HAR code or results.
 
 \clearpage
 \section*{Word block C: Section 5, Economic interpretation}
@@ -366,7 +366,7 @@ after = prefix + main_end + "\n" + appendix + "\n" + references + copy_blocks + 
 assert before.split(main_end, 1)[0] == after.split(main_end, 1)[0], "Main section changed"
 REPORT.write_text(after)
 
-(ROOT / "latex_report/jakes_appendix_provenance.json").write_text(json.dumps({
+(ROOT / "latex_report/var_appendix_provenance.json").write_text(json.dumps({
     "source_sha256": manifest["source_sha256"],
     "model_run": manifest["run_time"],
     "builder_sha256": digest(Path(__file__)),

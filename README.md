@@ -3,13 +3,13 @@ Group project
 
 ## Current final-dataset HAR and VAR results — 13 October 2026
 
-[VAR_QTFE.ipynb](VAR_QTFE.ipynb) is Jake's leverage-extension notebook, fully
+[VAR_QTFE.ipynb](VAR_QTFE.ipynb) is the leverage-extension notebook, fully
 executed on `datasets/vol_data_futures_yield_final_version.csv`. The main-model
 columns and numerical identity checks pass. See [the current final-data summary](reports/final_dataset/README.md).
-The teammate's original [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [Tim_VAR](Tim_VAR/README.md)
+The original [HAR_QTFE.ipynb](HAR_QTFE.ipynb) and [Tim_VAR](Tim_VAR/README.md)
 are preserved unchanged; HAR functions are read independently for matched references.
 
-Jake's VAR, LVAR and common-date HAR/LHAR benchmarks score the same **783 targets**
+The VAR, LVAR and common-date HAR/LHAR benchmarks score the same **783 targets**
 with the 12 July 2023 cutoff. BIC selects **five VAR lags**. Oil + gold, oil +
 natural gas, individual commodities, corn + gold, no-corn and all-four comparisons
 remain. All active VAR/LVAR systems retain every selected market lag.
@@ -27,9 +27,9 @@ forecasts and 17,226 independent HAR/LHAR matches. There are zero forecast fallb
 
 Use the project Python kernel; outputs are saved. Current local CSVs/plots are
 in `reports/final_dataset/var/generated`. The [report reconciliation](reports/final_dataset/GROUP_REPORT_REVIEW.md)
-explains how to combine Tim's **VAR** with Jake's **LVAR** section and keep each
-extension's matched equity benchmark clear. [Jake's section](latex_report/jakes%20section.tex)
-includes current results, sources and charts. Earlier analyses below use separately
+explains how to combine the calendar-controlled **VAR** with the **LVAR** section and keep each
+extension's matched equity benchmark clear. Report figures are in `var_figures/`.
+Earlier analyses below use separately
 documented data/samples and should not be mixed with this run.
 
 ## Earlier R VAR analysis — 4 October 2026
@@ -59,23 +59,7 @@ The R path reproduces the original main forecast results and adds robust
 joint tests, variance-scale losses, RK/anomaly checks and a matched corn/gas
 extension. The forecasts are exploratory because the evaluation period has
 already been inspected. Provider session timing and contract/quote validation
-remain open; see [the checklist](VAR_TODO.md).
-
-## Teammate's R analysis
-
-The 3 October contribution and results draft are in [timadditions](timadditions/README.md).
-The original files are preserved; a portable version reproduces the draft's
-nine-model forecast results using the repository VOLARE data:
-
-```sh
-Rscript --vanilla scripts/run_teammate_var.R
-Rscript --vanilla scripts/verify_teammate_var.R
-```
-
-See the [verification and checklist review](timadditions/VERIFICATION.md) for
-validated results and remaining limitations. This is an ES/oil/gold **log-RV5**
-analysis; its scope is now recorded above, while provider data treatment and
-session timing remain unresolved.
+remain open.
 
 ## HAR performance audit
 
@@ -90,12 +74,6 @@ The [return-control follow-up](reports/har_followup/RETURN_CONTROL_REVIEW.md)
 adds the same equity-return signals to AR, audits possible roll effects and runs
 five sensitivity scenarios with descriptive uncertainty intervals. Reproduce it
 with `.venv/bin/python scripts/audit_har_returns.py`.
-
-## VAR research checklist
-
-See [VAR_TODO.md](VAR_TODO.md) for the prioritised data-quality, code, modelling,
-forecast-evaluation and reporting checklist, including findings from the current
-VOLARE data and VAR notebook review.
 
 ## Research data
 
